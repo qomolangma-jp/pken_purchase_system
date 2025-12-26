@@ -3,20 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIFF Test App</title>
+    <title>KomaPay</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div id="app">
-        <h1>LIFF連携テスト</h1>
-        <div id="profile">
-            <img id="pictureUrl" width="100" style="border-radius: 50%;">
-            <p>こんにちは、<span id="displayName">ゲスト</span>さん！</p>
-        </div>
-        <button id="closeBtn">アプリを閉じる</button>
-    </div>
+    <div class="app-container">
+        <!-- ヘッダー -->
+        <header class="app-header">
+            <div class="logo">KomaPay</div>
+            <div class="header-icons">
+                <i class="fa-regular fa-bell"></i>
+                <i class="fa-regular fa-user"></i>
+            </div>
+        </header>
 
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <script src="script.js"></script>
+        <!-- メインコンテンツ -->
+        <main class="app-content">
+            <!-- 残高カード -->
+            <section class="balance-card">
+                <div class="balance-label">残高</div>
+                <div class="balance-amount">¥ 12,345</div>
+                <div class="balance-points">
+                    <span class="point-icon">P</span> 500 pt
+                </div>
+            </section>
+
+            <!-- アクションボタン -->
+            <section class="action-buttons">
+                <button class="action-btn">
+                    <div class="icon-circle"><i class="fa-solid fa-qrcode"></i></div>
+                    <span>支払う</span>
+                </button>
+                <button class="action-btn">
+                    <div class="icon-circle"><i class="fa-solid fa-plus"></i></div>
+                    <span>チャージ</span>
+                </button>
+                <button class="action-btn">
+                    <div class="icon-circle"><i class="fa-solid fa-paper-plane"></i></div>
+                    <span>送る</span>
+                </button>
+                <button class="action-btn">
+                    <div class="icon-circle"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+                    <span>履歴</span>
+                </button>
+            </section>
+
+            <!-- キャンペーンバナー（ダミー） -->
+            <section class="promo-banner">
+                <div class="banner-content">
+                    <h3>春のポイント還元祭</h3>
+                    <p>今なら最大5%還元！</p>
+                </div>
+            </section>
+
+            <!-- 最近の履歴 -->
+            <section class="recent-transactions">
+                <div class="section-header">
+                    <h2>最近の履歴</h2>
+                    <a href="#" class="see-all">すべて見る</a>
+                </div>
+                <ul class="transaction-list">
+                    <li class="transaction-item">
+                        <div class="trans-icon shop"><i class="fa-solid fa-store"></i></div>
+                        <div class="trans-info">
+                            <div class="trans-title">コンビニエンスストアA</div>
+                            <div class="trans-date">2025/12/26 12:30</div>
+                        </div>
+                        <div class="trans-amount negative">- ¥580</div>
+                    </li>
+                    <li class="transaction-item">
+                        <div class="trans-icon charge"><i class="fa-solid fa-credit-card"></i></div>
+                        <div class="trans-info">
+                            <div class="trans-title">クレジットカードチャージ</div>
+                            <div class="trans-date">2025/12/25 18:00</div>
+                        </div>
+                        <div class="trans-amount positive">+ ¥5,000</div>
+                    </li>
+                    <li class="transaction-item">
+                        <div class="trans-icon transfer"><i class="fa-solid fa-user-group"></i></div>
+                        <div class="trans-info">
+                            <div class="trans-title">田中さんへ送金</div>
+                            <div class="trans-date">2025/12/24 20:15</div>
+                        </div>
+                        <div class="trans-amount negative">- ¥2,000</div>
+                    </li>
+                </ul>
+            </section>
+        </main>
+
+        <!-- ボトムナビゲーション -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active">
+                <i class="fa-solid fa-house"></i>
+                <span>ホーム</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-wallet"></i>
+                <span>ウォレット</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>家計簿</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>設定</span>
+            </a>
+        </nav>
+    </div>
 </body>
 </html>
