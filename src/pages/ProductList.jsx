@@ -12,10 +12,26 @@ const ProductList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://komapay.p-kmt.com/api/products');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+        // 認証トークンを取得
+        const token = localStorage.getItem('authToken');
+        const headers = {
+          'Content-Type': 'application/json',
+        };
+        
+        // トークンがあればAuthorizationヘッダーに追加
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
+
+        const response = await fetch('https://komapay.p-kmt.com/api/products', {
+          method: 'GET',
+          headers: headers,
+        });
+
+        if (!response.ok) {
+          throw new Error('商品データの取得に失敗しました');
+        }
+
         const data = await response.json();
         // APIレスポンスの構造に合わせてデータをセット
         // { success: true, data: [...], count: 5 }

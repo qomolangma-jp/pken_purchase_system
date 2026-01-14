@@ -1,30 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+
+const API_BASE_URL = 'https://komapay.p-kmt.com';
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     const fetchProductDetail = async () => {
       try {
-        // 商品詳細の取得
-        // API仕様書によると GET /api/products/{id} がある
-        const response = await fetch(`https://komapay.p-kmt.com/api/products/${id}`);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+        // 認証トークンを取得
+        const token = localStorage.getItem('authToken');
+        const headers = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
+
+        // 商品詳細の取得
+        const response = await fetch(`https://komapay.p-kmt.com/api/products/${id}`, {
+          method: 'GET',
+          headers: headers,
+        });
+
+        if (!response.ok) {
+          throw new Error('商品データの取得に失敗しました');
+        }
+
         const data = await response.json();
         
         if (data.success && data.data) {
           setProduct(data.data);
           
-          // 関連商品の取得（同じカテゴリの商品を取得するために一覧APIを叩く必要があるかもしれないが、
-          // ここでは簡易的に一覧APIから同じカテゴリのものをフィルタリングするロジックを想定）
-          // 実際のAPI仕様に「関連商品」のエンドポイントがないため、一覧から取得してフィルタリングする
+          // 関連商品の取得
           fetchRelatedProducts(data.data.category);
         } else {
           setError('商品が見つかりませんでした。');
@@ -39,7 +55,20 @@ const ProductDetail = () => {
 
     const fetchRelatedProducts = async (category) => {
       try {
-        const response = await fetch('https://komapay.p-kmt.com/api/products');
+        const token = localStorage.getItem('authToken');
+        const headers = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch('https://komapay.p-kmt.com/api/products', {
+          method: 'GET',
+          headers: headers,
+        });
+
         if (response.ok) {
           const data = await response.json();
           if (data.success && Array.isArray(data.data)) {
@@ -58,10 +87,46 @@ const ProductDetail = () => {
     fetchProductDetail();
   }, [id]);
 
-  const handleAddToCart = () => {
-    // カート機能はまだAPI連携していないため、アラートのみ
-    alert(`${product.name}をカートに追加しました（デモ）`);
-    // TODO: POST /api/cart/add の実装
+  const handleAddToCart = async () => {
+    setAddingToCart(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        alert('ログインしてください');
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          product_id: parseInt(id),
+          quantity: 1,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'カートへの追加に失敗しました');
+      }
+
+      alert(`${product.name}をカートに追加しました！`);
+      // カートページへ遷移するか確認
+      if (confirm('カートを確認しますか？')) {
+        navigate('/cart');
+      }
+    } catch (err) {
+      console.error('Add to cart error:', err);
+      alert(err.message || 'カートへの追加に失敗しました');
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
   if (loading) {
@@ -152,9 +217,10 @@ const ProductDetail = () => {
                   <div className="mt-auto">
                     <button 
                       onClick={handleAddToCart}
-                      className="w-full bg-stone-800 hover:bg-stone-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                      disabled={addingToCart}
+                      className="w-full bg-stone-800 hover:bg-stone-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      カートに入れる
+                      {addingToCart ? '追加中...' : 'カートに入れる'}
                     </button>
                   </div>
                 </div>

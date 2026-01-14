@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 // import liff from '@line/liff'; // 実際のLIFFを使用する場合はコメントアウトを外す
 
+const API_BASE_URL = 'https://komapay.p-kmt.com';
+
 const Register = () => {
   const [name2nd, setName2nd] = useState('');
   const [name1st, setName1st] = useState('');
   const [lineId, setLineId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,13 +38,43 @@ const Register = () => {
     */
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Register:', { name_2nd: name2nd, name_1st: name1st, line_id: lineId });
-    
-    // Simulate registration success
-    alert('登録しました（デモ）\n姓: ' + name2nd + '\n名: ' + name1st + '\nLINE ID: ' + lineId);
-    navigate('/');
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name_2nd: name2nd,
+          name_1st: name1st,
+          line_id: lineId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || '登録に失敗しました');
+      }
+
+      // 登録成功時、トークンがあれば保存
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+      }
+
+      alert('登録が完了しました！');
+      navigate('/login');
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err.message || '登録中にエラーが発生しました');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,6 +91,12 @@ const Register = () => {
       <main className="main-content min-h-screen">
         <div className="container container-narrow py-10">
           <h1 className="page-title">新規登録</h1>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
 
           <form id="registerForm" className="form-card" onSubmit={handleSubmit}>
             <div className="form-group">
@@ -100,7 +140,9 @@ const Register = () => {
               <p className="text-xs text-stone-500 mt-1">※LINE IDは自動的に取得されます</p>
             </div>
 
-            <button type="submit" className="btn-primary">登録する</button>
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? '登録中...' : '登録する'}
+            </button>
           </form>
 
           <div className="mt-6 text-center">

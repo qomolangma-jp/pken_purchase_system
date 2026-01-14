@@ -1,18 +1,51 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+const API_BASE_URL = 'https://komapay.p-kmt.com';
+
 const Login = () => {
   const [studentId, setStudentId] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login:', { studentId, password });
+    setError('');
+    setLoading(true);
 
-    // Simulate login success
-    alert('ログインしました（デモ）');
-    navigate('/');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          student_id: studentId,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'ログインに失敗しました');
+      }
+
+      // トークンを保存
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+      }
+
+      alert('ログインしました！');
+      navigate('/');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.message || 'ログイン中にエラーが発生しました');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,6 +62,12 @@ const Login = () => {
       <main className="main-content min-h-screen">
         <div className="container container-narrow py-10">
           <h1 className="page-title">ログイン</h1>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
 
           <form id="loginForm" className="form-card" onSubmit={handleSubmit}>
             <div className="form-group">
@@ -57,7 +96,9 @@ const Login = () => {
               />
             </div>
 
-            <button type="submit" className="btn-primary">ログイン</button>
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'ログイン中...' : 'ログイン'}
+            </button>
           </form>
 
           <div className="mt-6 text-center flex flex-col gap-2">
