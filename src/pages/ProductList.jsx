@@ -119,58 +119,81 @@ const ProductList = () => {
       <main className="main-content min-h-screen pb-20">
         <div className="container">
 
-          {/* Search & Sort Area */}
-          <div className="controls-area">
-            <div className="search-wrapper">
-              <input 
-                type="text" 
-                placeholder="商品を検索..." 
-                className="search-input"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
+          {/* Search & Sort Area with left sidebar buttons */}
+          <div className="flex gap-6">
+            <aside className="w-40">
+              <div className="sticky top-4 bg-white p-3 rounded-md shadow-sm">
+                <h4 className="text-sm font-semibold mb-3">並び替え</h4>
+                <div className="flex flex-col space-y-2">
+                  <button
+                    className={`px-3 py-2 rounded text-sm text-left ${sortType === 'popularity' ? 'bg-blue-600 text-white' : 'bg-white text-stone-700 border'}`}
+                    onClick={() => setSortType('popularity')}
+                  >
+                    売れ筋順
+                  </button>
 
-            <div className="sort-wrapper">
-              <select 
-                className="sort-select"
-                value={sortType}
-                onChange={(e) => setSortType(e.target.value)}
-              >
-                <option value="popularity">売れ筋順</option>
-                <option value="price_asc">価格が安い順</option>
-                <option value="price_desc">価格が高い順</option>
-                <option value="name">名前順</option>
-              </select>
-            </div>
-          </div>
+                  <button
+                    className={`px-3 py-2 rounded text-sm text-left ${sortType === 'price_asc' ? 'bg-blue-600 text-white' : 'bg-white text-stone-700 border'}`}
+                    onClick={() => setSortType('price_asc')}
+                  >
+                    価格が安い順
+                  </button>
 
-          {/* Product Grid */}
-          <div className="product-grid">
-            {displayedProducts.length > 0 ? (
-              displayedProducts.map(product => (
-                <Link to={`/product/${product.id}`} key={product.id} className="product-card">
-                  <div className="card-image-wrapper">
-                    {product.image_url ? (
-                      <img src={product.image_url} alt={product.name} className="card-image" />
-                    ) : (
-                      <span>No Image</span>
-                    )}
-                  </div>
-                  <div className="card-content">
-                    <h3 className="card-title">{product.name}</h3>
-                    <p className="card-price">¥{product.price ? product.price.toLocaleString() : '-'}</p>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="no-results col-span-full">
-                該当する商品が見つかりませんでした。
+                  <button
+                    className={`px-3 py-2 rounded text-sm text-left ${sortType === 'price_desc' ? 'bg-blue-600 text-white' : 'bg-white text-stone-700 border'}`}
+                    onClick={() => setSortType('price_desc')}
+                  >
+                    価格が高い順
+                  </button>
+
+                  <button
+                    className={`px-3 py-2 rounded text-sm text-left ${sortType === 'name' ? 'bg-blue-600 text-white' : 'bg-white text-stone-700 border'}`}
+                    onClick={() => setSortType('name')}
+                  >
+                    名前順
+                  </button>
+                </div>
               </div>
-            )}
+            </aside>
+
+            <div className="flex-1">
+              <div className="search-wrapper mb-4">
+                <input 
+                  type="text" 
+                  placeholder="商品を検索..." 
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+
+              <div className="product-grid">
+                {displayedProducts.length > 0 ? (
+                  displayedProducts.map(product => (
+                    <Link to={`/product/${product.id}`} key={product.id} className="product-card">
+                      <div className="card-image-wrapper">
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} className="card-image" />
+                        ) : (
+                          <span>No Image</span>
+                        )}
+                      </div>
+                      <div className="card-content">
+                        <h3 className="card-title">{product.name}</h3>
+                        <p className="card-price">¥{product.price ? product.price.toLocaleString() : '-'}</p>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="no-results col-span-full">
+                    該当する商品が見つかりませんでした。
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
         </div>
