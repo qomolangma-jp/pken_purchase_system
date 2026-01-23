@@ -77,8 +77,14 @@ const Register = () => {
       } else {
         // JSONでない場合（HTMLなど）
         const text = await response.text();
-        console.error('Non-JSON response:', text.substring(0, 500));
-        throw new Error(`サーバーエラー: APIが正しく応答していません (Status: ${response.status})`);
+        console.error('Non-JSON response (最初の1000文字):', text.substring(0, 1000));
+        
+        // HTMLからエラーメッセージを抽出を試みる
+        const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+        const h1Match = text.match(/<h1[^>]*>(.*?)<\/h1>/i);
+        const errorInfo = titleMatch ? titleMatch[1] : (h1Match ? h1Match[1] : 'サーバーエラー');
+        
+        throw new Error(`バックエンドエラー (Status ${response.status}): ${errorInfo}\n\nバックエンド側のログを確認してください。`);
       }
 
       if (!response.ok) {
