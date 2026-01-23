@@ -27,7 +27,18 @@ const Login = () => {
         }),
       });
 
-      const data = await response.json();
+      // Content-Typeをチェック
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // JSONでない場合（HTMLなど）
+        const text = await response.text();
+        console.error('Non-JSON response:', text.substring(0, 200));
+        throw new Error(`サーバーエラー: APIが正しく応答していません (Status: ${response.status})`);
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'ログインに失敗しました');
