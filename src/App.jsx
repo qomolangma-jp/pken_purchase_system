@@ -1,5 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import ProductList from './pages/ProductList';
@@ -10,13 +12,53 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<ProductList />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          {/* 認証が必要なルート */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <ProductList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/product/:id"
+            element={
+              <ProtectedRoute>
+                <ProductDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute>
+                <Cart />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* 公開ルート（認証不要） */}
+          <Route
+            path="/register"
+            element={
+              <ProtectedRoute>
+                <Register />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <ProtectedRoute>
+                <Login />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

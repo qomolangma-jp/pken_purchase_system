@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// import liff from '@line/liff'; // 実際のLIFFを使用する場合はコメントアウトを外す
+import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = 'https://komapay.p-kmt.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://komapay.p-kmt.com';
 
 const Register = () => {
   const [name2nd, setName2nd] = useState('');
@@ -11,32 +11,32 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login, liff, liffInitialized, user } = useAuth();
+
+  // すでにログイン済みの場合はトップページへリダイレクト
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
-    // Mock LIFF initialization
-    // In a real app, liff.init() would happen here
-    // For demo, we set a mock LINE ID
-    const mockLineId = "U1234567890abcdef";
-    setLineId(mockLineId);
-    console.log('LIFF initialized (mock), LINE ID set:', mockLineId);
-
-    /*
-    // 実際のLIFF初期化コード例
-    liff.init({ liffId: "YOUR_LIFF_ID" })
-      .then(() => {
-        if (liff.isLoggedIn()) {
-          liff.getProfile().then(profile => {
-            setLineId(profile.userId);
-          });
-        } else {
-          liff.login();
+    // LIFFからLINE IDを取得
+    const getLineId = async () => {
+      if (liffInitialized && liff.isLoggedIn()) {
+        try {
+          const profile = await liff.getProfile();
+          setLineId(profile.userId);
+          console.log('LINE ID取得:', profile.userId);
+        } catch (err) {
+          console.error('LINE IDの取得に失敗しました:', err);
+          setError('LINE IDの取得に失敗しました');
         }
-      })
-      .catch((err) => {
-        console.error('LIFF Initialization failed', err);
-      });
-    */
-  }, []);
+      }
+    };
+
+    getLineId();
+  }, [liff, liffInitialized]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,6 +72,9 @@ const Register = () => {
       if (!response.ok) {
         throw new Error(data.message || '登録に失敗しました');
       }
+
+      // 認証コンテキストにログイン
+      await login(data.user);
 
       // 登録成功時、トークンがあれば保存
       if (data.token) {

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = 'https://komapay.p-kmt.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://komapay.p-kmt.com';
 
 const Login = () => {
   const [studentId, setStudentId] = useState('');
@@ -9,6 +10,14 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login, liff, liffInitialized, user } = useAuth();
+
+  // すでにログイン済みの場合はトップページへリダイレクト
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,6 +25,13 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // LIFFプロフィールからLINE IDを取得
+      let lineId = null;
+      if (liffInitialized && liff.isLoggedIn()) {
+        const profile = await liff.getProfile();
+        lineId = profile.userId;
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -24,6 +40,7 @@ const Login = () => {
         body: JSON.stringify({
           student_id: studentId,
           password: password,
+          line_id: lineId, // LINE IDも送信
         }),
       });
 
@@ -43,6 +60,9 @@ const Login = () => {
       if (!response.ok) {
         throw new Error(data.message || 'ログインに失敗しました');
       }
+
+      // 認証コンテキストにログイン
+      await login(data.user);
 
       // トークンを保存
       if (data.token) {
