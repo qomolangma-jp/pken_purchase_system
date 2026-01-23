@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import DebugLogger from './components/DebugLogger';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import ProductList from './pages/ProductList';
@@ -13,6 +14,8 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        {/* 開発環境でのみデバッグログを表示 */}
+        <DebugLogger />
         <Routes>
           {/* 認証が必要なルート */}
           <Route
