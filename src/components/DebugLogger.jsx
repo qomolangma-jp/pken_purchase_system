@@ -6,8 +6,11 @@ const DebugLogger = () => {
   const [isMinimized, setIsMinimized] = useState(false);
 
   useEffect(() => {
-    // 開発環境でない場合は何もしない
-    if (import.meta.env.PROD) return;
+    // 環境変数でデバッグモードを強制的に有効化できる
+    const forceDebug = import.meta.env.VITE_FORCE_DEBUG === 'true';
+    
+    // 開発環境でない場合、かつ強制デバッグが無効の場合は何もしない
+    if (import.meta.env.PROD && !forceDebug) return;
 
     // console.log, console.error, console.warn をオーバーライド
     const originalLog = console.log;
@@ -51,8 +54,11 @@ const DebugLogger = () => {
       console.error = originalError;
       console.warn = originalWarn;
       window.removeEventListener('error', handleError);
-    };
-  }, []);
+    }環境変数でデバッグモードを強制的に有効化できる
+  const forceDebug = import.meta.env.VITE_FORCE_DEBUG === 'true';
+  
+  // 開発環境でない場合、かつ強制デバッグが無効の場合は何も表示しない
+  if (import.meta.env.PROD && !forceDebug
 
   // 開発環境でない場合は何も表示しない
   if (import.meta.env.PROD) return null;
