@@ -44,33 +44,46 @@ const Register = () => {
     setLoading(true);
 
     try {
+      const requestData = {
+        name_2nd: name2nd,
+        name_1st: name1st,
+        line_id: lineId,
+      };
+
+      console.log('=== 登録リクエスト送信 ===');
+      console.log('URL:', `${API_BASE_URL}/api/auth/register`);
+      console.log('送信データ:', requestData);
+
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name_2nd: name2nd,
-          name_1st: name1st,
-          line_id: lineId,
-        }),
+        body: JSON.stringify(requestData),
       });
+
+      console.log('レスポンスステータス:', response.status);
+      console.log('レスポンスOK:', response.ok);
 
       // Content-Typeをチェック
       const contentType = response.headers.get('content-type');
+      console.log('Content-Type:', contentType);
+      
       let data;
       
       if (contentType && contentType.includes('application/json')) {
         data = await response.json();
+        console.log('レスポンスデータ:', data);
       } else {
         // JSONでない場合（HTMLなど）
         const text = await response.text();
-        console.error('Non-JSON response:', text.substring(0, 200));
+        console.error('Non-JSON response:', text.substring(0, 500));
         throw new Error(`サーバーエラー: APIが正しく応答していません (Status: ${response.status})`);
       }
 
       if (!response.ok) {
-        throw new Error(data.message || '登録に失敗しました');
+        console.error('登録エラー:', data);
+        throw new Error(data.message || data.error || '登録に失敗しました');
       }
 
       // 認証コンテキストにログイン
