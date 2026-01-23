@@ -140,7 +140,7 @@ const Register = () => {
       {/* Main Content */}
       <main className="main-content min-h-screen">
         <div className="container container-narrow py-10">
-          <h1 className="page-title">新規登録-01.23_03</h1>
+          <h1 className="page-title">新規登録-01.23_04</h1>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
