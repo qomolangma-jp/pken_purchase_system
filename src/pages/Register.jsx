@@ -54,13 +54,19 @@ const Register = () => {
       console.log('URL:', `${API_BASE_URL}/api/auth/register`);
       console.log('送信データ:', requestData);
 
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      });
+      let response;
+      try {
+        response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        });
+      } catch (fetchError) {
+        console.error('❌ ネットワークエラー:', fetchError);
+        throw new Error(`通信エラー: バックエンドに接続できません。\n\n原因:\n- バックエンドサーバーがダウンしている\n- CORS設定が正しくない\n- ネットワーク接続の問題\n\nバックエンド管理者に確認してください。`);
+      }
 
       console.log('レスポンスステータス:', response.status);
       console.log('レスポンスOK:', response.ok);

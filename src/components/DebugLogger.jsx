@@ -80,17 +80,14 @@ const DebugLogger = () => {
   };
 
   return (
-    <div 
-      className={`fixed ${isMinimized ? 'bottom-4 right-4' : 'top-4 right-4 bottom-4 left-4'} pointer-events-none`}
-      style={{ zIndex: 999999 }}
-    >
-      <div className={`${isMinimized ? 'w-auto' : 'w-full h-full'} pointer-events-auto`}>
+    <div style={{ width: '100%', position: 'relative', margin: 0, padding: 0 }}>
+      <div className="w-full max-w-full mx-auto mt-8 mb-0 pointer-events-auto">
         <div 
-          className="bg-black bg-opacity-95 text-white rounded-lg shadow-2xl flex flex-col border-2 border-green-500" 
-          style={{ height: isMinimized ? 'auto' : '100%', maxHeight: isMinimized ? 'auto' : '90vh' }}
+          className="bg-black bg-opacity-95 text-white rounded-t-lg shadow-2xl flex flex-col border-t-4 border-green-500"
+          style={{ width: '100%', maxHeight: isMinimized ? 'auto' : '30vh', minHeight: isMinimized ? 'auto' : '120px', position: 'static', margin: 0, padding: 0 }}
         >
           {/* ヘッダー */}
-          <div className="flex items-center justify-between p-3 border-b border-gray-700 bg-green-600">
+          <div className="flex items-center justify-between p-2 border-b border-gray-700 bg-green-600 rounded-t-lg">
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold">🐛 Debug Log (LIFF)</span>
               <span className="text-xs text-gray-200">({logs.length})</span>
@@ -119,7 +116,7 @@ const DebugLogger = () => {
 
           {/* ログ表示 */}
           {!isMinimized && (
-            <div className="flex-1 overflow-y-auto p-3 space-y-2 text-xs font-mono">
+            <div className="flex-1 overflow-y-auto p-2 space-y-2 text-xs font-mono" style={{ background: 'rgba(0,0,0,0.92)' }}>
               {logs.length === 0 ? (
                 <div className="text-gray-400 text-center py-4">
                   ログがありません
