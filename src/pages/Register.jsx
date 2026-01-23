@@ -88,9 +88,13 @@ const Register = () => {
       }
 
       if (!response.ok) {
-        console.error('登録エラー:', data);
-        throw new Error(data.message || data.error || '登録に失敗しました');
+        console.error('登録エラーレスポンス:', data);
+        const errorMessage = data.message || data.error || '登録に失敗しました';
+        throw new Error(errorMessage);
       }
+
+      console.log('✅ 登録成功！');
+      console.log('ユーザーデータ:', data.user);
 
       // 認証コンテキストにログイン
       await login(data.user);
@@ -98,12 +102,19 @@ const Register = () => {
       // 登録成功時、トークンがあれば保存
       if (data.token) {
         localStorage.setItem('authToken', data.token);
+        console.log('トークン保存完了');
       }
 
-      alert('登録が完了しました！');
-      navigate('/login');
+      alert('登録が完了しました！自動的にログインします。');
+      console.log('トップページへリダイレクト');
+      navigate('/');
     } catch (err) {
       console.error('Registration error:', err);
+      console.error('エラー詳細:', {
+        message: err.message,
+        stack: err.stack,
+        name: err.name
+      });
       setError(err.message || '登録中にエラーが発生しました');
     } finally {
       setLoading(false);
