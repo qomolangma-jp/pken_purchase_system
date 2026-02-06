@@ -98,6 +98,8 @@ const ProductDetail = () => {
         return;
       }
 
+      console.log('カート追加リクエスト:', { product_id: parseInt(id), quantity: 1 });
+
       const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
         method: 'POST',
         headers: {
@@ -110,7 +112,18 @@ const ProductDetail = () => {
         }),
       });
 
+      console.log('レスポンスステータス:', response.status);
+      console.log('レスポンスヘッダー:', response.headers.get('content-type'));
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('JSONでないレスポンス:', text);
+        throw new Error('サーバーから不正なレスポンスが返されました');
+      }
+
       const data = await response.json();
+      console.log('レスポンスデータ:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'カートへの追加に失敗しました');
