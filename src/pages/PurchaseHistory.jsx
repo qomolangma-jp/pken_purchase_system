@@ -22,7 +22,7 @@ const PurchaseHistory = () => {
       }
 
       console.log('購入履歴取得開始');
-      const response = await fetch(`${API_BASE_URL}/api/orders/my`, {
+      const response = await fetch(`${API_BASE_URL}/api/orders/my/list`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
