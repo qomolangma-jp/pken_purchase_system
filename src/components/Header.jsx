@@ -10,7 +10,7 @@ const Header = () => (
       >
         <span className="material-icons">menu</span>
       </button>
-      <h1 className="text-lg font-bold">モバイルオーダー</h1>
+      <h1 className="text-lg font-bold">Mobile Order</h1>
     </div>
     <Link to="/cart" aria-label="カート画面へ" className="text-2xl">
       <span className="material-icons">shopping_cart</span>
