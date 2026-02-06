@@ -128,15 +128,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Header */}
-      <header className="site-header">
-        <div className="container header-inner">
-          <Link to="/" className="logo">Mobile Order</Link>
-          <Link to="/" className="text-sm text-stone-600">トップへ戻る</Link>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-stone-50 pt-20">
       {/* Main Content */}
       <main className="main-content min-h-screen">
         <div className="container container-narrow py-10">
