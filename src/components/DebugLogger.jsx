@@ -80,11 +80,11 @@ const DebugLogger = () => {
   };
 
   return (
-    <div style={{ width: '100%', position: 'relative', margin: 0, padding: 0 }}>
-      <div className="w-full max-w-full mx-auto mt-8 mb-0 pointer-events-auto">
+    <div style={{ width: '100%', position: 'fixed', bottom: 0, left: 0, right: 0, margin: 0, padding: 0, zIndex: 9999 }}>
+      <div className="w-full max-w-full mx-auto mb-0 pointer-events-auto">
         <div 
           className="bg-black bg-opacity-95 text-white rounded-t-lg shadow-2xl flex flex-col border-t-4 border-green-500"
-          style={{ width: '100%', maxHeight: isMinimized ? 'auto' : '30vh', minHeight: isMinimized ? 'auto' : '120px', position: 'static', margin: 0, padding: 0 }}
+          style={{ width: '100%', maxHeight: isMinimized ? 'auto' : '30vh', minHeight: isMinimized ? 'auto' : '120px', margin: 0, padding: 0 }}
         >
           {/* ヘッダー */}
           <div className="flex items-center justify-between p-2 border-b border-gray-700 bg-green-600 rounded-t-lg">
