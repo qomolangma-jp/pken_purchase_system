@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       console.log('LINEプロフィール取得成功:', { lineId, displayName: profile.displayName });
 
       // バックエンドAPIに問い合わせ
-      const response = await fetch('/api/auth/check', {
+      const response = await fetch('https://komapay.p-kmt.com/api/auth/check', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
