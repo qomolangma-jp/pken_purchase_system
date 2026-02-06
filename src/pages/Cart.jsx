@@ -22,6 +22,9 @@ const Cart = () => {
         return;
       }
 
+      console.log('カート取得開始');
+      console.log('トークン:', token ? `あり (長さ: ${token.length})` : 'なし');
+
       const response = await fetch(`${API_BASE_URL}/api/cart`, {
         method: 'GET',
         headers: {
@@ -30,7 +33,18 @@ const Cart = () => {
         },
       });
 
+      console.log('カートレスポンス:', response.status);
+      console.log('レスポンスヘッダー:', response.headers.get('content-type'));
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('JSONでないレスポンス:', text.substring(0, 500));
+        throw new Error('サーバーから正しい応答が得られませんでした');
+      }
+
       const data = await response.json();
+      console.log('カートデータ:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'カート情報の取得に失敗しました');
@@ -38,10 +52,13 @@ const Cart = () => {
 
       // APIレスポンスの構造に応じて調整
       if (data.success && Array.isArray(data.data)) {
+        console.log('カートアイテム数:', data.data.length);
         setCartItems(data.data);
       } else if (Array.isArray(data)) {
+        console.log('カートアイテム数:', data.length);
         setCartItems(data);
       } else {
+        console.warn('カートデータが配列ではありません:', data);
         setCartItems([]);
       }
     } catch (err) {
