@@ -9,7 +9,10 @@ const Cart = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  console.log('===== Cart.jsx がマウントされました =====');
+
   useEffect(() => {
+    console.log('===== useEffect実行: fetchCart呼び出し =====');
     fetchCart();
   }, []);
 
