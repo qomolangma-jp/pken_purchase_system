@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import ProductList from './pages/ProductList';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
+import PurchaseHistory from './pages/PurchaseHistory';
 import './App.css';
 
 function App() {
@@ -41,6 +42,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Cart />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/purchase-history"
+            element={
+              <ProtectedRoute>
+                <PurchaseHistory />
               </ProtectedRoute>
             }
           />
