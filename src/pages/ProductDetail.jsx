@@ -114,12 +114,13 @@ const ProductDetail = () => {
 
       console.log('レスポンスステータス:', response.status);
       console.log('レスポンスヘッダー:', response.headers.get('content-type'));
+      console.log('レスポンスURL:', response.url);
 
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
-        console.error('JSONでないレスポンス:', text);
-        throw new Error('サーバーから不正なレスポンスが返されました');
+        console.error('JSONでないレスポンス:', text.substring(0, 500));
+        throw new Error(`サーバーエラー (${response.status}): APIエンドポイントが見つからないか、サーバー側でエラーが発生しています`);
       }
 
       const data = await response.json();
