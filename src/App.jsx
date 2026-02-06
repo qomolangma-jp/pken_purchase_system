@@ -1,4 +1,5 @@
 import React from 'react';
+import Header from './components/Header';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -13,6 +14,7 @@ import './App.css';
 function App() {
   return (
     <Router>
+      <Header />
       <AuthProvider>
         {/* 開発環境でのみデバッグログを表示 */}
         <DebugLogger />
@@ -42,7 +44,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
           {/* 公開ルート（認証不要） */}
           <Route
             path="/register"
