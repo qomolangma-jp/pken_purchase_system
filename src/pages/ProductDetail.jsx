@@ -120,6 +120,12 @@ const ProductDetail = () => {
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
         console.error('JSONでないレスポンス:', text.substring(0, 500));
+        
+        // 500エラーの場合はサーバー側のエラー
+        if (response.status === 500) {
+          throw new Error('サーバーエラーが発生しました。カートの追加に失敗しました。');
+        }
+        
         throw new Error(`サーバーエラー (${response.status}): APIエンドポイントが見つからないか、サーバー側でエラーが発生しています`);
       }
 
@@ -127,7 +133,7 @@ const ProductDetail = () => {
       console.log('レスポンスデータ:', data);
 
       if (!response.ok) {
-        throw new Error(data.message || 'カートへの追加に失敗しました');
+        throw new Error(data.message || `カートへの追加に失敗しました (${response.status})`);
       }
 
       alert(`${product.name}をカートに追加しました！`);
@@ -137,6 +143,8 @@ const ProductDetail = () => {
       }
     } catch (err) {
       console.error('Add to cart error:', err);
+      console.error('エラーメッセージ:', err.message);
+      console.error('エラースタック:', err.stack);
       alert(err.message || 'カートへの追加に失敗しました');
     } finally {
       setAddingToCart(false);
