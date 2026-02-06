@@ -98,8 +98,14 @@ const ProductDetail = () => {
         return;
       }
 
-      console.log('トークン:', token ? 'あり (長さ: ' + token.length + ')' : 'なし');
-      console.log('カート追加リクエスト:', { product_id: parseInt(id), quantity: 1 });
+      const requestData = {
+        product_id: parseInt(id),
+        quantity: 1,
+      };
+
+      console.log('トークン:', token ? `あり (長さ: ${token.length}, 最初の10文字: ${token.substring(0, 10)}...)` : 'なし');
+      console.log('カート追加リクエスト:', requestData);
+      console.log('リクエストURL:', `${API_BASE_URL}/api/cart/add`);
 
       const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
         method: 'POST',
@@ -107,10 +113,7 @@ const ProductDetail = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          product_id: parseInt(id),
-          quantity: 1,
-        }),
+        body: JSON.stringify(requestData),
       });
 
       console.log('レスポンスステータス:', response.status);
