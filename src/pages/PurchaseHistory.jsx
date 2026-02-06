@@ -36,14 +36,23 @@ const PurchaseHistory = () => {
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
         console.error('JSONでないレスポンス:', text.substring(0, 500));
-        throw new Error('サーバーから正しい応答が得られませんでした');
+        
+        // 403エラーの場合は権限エラー
+        if (response.status === 403) {
+          throw new Error('アクセス権限がありません。ログインし直してください。');
+        }
+        
+        throw new Error(`サーバーエラー (${response.status}): 購入履歴の取得に失敗しました`);
       }
 
       const data = await response.json();
       console.log('購入履歴データ:', data);
 
       if (!response.ok) {
-        throw new Error(data.message || '購入履歴の取得に失敗しました');
+        // サーバーからのエラーメッセージを表示
+        const errorMsg = data.message || data.error || '購入履歴の取得に失敗しました';
+        console.error('APIエラー:', errorMsg);
+        throw new Error(errorMsg);
       }
 
       // APIレスポンスの構造に応じて調整
