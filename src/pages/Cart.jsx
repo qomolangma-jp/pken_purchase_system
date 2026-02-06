@@ -50,15 +50,16 @@ const Cart = () => {
         throw new Error(data.message || 'カート情報の取得に失敗しました');
       }
 
-      // APIレスポンスの構造に応じて調整
-      if (data.success && Array.isArray(data.data)) {
-        console.log('カートアイテム数:', data.data.length);
-        setCartItems(data.data);
+      // APIレスポンスの構造: { success: true, data: { items: [...], total: 1000, count: 5 } }
+      if (data.success && data.data && Array.isArray(data.data.items)) {
+        console.log('カートアイテム数:', data.data.items.length);
+        console.log('合計金額:', data.data.total);
+        setCartItems(data.data.items);
       } else if (Array.isArray(data)) {
         console.log('カートアイテム数:', data.length);
         setCartItems(data);
       } else {
-        console.warn('カートデータが配列ではありません:', data);
+        console.warn('カートデータが期待する構造ではありません:', data);
         setCartItems([]);
       }
     } catch (err) {
