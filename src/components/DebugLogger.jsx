@@ -139,7 +139,7 @@ const DebugLogger = () => {
                     className={`p-2 rounded ${getLogColor(log.type)} ${log.type === 'error' ? 'border-red-700' : 'border-gray-600'} border`}
                   >
                     <div className="flex items-start gap-2">
-                      <span className={log.type === 'error' ? 'text-gray-300' : 'text-gray-400'} className="whitespace-nowrap">{log.timestamp}</span>
+                      <span className={`whitespace-nowrap ${log.type === 'error' ? 'text-gray-300' : 'text-gray-400'}`}>{log.timestamp}</span>
                       <span className={`font-bold ${
                         log.type === 'error' ? 'text-white' :
                         log.type === 'warn' ? 'text-yellow-600' :
