@@ -45,7 +45,8 @@ const Cart = () => {
         setCartItems([]);
       }
     } catch (err) {
-      console.error('Cart fetch error:', err);
+      console.error('Cart fetch error:', String(err));
+      console.error('エラーメッセージ:', err.message || 'メッセージなし');
       setError(err.message || 'カート情報の取得に失敗しました');
     } finally {
       setLoading(false);

@@ -73,7 +73,7 @@ const DebugLogger = () => {
 
   const getLogColor = (type) => {
     switch (type) {
-      case 'error': return 'text-red-600 bg-red-50';
+      case 'error': return 'text-white bg-gray-800';
       case 'warn': return 'text-yellow-700 bg-yellow-50';
       default: return 'text-gray-700 bg-gray-50';
     }
@@ -141,14 +141,16 @@ const DebugLogger = () => {
                     <div className="flex items-start gap-2">
                       <span className="text-gray-400 whitespace-nowrap">{log.timestamp}</span>
                       <span className={`font-bold ${
-                        log.type === 'error' ? 'text-red-600' :
+                        log.type === 'error' ? 'text-white' :
                         log.type === 'warn' ? 'text-yellow-600' :
                         'text-blue-600'
                       }`}>
                         [{log.type.toUpperCase()}]
                       </span>
                     </div>
-                    <pre className="mt-1 whitespace-pre-wrap break-all text-gray-800">{log.message}</pre>
+                    <pre className={`mt-1 whitespace-pre-wrap break-all ${
+                      log.type === 'error' ? 'text-white' : 'text-gray-800'
+                    }`}>{log.message}</pre>
                   </div>
                 ))
               )}

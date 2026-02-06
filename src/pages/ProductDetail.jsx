@@ -98,6 +98,7 @@ const ProductDetail = () => {
         return;
       }
 
+      console.log('トークン:', token ? 'あり (長さ: ' + token.length + ')' : 'なし');
       console.log('カート追加リクエスト:', { product_id: parseInt(id), quantity: 1 });
 
       const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
@@ -142,9 +143,11 @@ const ProductDetail = () => {
         navigate('/cart');
       }
     } catch (err) {
-      console.error('Add to cart error:', err);
-      console.error('エラーメッセージ:', err.message);
-      console.error('エラースタック:', err.stack);
+      console.error('Add to cart error:', String(err));
+      console.error('エラーメッセージ:', err.message || 'メッセージなし');
+      if (err.stack) {
+        console.error('エラースタック:', err.stack);
+      }
       alert(err.message || 'カートへの追加に失敗しました');
     } finally {
       setAddingToCart(false);
