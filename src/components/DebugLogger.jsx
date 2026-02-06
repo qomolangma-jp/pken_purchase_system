@@ -73,7 +73,7 @@ const DebugLogger = () => {
 
   const getLogColor = (type) => {
     switch (type) {
-      case 'error': return 'text-white bg-gray-800';
+      case 'error': return 'text-white bg-red-900';
       case 'warn': return 'text-yellow-700 bg-yellow-50';
       default: return 'text-gray-700 bg-gray-50';
     }
@@ -136,10 +136,10 @@ const DebugLogger = () => {
                 logs.map((log, index) => (
                   <div
                     key={index}
-                    className={`p-2 rounded ${getLogColor(log.type)} border border-gray-600`}
+                    className={`p-2 rounded ${getLogColor(log.type)} ${log.type === 'error' ? 'border-red-700' : 'border-gray-600'} border`}
                   >
                     <div className="flex items-start gap-2">
-                      <span className="text-gray-400 whitespace-nowrap">{log.timestamp}</span>
+                      <span className={log.type === 'error' ? 'text-gray-300' : 'text-gray-400'} className="whitespace-nowrap">{log.timestamp}</span>
                       <span className={`font-bold ${
                         log.type === 'error' ? 'text-white' :
                         log.type === 'warn' ? 'text-yellow-600' :
