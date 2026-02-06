@@ -136,21 +136,33 @@ const DebugLogger = () => {
                 logs.map((log, index) => (
                   <div
                     key={index}
-                    className={`p-2 rounded ${getLogColor(log.type)} ${log.type === 'error' ? 'border-red-700' : 'border-gray-600'} border`}
+                    className={`p-2 rounded border`}
+                    style={{
+                      backgroundColor: log.type === 'error' ? '#7f1d1d' : log.type === 'warn' ? '#fef3c7' : '#f9fafb',
+                      color: log.type === 'error' ? '#ffffff' : log.type === 'warn' ? '#a16207' : '#374151',
+                      borderColor: log.type === 'error' ? '#991b1b' : '#9ca3af'
+                    }}
                   >
                     <div className="flex items-start gap-2">
-                      <span className={`whitespace-nowrap ${log.type === 'error' ? 'text-gray-300' : 'text-gray-400'}`}>{log.timestamp}</span>
-                      <span className={`font-bold ${
-                        log.type === 'error' ? 'text-white' :
-                        log.type === 'warn' ? 'text-yellow-600' :
-                        'text-blue-600'
-                      }`}>
+                      <span 
+                        className="whitespace-nowrap"
+                        style={{ color: log.type === 'error' ? '#d1d5db' : '#9ca3af' }}
+                      >
+                        {log.timestamp}
+                      </span>
+                      <span 
+                        className="font-bold"
+                        style={{ color: log.type === 'error' ? '#ffffff' : log.type === 'warn' ? '#ca8a04' : '#2563eb' }}
+                      >
                         [{log.type.toUpperCase()}]
                       </span>
                     </div>
-                    <pre className={`mt-1 whitespace-pre-wrap break-all ${
-                      log.type === 'error' ? 'text-white' : 'text-gray-800'
-                    }`}>{log.message}</pre>
+                    <pre 
+                      className="mt-1 whitespace-pre-wrap break-all"
+                      style={{ color: log.type === 'error' ? '#ffffff' : '#1f2937' }}
+                    >
+                      {log.message}
+                    </pre>
                   </div>
                 ))
               )}
