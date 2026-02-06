@@ -222,7 +222,7 @@ const ProductDetail = () => {
                     <button 
                       onClick={handleAddToCart}
                       disabled={addingToCart}
-                      className="w-full bg-stone-800 hover:bg-stone-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-stone-800 hover:bg-stone-700 text-white font-bold py-6 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                     >
                       {addingToCart ? '追加中...' : 'カートに入れる'}
                     </button>
