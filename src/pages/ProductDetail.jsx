@@ -171,33 +171,9 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Header */}
-      <header className="site-header">
-        <div className="container header-inner">
-          <Link to="/" className="logo">Mobile Order</Link>
-          <div className="header-actions">
-            <Link to="/cart" className="cart-button">
-              <svg className="w-6 h-6" style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-stone-50 pt-20">
       {/* Main Content */}
-      <main className="main-content min-h-screen pb-20">
-        <div className="container">
-          <div className="product-detail-container">
-            <div className="detail-card bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="md:flex">
-                {/* Image Section */}
-                <div className="md:w-1/2 bg-stone-200 aspect-square md:aspect-auto flex items-center justify-center relative">
-                  {product.image_url ? (
-                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-2xl text-stone-400">No Image</span>
+      <main className="main-content min-h-screen pb-20">\n        <div className="container">\n          <div className="product-detail-container">\n            <div className="detail-card bg-white rounded-lg shadow-sm overflow-hidden">\n              <div className="md:flex">\n                {/* Image Section */}\n                <div className="md:w-1/2 bg-stone-200 aspect-square md:aspect-auto flex items-center justify-center relative">\n                  {product.image_url ? (\n                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />\n                  ) : (\n                    <span className="text-2xl text-stone-400">No Image</span>
                   )}
                 </div>
 

@@ -7,7 +7,6 @@ const ProductList = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortType, setSortType] = useState('popularity');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -81,56 +80,7 @@ const ProductList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Header */}
-      <header className="site-header">
-        <div className="container header-inner">
-          {/* Logo */}
-          <Link to="/" className="logo">Mobile Order</Link>
-
-          <div className="flex items-center gap-4">
-            <Link to="/cart" className="relative text-stone-600 hover:text-stone-800">
-              <svg className="w-6 h-6" style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" style={{ display: 'none' }}>0</span>
-            </Link>
-
-            {/* Hamburger Menu Button */}
-            <button 
-              className="menu-button" 
-              aria-label="メニューを開く"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <svg className="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              ) : (
-                <svg className="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Drawer Menu */}
-        <div className={`mobile-menu ${isMenuOpen ? 'is-open' : ''}`}>
-          <nav className="mobile-nav">
-            <Link to="/" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>すべて表示</Link>
-            <Link to="/" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>商品一覧</Link>
-            <Link to="#" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>購入履歴</Link>
-            <Link to="#" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>ユーザー情報</Link>
-            <Link to="#" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>意見を送る</Link>
-            <Link to="#" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>使い方</Link>
-            <Link to="#" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>お知らせ</Link>
-            <Link to="/login" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>ログイン</Link>
-            <Link to="/register" className="mobile-nav-link" onClick={() => setIsMenuOpen(false)}>新規登録</Link>
-          </nav>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-stone-50 pt-20">
       {/* Main Content */}
       <main className="main-content min-h-screen pb-20">
         <div className="container">
