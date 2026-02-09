@@ -178,7 +178,17 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen bg-stone-50 pt-20">
       {/* Main Content */}
-      <main className="main-content min-h-screen pb-20">\n        <div className="container">\n          <div className="product-detail-container">\n            <div className="detail-card bg-white rounded-lg shadow-sm overflow-hidden">\n              <div className="md:flex">\n                {/* Image Section */}\n                <div className="md:w-1/2 bg-stone-200 aspect-square md:aspect-auto flex items-center justify-center relative">\n                  {product.image_url ? (\n                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />\n                  ) : (\n                    <span className="text-2xl text-stone-400">No Image</span>
+      <main className="main-content min-h-screen pb-20">
+        <div className="container">
+          <div className="product-detail-container">
+            <div className="detail-card bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="md:flex">
+                {/* Image Section */}
+                <div className="md:w-1/2 bg-stone-200 aspect-square md:aspect-auto flex items-center justify-center relative">
+                  {product.image_url ? (
+                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-2xl text-stone-400">No Image</span>
                   )}
                 </div>
 
