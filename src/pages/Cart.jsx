@@ -11,11 +11,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const { fetchCartCount } = useAuth();
 
-  console.log('===== Cart.jsx がマウントされました =====');
-  alert('Cart.jsx が読み込まれました！');
-
   useEffect(() => {
-    console.log('===== useEffect実行: fetchCart呼び出し =====');
     fetchCart();
   }, []);
 
