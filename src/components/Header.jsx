@@ -15,12 +15,12 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full h-14 bg-white shadow-md z-50 flex items-center justify-between px-4 md:px-6 border-b border-stone-200">
+      <header className="fixed top-0 left-0 w-full h-14 bg-green-600 shadow-md z-50 flex items-center justify-between px-4 md:px-6 border-b border-green-700">
         {/* 左側：ロゴとナビゲーション */}
         <div className="flex items-center gap-6">
           {/* モバイルメニューボタン */}
           <button
-            className="md:hidden text-stone-800 text-2xl focus:outline-none"
+            className="md:hidden text-white text-2xl focus:outline-none"
             aria-label="メニューを開く"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
@@ -28,7 +28,7 @@ const Header = () => {
           </button>
           
           {/* ロゴ */}
-          <Link to="/" className="text-stone-800 font-bold text-lg md:text-xl hover:text-stone-600 transition-colors">
+          <Link to="/" className="text-white font-bold text-lg md:text-xl hover:text-green-100 transition-colors">
             Mobile Order
           </Link>
           
@@ -36,13 +36,13 @@ const Header = () => {
           <nav className="hidden md:flex items-center gap-1">
             <Link 
               to="/" 
-              className="px-4 py-2 text-stone-700 hover:bg-stone-100 rounded transition-colors text-sm"
+              className="px-4 py-2 text-white hover:bg-green-700 rounded transition-colors text-sm"
             >
               商品一覧
             </Link>
             <Link 
               to="/purchase-history" 
-              className="px-4 py-2 text-stone-700 hover:bg-stone-100 rounded transition-colors text-sm"
+              className="px-4 py-2 text-white hover:bg-green-700 rounded transition-colors text-sm"
             >
               購入履歴
             </Link>
@@ -53,14 +53,14 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {/* ユーザー名表示 */}
           {user ? (
-            <div className="hidden md:flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded hover:bg-stone-200 transition-colors">
-              <span className="material-icons text-lg text-stone-600">account_circle</span>
-              <span className="text-sm text-stone-800 font-medium">{user.name || user.student_id}</span>
+            <div className="hidden md:flex items-center gap-2 bg-green-700 px-3 py-1.5 rounded hover:bg-green-800 transition-colors">
+              <span className="material-icons text-lg text-white">account_circle</span>
+              <span className="text-sm text-white font-medium">{user.name || user.student_id}</span>
             </div>
           ) : (
             <Link 
               to="/login" 
-              className="hidden md:flex items-center gap-1 px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="hidden md:flex items-center gap-1 px-4 py-1.5 bg-white text-green-600 rounded hover:bg-green-50 transition-colors text-sm font-medium"
             >
               <span className="material-icons text-lg">login</span>
               <span>ログイン</span>
@@ -68,8 +68,8 @@ const Header = () => {
           )}
           
           {/* カートアイコン */}
-          <Link to="/cart" aria-label="カート画面へ" className="relative p-2 hover:bg-stone-100 rounded transition-colors">
-            <span className="material-icons text-stone-800 text-2xl">shopping_cart</span>
+          <Link to="/cart" aria-label="カート画面へ" className="relative p-2 hover:bg-green-700 rounded transition-colors">
+            <span className="material-icons text-white text-2xl">shopping_cart</span>
             {cartCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {cartCount > 99 ? '99+' : cartCount}
