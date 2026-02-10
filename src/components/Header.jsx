@@ -15,12 +15,12 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full h-14 bg-[#212121] shadow-lg z-50 flex items-center justify-between px-4 md:px-6">
+      <header className="fixed top-0 left-0 w-full h-14 bg-white shadow-md z-50 flex items-center justify-between px-4 md:px-6 border-b border-stone-200">
         {/* 左側：ロゴとナビゲーション */}
         <div className="flex items-center gap-6">
           {/* モバイルメニューボタン */}
           <button
-            className="md:hidden text-white text-2xl focus:outline-none"
+            className="md:hidden text-stone-800 text-2xl focus:outline-none"
             aria-label="メニューを開く"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
@@ -28,7 +28,7 @@ const Header = () => {
           </button>
           
           {/* ロゴ */}
-          <Link to="/" className="text-white font-bold text-lg md:text-xl hover:text-gray-300 transition-colors">
+          <Link to="/" className="text-stone-800 font-bold text-lg md:text-xl hover:text-stone-600 transition-colors">
             Mobile Order
           </Link>
           
@@ -36,13 +36,13 @@ const Header = () => {
           <nav className="hidden md:flex items-center gap-1">
             <Link 
               to="/" 
-              className="px-4 py-2 text-white hover:bg-[#333333] rounded transition-colors text-sm"
+              className="px-4 py-2 text-stone-700 hover:bg-stone-100 rounded transition-colors text-sm"
             >
               商品一覧
             </Link>
             <Link 
               to="/purchase-history" 
-              className="px-4 py-2 text-white hover:bg-[#333333] rounded transition-colors text-sm"
+              className="px-4 py-2 text-stone-700 hover:bg-stone-100 rounded transition-colors text-sm"
             >
               購入履歴
             </Link>
@@ -53,9 +53,9 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {/* ユーザー名表示 */}
           {user ? (
-            <div className="hidden md:flex items-center gap-2 bg-[#333333] px-3 py-1.5 rounded hover:bg-[#404040] transition-colors">
-              <span className="material-icons text-lg text-gray-300">account_circle</span>
-              <span className="text-sm text-white font-medium">{user.name || user.student_id}</span>
+            <div className="hidden md:flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded hover:bg-stone-200 transition-colors">
+              <span className="material-icons text-lg text-stone-600">account_circle</span>
+              <span className="text-sm text-stone-800 font-medium">{user.name || user.student_id}</span>
             </div>
           ) : (
             <Link 
@@ -68,8 +68,8 @@ const Header = () => {
           )}
           
           {/* カートアイコン */}
-          <Link to="/cart" aria-label="カート画面へ" className="relative p-2 hover:bg-[#333333] rounded transition-colors">
-            <span className="material-icons text-white text-2xl">shopping_cart</span>
+          <Link to="/cart" aria-label="カート画面へ" className="relative p-2 hover:bg-stone-100 rounded transition-colors">
+            <span className="material-icons text-stone-800 text-2xl">shopping_cart</span>
             {cartCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {cartCount > 99 ? '99+' : cartCount}
@@ -84,18 +84,18 @@ const Header = () => {
         <>
           {/* オーバーレイ */}
           <div 
-            className="fixed inset-0 bg-black bg-opacity-60 z-40"
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={() => setIsMenuOpen(false)}
           />
           
           {/* メニューパネル */}
-          <div className="fixed top-0 left-0 w-64 h-full bg-[#212121] shadow-2xl z-50 transform transition-transform duration-300 flex flex-col">
-            <div className="p-4 border-b border-gray-700">
+          <div className="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-50 transform transition-transform duration-300 flex flex-col">
+            <div className="p-4 border-b border-stone-200">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-white">メニュー</h2>
+                <h2 className="text-xl font-bold text-stone-800">メニュー</h2>
                 <button
                   onClick={() => setIsMenuOpen(false)}
-                  className="text-white text-2xl focus:outline-none hover:bg-[#333333] rounded p-1"
+                  className="text-stone-800 text-2xl focus:outline-none hover:bg-stone-100 rounded p-1"
                   aria-label="メニューを閉じる"
                 >
                   <span className="material-icons">close</span>
@@ -104,12 +104,12 @@ const Header = () => {
               
               {/* ユーザー情報表示 */}
               {user && (
-                <div className="bg-[#333333] rounded-lg p-3 mb-4">
+                <div className="bg-stone-50 rounded-lg p-3 mb-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="material-icons text-gray-300">account_circle</span>
-                    <span className="font-bold text-white">{user.name || '名前未設定'}</span>
+                    <span className="material-icons text-stone-600">account_circle</span>
+                    <span className="font-bold text-stone-800">{user.name || '名前未設定'}</span>
                   </div>
-                  <p className="text-xs text-gray-400 ml-8">学生番号: {user.student_id || '-'}</p>
+                  <p className="text-xs text-stone-500 ml-8">学生番号: {user.student_id || '-'}</p>
                 </div>
               )}
             </div>
@@ -118,7 +118,7 @@ const Header = () => {
               <div className="space-y-2">
                 <Link 
                   to="/" 
-                  className="px-4 py-3 hover:bg-[#333333] text-white rounded transition-colors flex items-center gap-2"
+                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <span className="material-icons text-lg">store</span>
@@ -126,7 +126,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   to="/cart" 
-                  className="px-4 py-3 hover:bg-[#333333] text-white rounded transition-colors flex items-center gap-2"
+                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <span className="material-icons text-lg">shopping_cart</span>
@@ -139,7 +139,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   to="/purchase-history" 
-                  className="px-4 py-3 hover:bg-[#333333] text-white rounded transition-colors flex items-center gap-2"
+                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <span className="material-icons text-lg">history</span>
@@ -147,11 +147,11 @@ const Header = () => {
                 </Link>
               </div>
               
-              <div className="mt-auto pt-4 border-t border-gray-700 space-y-2">
+              <div className="mt-auto pt-4 border-t border-stone-200 space-y-2">
                 {user ? (
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-3 hover:bg-red-900 bg-red-800 text-white rounded transition-colors flex items-center gap-2"
+                    className="w-full px-4 py-3 hover:bg-red-50 text-red-600 rounded transition-colors flex items-center gap-2"
                   >
                     <span className="material-icons text-lg">logout</span>
                     <span>ログアウト</span>
@@ -160,7 +160,7 @@ const Header = () => {
                   <>
                     <Link 
                       to="/login" 
-                      className="px-4 py-3 hover:bg-[#333333] text-white rounded transition-colors flex items-center gap-2"
+                      className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <span className="material-icons text-lg">login</span>
@@ -168,7 +168,7 @@ const Header = () => {
                     </Link>
                     <Link 
                       to="/register" 
-                      className="px-4 py-3 hover:bg-[#333333] text-white rounded transition-colors flex items-center gap-2"
+                      className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <span className="material-icons text-lg">person_add</span>
