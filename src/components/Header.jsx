@@ -15,10 +15,10 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full h-16 bg-white shadow z-50 flex items-center justify-between px-4">
+      <header className="fixed top-0 left-0 w-full h-16 bg-gradient-to-r from-stone-800 to-stone-700 text-white shadow-lg z-50 flex items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <button
-            className="text-2xl focus:outline-none"
+            className="text-2xl focus:outline-none hover:text-stone-200 transition-colors"
             aria-label="メニューを開く"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
@@ -30,14 +30,14 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {/* ユーザー名表示（PC表示） */}
           {user && (
-            <div className="hidden md:flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full">
-              <span className="material-icons text-lg text-stone-600">account_circle</span>
-              <span className="font-medium text-stone-800">{user.name || user.student_id}</span>
+            <div className="hidden md:flex items-center gap-2 bg-white bg-opacity-20 px-3 py-1.5 rounded-full backdrop-blur-sm">
+              <span className="material-icons text-lg text-white">account_circle</span>
+              <span className="font-medium text-white">{user.name || user.student_id}</span>
             </div>
           )}
           
           {/* カートアイコン */}
-          <Link to="/cart" aria-label="カート画面へ" className="text-2xl relative">
+          <Link to="/cart" aria-label="カート画面へ" className="text-2xl relative hover:text-stone-200 transition-colors">
             <span className="material-icons">shopping_cart</span>
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
