@@ -20,7 +20,7 @@ const Header = () => {
         <div className="flex items-center gap-6">
           {/* モバイルメニューボタン */}
           <button
-            className="md:hidden text-stone-800 text-2xl focus:outline-none bg-stone-100 hover:bg-stone-200 rounded p-2 transition-colors"
+            className="md:hidden text-stone-800 text-2xl focus:outline-none"
             aria-label="メニューを開く"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
@@ -89,8 +89,8 @@ const Header = () => {
           />
           
           {/* メニューパネル */}
-          <div className="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-50 transform transition-transform duration-300 flex flex-col">
-            <div className="p-4 border-b border-stone-200">
+          <div className="fixed top-0 left-0 w-64 h-full bg-stone-50 shadow-2xl z-50 transform transition-transform duration-300 flex flex-col border-r-2 border-stone-300">
+            <div className="p-4 border-b border-stone-300 bg-white">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-stone-800">メニュー</h2>
                 <button
@@ -114,11 +114,11 @@ const Header = () => {
               )}
             </div>
             
-            <nav className="flex-1 flex flex-col p-4 overflow-y-auto">
+            <nav className="flex-1 flex flex-col p-4 overflow-y-auto bg-white">
               <div className="space-y-2">
                 <Link 
                   to="/" 
-                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
+                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2 bg-white border border-stone-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <span className="material-icons text-lg">store</span>
@@ -126,7 +126,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   to="/cart" 
-                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
+                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2 bg-white border border-stone-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <span className="material-icons text-lg">shopping_cart</span>
@@ -139,7 +139,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   to="/purchase-history" 
-                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
+                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2 bg-white border border-stone-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <span className="material-icons text-lg">history</span>
@@ -147,11 +147,11 @@ const Header = () => {
                 </Link>
               </div>
               
-              <div className="mt-auto pt-4 border-t border-stone-200 space-y-2">
+              <div className="mt-auto pt-4 border-t border-stone-300 space-y-2">
                 {user ? (
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-3 hover:bg-red-50 text-red-600 rounded transition-colors flex items-center gap-2"
+                    className="w-full px-4 py-3 hover:bg-red-100 bg-red-50 text-red-600 rounded transition-colors flex items-center gap-2 border border-red-200"
                   >
                     <span className="material-icons text-lg">logout</span>
                     <span>ログアウト</span>
@@ -160,7 +160,7 @@ const Header = () => {
                   <>
                     <Link 
                       to="/login" 
-                      className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
+                      className="px-4 py-3 hover:bg-blue-100 bg-blue-50 text-blue-600 rounded transition-colors flex items-center gap-2 border border-blue-200"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <span className="material-icons text-lg">login</span>
@@ -168,7 +168,7 @@ const Header = () => {
                     </Link>
                     <Link 
                       to="/register" 
-                      className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
+                      className="px-4 py-3 hover:bg-green-100 bg-green-50 text-green-600 rounded transition-colors flex items-center gap-2 border border-green-200"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <span className="material-icons text-lg">person_add</span>
