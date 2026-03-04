@@ -84,12 +84,12 @@ const Header = () => {
         <>
           {/* オーバーレイ */}
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[60]"
             onClick={() => setIsMenuOpen(false)}
           />
           
           {/* メニューパネル */}
-          <div className="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-50 transform transition-transform duration-300 flex flex-col border-r-4 border-stone-300">
+          <div className="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-[70] transform transition-transform duration-300 flex flex-col border-r-4 border-stone-300">
             <div className="p-4 border-b-2 border-stone-200 bg-stone-50">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-stone-800">メニュー</h2>

@@ -20,7 +20,9 @@ function App() {
         <Header />
         {/* 開発環境でのみデバッグログを表示 */}
         <DebugLogger />
-        <Routes>
+        {/* ヘッダーの高さ分のパディングを追加してコンテンツが隠れないようにする */}
+        <main className="pt-14">
+          <Routes>
           {/* 認証が必要なルート */}
           <Route
             path="/"
@@ -75,7 +77,8 @@ function App() {
             path="/auth/callback"
             element={<LineCallback />}
           />
-        </Routes>
+          </Routes>
+        </main>
       </AuthProvider>
     </Router>
   );
