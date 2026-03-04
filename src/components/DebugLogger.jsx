@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const DebugLogger = () => {
   const [logs, setLogs] = useState([]);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -69,7 +69,6 @@ const DebugLogger = () => {
 
   // 表示条件
   if (!shouldShow || !isMounted) return null;
-  if (!isVisible) return null;
 
   const getLogColor = (type) => {
     switch (type) {
@@ -78,6 +77,32 @@ const DebugLogger = () => {
       default: return 'text-gray-700 bg-gray-50';
     }
   };
+
+  // デバッグログが非表示の場合は、左下にボタンだけ表示
+  if (!isVisible) {
+    return (
+      <button
+        onClick={() => setIsVisible(true)}
+        className="bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-lg flex items-center gap-2"
+        style={{
+          position: 'fixed',
+          bottom: '16px',
+          left: '16px',
+          padding: '12px 16px',
+          zIndex: 9999,
+          fontSize: '14px'
+        }}
+        title="デバッグログを表示"
+      >
+        🐛 Debug
+        {logs.length > 0 && (
+          <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1">
+            {logs.length}
+          </span>
+        )}
+      </button>
+    );
+  }
 
   return (
     <div 
