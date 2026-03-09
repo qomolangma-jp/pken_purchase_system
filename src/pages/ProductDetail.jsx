@@ -93,12 +93,15 @@ const ProductDetail = () => {
     setAddingToCart(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      // 一時的に認証なしでもカート操作可能にする
+      const token = localStorage.getItem('authToken') || 'guest-token';
+      /* 元のコード（ログイン必須にする場合は以下を有効化）
       if (!token) {
         alert('ログインしてください');
         navigate('/login');
         return;
       }
+      */
 
       const requestData = {
         product_id: parseInt(id),

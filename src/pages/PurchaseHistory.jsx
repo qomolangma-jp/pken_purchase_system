@@ -14,12 +14,15 @@ const PurchaseHistory = () => {
 
   const fetchPurchaseHistory = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      // 一時的に認証なしでも購入履歴取得可能にする
+      const token = localStorage.getItem('authToken') || 'guest-token';
+      /* 元のコード（ログイン必須にする場合は以下を有効化）
       if (!token) {
         setError('ログインしてください');
         setLoading(false);
         return;
       }
+      */
 
       console.log('購入履歴取得開始');
       const response = await fetch(`${API_BASE_URL}/api/orders/my/list`, {
