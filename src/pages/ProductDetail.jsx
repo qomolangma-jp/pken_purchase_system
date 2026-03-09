@@ -184,9 +184,9 @@ const ProductDetail = () => {
             <div className="detail-card bg-white rounded-lg shadow-sm overflow-hidden">
               <div className="flex flex-col md:flex-row">
                 {/* Image Section */}
-                <div className="md:w-2/5 bg-stone-200 flex items-center justify-center relative max-h-48 md:max-h-80">
+                <div className="w-full md:w-2/5 bg-stone-200 flex items-center justify-center relative h-48 md:h-80">
                   {product.image_url ? (
-                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                    <img src={product.image_url} alt={product.name} className="max-w-full max-h-full object-contain" />
                   ) : (
                     <span className="text-2xl text-stone-400">No Image</span>
                   )}
