@@ -13,6 +13,7 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -87,6 +88,9 @@ const ProductDetail = () => {
     };
 
     fetchProductDetail();
+    
+    // 商品が変わったら数量を1にリセット
+    setQuantity(1);
   }, [id]);
 
   const handleAddToCart = async () => {
@@ -105,7 +109,7 @@ const ProductDetail = () => {
 
       const requestData = {
         product_id: parseInt(id),
-        quantity: 1,
+        quantity: quantity,
       };
 
       console.log('トークン:', token ? `あり (長さ: ${token.length}, 最初の10文字: ${token.substring(0, 10)}...)` : 'なし');
@@ -148,11 +152,14 @@ const ProductDetail = () => {
       // カート数を更新
       await fetchCartCount();
 
-      alert(`${product.name}をカートに追加しました！`);
+      alert(`${product.name} を ${quantity}個 カートに追加しました！`);
       // カートページへ遷移するか確認
       if (confirm('カートを確認しますか？')) {
         navigate('/cart');
       }
+      
+      // 数量をリセット
+      setQuantity(1);
     } catch (err) {
       console.error('Add to cart error:', String(err));
       console.error('エラーメッセージ:', err.message || 'メッセージなし');
@@ -235,6 +242,26 @@ const ProductDetail = () => {
                       💡 過去30日で{product.purchaseCountLast30Days}回購入されました！
                     </div>
                   )}
+
+                  {/* 数量選択 */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-semibold text-stone-700 mb-2">数量</label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="w-10 h-10 rounded border-2 border-stone-300 flex items-center justify-center hover:bg-stone-100 transition-colors text-lg font-bold"
+                      >
+                        -
+                      </button>
+                      <span className="text-xl font-bold text-stone-800 min-w-[3rem] text-center">{quantity}</span>
+                      <button
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="w-10 h-10 rounded border-2 border-stone-300 flex items-center justify-center hover:bg-stone-100 transition-colors text-lg font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
 
                   <div className="mt-auto">
                     <button 
