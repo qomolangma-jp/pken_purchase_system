@@ -305,13 +305,13 @@ const Cart = () => {
                   </div>
 
                   <button
-                    className="w-full bg-stone-800 hover:bg-stone-700 text-white font-bold py-2.5 md:py-3 px-4 rounded-lg transition-colors text-sm md:text-base"
+                    className="w-full bg-stone-800 hover:bg-stone-700 text-white font-bold py-4 md:py-5 px-4 rounded-lg transition-colors text-sm md:text-base"
                     onClick={() => alert('購入機能はまだ実装されていません')}
                   >
                     購入手続きへ
                   </button>
 
-                  <Link to="/" className="block text-center link-text mt-3 md:mt-4 text-sm md:text-base">
+                  <Link to="/" className="block text-center link-text mt-3 md:mt-4 text-sm md:text-base py-2">
                     買い物を続ける
                   </Link>
                 </div>
