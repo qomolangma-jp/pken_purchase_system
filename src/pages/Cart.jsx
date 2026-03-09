@@ -79,13 +79,13 @@ const Cart = () => {
   const updateQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 0) return;
 
-    // 数量が0の場合は削除（確認なし）
-    if (newQuantity === 0) {
-      await removeItem(itemId, false);
-      return;
-    }
-
     try {
+      // 数量が0の場合は削除（確認なし）
+      if (newQuantity === 0) {
+        await removeItem(itemId, false);
+        return;
+      }
+
       const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/api/cart/${itemId}`, {
         method: 'PUT',
