@@ -222,7 +222,7 @@ const Cart = () => {
                     <div key={item.id} className="bg-white rounded-lg shadow-sm p-3 md:p-4">
                       <div className="flex gap-3 md:gap-4">
                         {/* Product Image */}
-                        <Link to={`/product/${product.id}`} className="w-16 h-16 md:w-20 md:h-20 bg-stone-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
+                        <Link to={`/product/${product.id}`} className="w-12 h-12 md:w-16 md:h-16 bg-stone-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
                           {productImage ? (
                             <img src={productImage} alt={productName} className="w-full h-full object-cover" />
                           ) : (

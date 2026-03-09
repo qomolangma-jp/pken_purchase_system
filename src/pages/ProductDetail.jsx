@@ -184,7 +184,7 @@ const ProductDetail = () => {
             <div className="detail-card bg-white rounded-lg shadow-sm overflow-hidden">
               <div className="md:flex">
                 {/* Image Section */}
-                <div className="md:w-1/2 bg-stone-200 aspect-square md:aspect-auto flex items-center justify-center relative">
+                <div className="md:w-2/5 bg-stone-200 aspect-square md:aspect-auto flex items-center justify-center relative max-h-96">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                   ) : (
@@ -193,7 +193,7 @@ const ProductDetail = () => {
                 </div>
 
                 {/* Content Section */}
-                <div className="p-6 md:w-1/2 flex flex-col">
+                <div className="p-6 md:w-3/5 flex flex-col">
                   <div className="mb-6">
                     <div className="flex justify-between items-start mb-2">
                       <h1 className="text-2xl font-bold text-stone-800">{product.name}</h1>
