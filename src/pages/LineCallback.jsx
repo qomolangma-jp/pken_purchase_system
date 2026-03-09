@@ -73,7 +73,7 @@ const LineCallback = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-stone-50 pt-20 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 pt-24 flex items-center justify-center">
         <div className="container container-narrow">
           <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg">
             <h2 className="font-bold text-lg mb-2">エラー</h2>
@@ -91,7 +91,7 @@ const LineCallback = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-20 flex items-center justify-center">
+    <div className="min-h-screen bg-stone-50 pt-24 flex items-center justify-center">
       <div className="text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-stone-800 mb-4"></div>
         <p className="text-stone-600">ログイン処理中...</p>

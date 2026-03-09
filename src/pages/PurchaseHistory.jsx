@@ -96,7 +96,7 @@ const PurchaseHistory = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-20 pb-8">
+    <div className="min-h-screen bg-stone-50 pt-24 pb-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <h1 className="text-2xl font-bold text-stone-800 mb-6">購入履歴</h1>
 

@@ -128,7 +128,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-20">
+    <div className="min-h-screen bg-stone-50 pt-24">
       {/* Main Content */}
       <main className="main-content min-h-screen">
         <div className="container container-narrow py-10">

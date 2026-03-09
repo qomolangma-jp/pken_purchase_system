@@ -176,7 +176,7 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-20">
+    <div className="min-h-screen bg-stone-50 pt-24">
       {/* Main Content */}
       <main className="main-content min-h-screen pb-20">
         <div className="container">
