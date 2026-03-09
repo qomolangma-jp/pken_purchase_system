@@ -206,7 +206,7 @@ const ProductDetail = () => {
                 <div className="p-4 md:p-6 md:w-3/5 flex flex-col">
                   <div className="mb-4 md:mb-6">
                     <div className="flex justify-between items-start mb-2">
-                      <h1 className="text-xl md:text-2xl font-bold text-stone-800">{product.name}</h1>
+                      <h1 className="text-3xl font-bold text-[#00873c]">{product.name}</h1>
                       {product.popularity && (
                         <span className="bg-gradient-to-r from-orange-400 to-yellow-400 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                           人気度: {product.popularity}
@@ -270,7 +270,7 @@ const ProductDetail = () => {
                     <button 
                       onClick={handleAddToCart}
                       disabled={addingToCart}
-                      className="w-full h-24 bg-mos-green hover:bg-mos-green-dark text-white font-bold px-4 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base md:text-lg flex items-center justify-center shadow-lg hover:shadow-xl active:scale-95"
+                      className="w-full h-24 !py-8 bg-mos-green hover:bg-mos-green-dark text-white font-bold px-4 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base md:text-lg flex items-center justify-center shadow-lg hover:shadow-xl active:scale-95"
                     >
                       {addingToCart ? '追加中...' : 'カートに入れる'}
                     </button>
