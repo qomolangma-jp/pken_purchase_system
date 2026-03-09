@@ -207,9 +207,9 @@ const Cart = () => {
               <Link to="/" className="link-text link-text-bold text-sm md:text-base">商品を見る</Link>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-3 md:gap-4">
               {/* Cart Items */}
-              <div className="md:col-span-1 space-y-4">
+              <div className="md:col-span-1 space-y-2 md:space-y-3">
                 {cartItems.map((item) => {
                   // APIレスポンスの構造に応じて商品情報を取得
                   const product = item.product || item;
