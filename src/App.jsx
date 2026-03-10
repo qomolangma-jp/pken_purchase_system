@@ -11,6 +11,7 @@ import ProductList from './pages/ProductList';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import PurchaseHistory from './pages/PurchaseHistory';
+import News from './pages/News';
 import './App.css';
 
 function App() {
@@ -51,6 +52,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PurchaseHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/news"
+            element={
+              <ProtectedRoute>
+                <News />
               </ProtectedRoute>
             }
           />

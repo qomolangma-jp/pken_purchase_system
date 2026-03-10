@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
+  const [newsList, setNewsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,7 +50,31 @@ const ProductList = () => {
       }
     };
 
+    const fetchNews = async () => {
+      try {
+        const response = await fetch('https://komapay.p-kmt.com/api/news', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && Array.isArray(data.data)) {
+            // 最新3件のニュースのみ取得
+            setNewsList(data.data.slice(0, 3));
+          } else if (Array.isArray(data)) {
+            setNewsList(data.slice(0, 3));
+          }
+        }
+      } catch (err) {
+        console.error('News fetch error:', err);
+      }
+    };
+
     fetchProducts();
+    fetchNews();
   }, []);
 
   // Filter and Sort
@@ -175,6 +200,37 @@ const ProductList = () => {
               </div>
             </div>
           </div>
+
+          {/* News Section */}
+          {newsList.length > 0 && (
+            <div className="mt-16">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-stone-800">最新ニュース</h2>
+                <Link to="/news" className="text-mos-green hover:text-mos-green-dark font-semibold text-sm">
+                  すべて見る →
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {newsList.map((newsItem) => (
+                  <div key={newsItem.id} className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow duration-300">
+                    <div className="text-sm text-stone-500 mb-2">
+                      {new Date(newsItem.created_at).toLocaleDateString('ja-JP', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                      })}
+                    </div>
+                    <h3 className="text-base font-bold text-stone-800 mb-2 line-clamp-2">
+                      {newsItem.title}
+                    </h3>
+                    <p className="text-stone-600 text-sm line-clamp-2">
+                      {newsItem.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
         </div>
       </main>

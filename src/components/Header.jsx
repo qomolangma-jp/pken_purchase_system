@@ -51,6 +51,12 @@ const Header = () => {
               商品一覧
             </Link>
             <Link 
+              to="/news" 
+              className="px-4 py-2 text-white hover:bg-green-700 rounded transition-colors text-sm"
+            >
+              ニュース
+            </Link>
+            <Link 
               to="/purchase-history" 
               className="px-4 py-2 text-white hover:bg-green-700 rounded transition-colors text-sm"
             >
@@ -153,6 +159,14 @@ const Header = () => {
                 >
                   <span className="material-icons text-lg">history</span>
                   <span>購入履歴</span>
+                </Link>
+                <Link 
+                  to="/news" 
+                  className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <span className="material-icons text-lg">newspaper</span>
+                  <span>ニュース</span>
                 </Link>
               </div>
               
