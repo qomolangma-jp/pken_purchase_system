@@ -159,7 +159,7 @@ const ProductList = () => {
                         <div className="absolute -top-3 right-4 bg-gradient-to-r from-orange-400 to-yellow-400 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                           人気
                         </div>
-                        <h3 className="text-base md:text-lg font-bold text-stone-800 mb-2 truncate">{product.name}</h3>
+                        <h3 className="text-base md:text-lg font-bold text-stone-800 mb-2 truncate pt-6">{product.name}</h3>
                         <div className="flex items-baseline gap-1">
                           <span className="text-2xl md:text-3xl font-black text-mos-green">¥{product.price ? product.price.toLocaleString() : '-'}</span>
                           <span className="text-xs text-stone-500">税込</span>
