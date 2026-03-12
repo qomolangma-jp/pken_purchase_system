@@ -194,12 +194,12 @@ const Cart = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-14">
-        <div className="container px-4 h-full flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="text-stone-700 text-2xl font-light">←</button>
-          <h1 className="text-lg font-bold text-stone-800">カート</h1>
+      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-12">
+        <div className="container px-3 h-full flex items-center justify-between">
+          <button onClick={() => navigate(-1)} className="text-stone-700 text-xl font-light">←</button>
+          <h1 className="text-base font-bold text-stone-800">カート</h1>
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded transition-colors text-xs"
             onClick={() => alert('購入機能はまだ実装されていません')}
           >
             お会計へ進む
@@ -208,44 +208,44 @@ const Cart = () => {
       </div>
 
       {/* Main Content */}
-      <main className="pt-14 pb-20">
+      <main className="pt-12 pb-20">
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-600 text-red-700 px-4 py-3 m-3 mt-4 rounded-lg">
+          <div className="bg-red-50 border-l-4 border-red-600 text-red-700 px-3 py-2 m-2 mt-2 rounded text-xs">
             <p className="font-semibold">⚠️ エラー</p>
-            <p className="text-sm">{error}</p>
+            <p className="text-xs">{error}</p>
           </div>
         )}
 
         {cartItems.length === 0 ? (
-          <div className="text-center py-12 px-4">
-            <p className="text-stone-600 mb-4 text-base font-semibold">カートに商品がありません</p>
-            <Link to="/" className="inline-block bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2 px-6 rounded transition-all">
+          <div className="text-center py-8 px-3">
+            <p className="text-stone-600 mb-3 text-sm font-semibold">カートに商品がありません</p>
+            <Link to="/" className="inline-block bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2 px-4 rounded text-sm transition-all">
               商品を見る
             </Link>
           </div>
         ) : (
-          <div className="px-3 md:px-4">
+          <div className="px-2">
             {/* Campaign Banner */}
-            <div className="bg-yellow-300 border-b-4 border-yellow-400 p-3 rounded mb-3">
-              <p className="text-sm font-bold text-stone-800">
+            <div className="bg-yellow-300 border-b-4 border-yellow-400 p-2 rounded mb-2">
+              <p className="text-xs font-bold text-stone-800">
                 キャンペーン情報はこちら
               </p>
             </div>
 
             {/* Tap to expand notice */}
-            <div className="text-center text-xs text-blue-600 font-bold mb-4 py-1 bg-blue-50 rounded">
-              <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs">タップ</span>
+            <div className="text-center text-xs text-blue-600 font-bold mb-2 py-0.5 bg-blue-50 rounded">
+              <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs inline-block">タップ</span>
             </div>
 
             {/* Cart Summary Line */}
-            <div className="bg-white rounded px-3 py-2 mb-3 text-sm">
+            <div className="bg-white rounded px-2 py-1.5 mb-2 text-xs">
               <p className="text-stone-700 font-semibold">
-                小計（アイテム）: <span className="text-mos-green font-bold text-base">¥{getTotalPrice().toLocaleString()}</span>
+                小計（アイテム）: <span className="text-mos-green font-bold text-sm">¥{getTotalPrice().toLocaleString()}</span>
               </p>
             </div>
 
             {/* Cart Items */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {cartItems.map((item) => {
                 const product = item.product || item;
                 const productName = product.name || 'Unknown Product';
@@ -254,10 +254,10 @@ const Cart = () => {
                 const quantity = item.quantity || 1;
 
                 return (
-                  <div key={item.id} className="bg-white rounded-lg shadow-sm p-3">
-                    <div className="flex gap-3">
-                      {/* Product Image - Small */}
-                      <Link to={`/product/${product.id}`} className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity">
+                  <div key={item.id} className="bg-white rounded-lg shadow-sm p-2">
+                    <div className="flex gap-2 items-start">
+                      {/* Product Image - Very Small */}
+                      <Link to={`/product/${product.id}`} className="w-14 h-14 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity">
                         {productImage ? (
                           <img src={productImage} alt={productName} className="w-full h-full object-cover" />
                         ) : (
@@ -267,51 +267,49 @@ const Cart = () => {
 
                       {/* Product Info - Main Content */}
                       <div className="flex-1 min-w-0">
-                        <Link to={`/product/${product.id}`} className="font-bold text-sm md:text-base text-stone-800 hover:text-mos-green line-clamp-2">
+                        <Link to={`/product/${product.id}`} className="font-bold text-xs text-stone-800 hover:text-mos-green line-clamp-2 block">
                           {productName}
                         </Link>
-                        <p className="text-xs text-stone-600 mt-1 line-clamp-2">
-                          {product.description || 'Product details'}
+                        <p className="text-xs text-stone-600 mt-0.5 line-clamp-1">
+                          {product.description || ''}
                         </p>
                       </div>
 
-                      {/* Price - Right Side */}
-                      <div className="flex flex-col items-end justify-between">
-                        <p className="text-lg md:text-xl font-bold text-mos-green">
+                      {/* Price and Controls - Right Side, Compact */}
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <p className="text-sm font-bold text-mos-green whitespace-nowrap">
                           ¥{productPrice.toLocaleString()}
                         </p>
                         
-                        {/* Quantity Controls - Compact */}
-                        <div className="flex items-center gap-0.5 bg-stone-50 rounded p-0.5">
+                        {/* Quantity Controls - Ultra Compact */}
+                        <div className="flex items-center gap-0.5 bg-stone-100 rounded">
                           <button
                             onClick={() => updateQuantity(item.id, quantity - 1)}
-                            className="w-5 h-5 text-xs font-bold text-mos-green border border-mos-green rounded hover:bg-green-100 transition-colors"
+                            className="w-5 h-5 text-xs font-bold text-mos-green flex items-center justify-center hover:bg-green-200 transition-colors"
                           >
                             −
                           </button>
                           <span className="w-4 text-center text-xs font-semibold">{quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, quantity + 1)}
-                            className="w-5 h-5 text-xs font-bold text-mos-green border border-mos-green rounded hover:bg-green-100 transition-colors"
+                            className="w-5 h-5 text-xs font-bold text-mos-green flex items-center justify-center hover:bg-green-200 transition-colors"
                           >
                             +
                           </button>
                         </div>
-                      </div>
 
-                      {/* Delete Button */}
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="text-red-600 hover:text-red-700 text-xl"
-                      >
-                        ✕
-                      </button>
+                        <button
+                          onClick={() => removeItem(item.id)}
+                          className="text-red-600 hover:text-red-700 text-lg leading-none"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
 
                     {/* Subtotal Line */}
-                    <div className="mt-2 text-right border-t pt-2">
-                      <p className="text-xs text-stone-600 mb-1">小計</p>
-                      <p className="text-lg font-bold text-mos-green">
+                    <div className="mt-1.5 text-right border-t border-stone-100 pt-1.5">
+                      <p className="text-xs text-mos-green font-bold">
                         ¥{(productPrice * quantity).toLocaleString()}
                       </p>
                     </div>
@@ -321,22 +319,22 @@ const Cart = () => {
             </div>
 
             {/* Bottom Summary Card */}
-            <div className="bg-white rounded-lg shadow-md p-4 mt-4 sticky bottom-0">
-              <div className="text-center mb-3 pb-3 border-b">
-                <p className="text-xs text-stone-600 mb-1">合計</p>
-                <p className="text-3xl md:text-4xl font-black text-mos-green">
+            <div className="bg-white rounded-lg shadow-md p-2.5 mt-3 sticky bottom-0">
+              <div className="text-center mb-2 pb-2 border-b border-stone-200">
+                <p className="text-xs text-stone-600 mb-0.5">合計</p>
+                <p className="text-2xl font-black text-mos-green">
                   ¥{getTotalPrice().toLocaleString()}
                 </p>
               </div>
 
               <button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all text-sm md:text-base mb-2"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-3 rounded text-xs transition-all mb-1.5"
                 onClick={() => alert('購入機能はまだ実装されていません')}
               >
                 お会計へ進む
               </button>
 
-              <Link to="/" className="block text-center text-mos-green hover:text-mos-green-dark font-semibold py-2 px-4 border border-mos-green rounded-lg transition-all">
+              <Link to="/" className="block text-center text-mos-green hover:text-mos-green-dark font-semibold py-2 px-3 border border-mos-green rounded transition-all text-xs">
                 買い物を続ける
               </Link>
             </div>
