@@ -49,6 +49,11 @@ const PurchaseHistory = () => {
       console.log('購入履歴データ:', data);
 
       if (!response.ok) {
+        // 認証エラーの場合はトークンをクリア
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem('authToken');
+          throw new Error('認証エラーが発生しました。再度ログインしてください。');
+        }
         // サーバーからのエラーメッセージを表示
         const errorMsg = data.message || data.error || '購入履歴の取得に失敗しました';
         console.error('APIエラー:', errorMsg);

@@ -49,6 +49,13 @@ const Cart = () => {
       console.log('カートデータ:', data);
 
       if (!response.ok) {
+        // 認証エラーの場合はトークンをクリアしてログインページへ
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem('authToken');
+          setError('認証エラーが発生しました。再度ログインしてください。');
+          setLoading(false);
+          return;
+        }
         throw new Error(data.message || 'カート情報の取得に失敗しました');
       }
 

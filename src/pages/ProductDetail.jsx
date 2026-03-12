@@ -143,6 +143,13 @@ const ProductDetail = () => {
       console.log('レスポンスデータ:', data);
 
       if (!response.ok) {
+        // 認証エラーの場合はトークンをクリアしてログインページへ
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem('authToken');
+          alert('認証エラーが発生しました。再度ログインしてください。');
+          navigate('/login');
+          return;
+        }
         throw new Error(data.message || `カートへの追加に失敗しました (${response.status})`);
       }
 

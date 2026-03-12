@@ -48,7 +48,11 @@ export const AuthProvider = ({ children }) => {
           setCartCount(count);
         }
       } else {
-        // 認証エラーなどの場合は0にする
+        // 認証エラー（401/403）の場合はトークンをクリア
+        if (response.status === 401 || response.status === 403) {
+          console.warn('認証エラー: トークンが無効です');
+          localStorage.removeItem('authToken');
+        }
         setCartCount(0);
       }
     } catch (error) {
