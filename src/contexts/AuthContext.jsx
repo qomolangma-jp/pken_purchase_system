@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      const response = await fetch('https://komapay.p-kmt.com/api/cart', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/cart`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +133,8 @@ export const AuthProvider = ({ children }) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒タイムアウト
 
-        const response = await fetch('https://komapay.p-kmt.com/api/auth/check', {
+        // まず /api/auth/line-login を試す（トークン生成用）
+        let response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/auth/line-login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -141,6 +142,19 @@ export const AuthProvider = ({ children }) => {
           body: JSON.stringify({ line_id: lineId }),
           signal: controller.signal,
         });
+
+        // /api/auth/line-login が存在しない場合は /api/auth/check を使用
+        if (!response.ok && response.status === 404) {
+          console.log('/api/auth/line-login が見つかりません。/api/auth/check を使用します。');
+          response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/auth/check`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ line_id: lineId }),
+            signal: controller.signal,
+          });
+        }
 
         clearTimeout(timeoutId);
         console.log('認証APIレスポンス:', response.status);

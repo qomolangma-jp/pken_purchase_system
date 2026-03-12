@@ -23,7 +23,7 @@ const ProductList = () => {
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch('https://komapay.p-kmt.com/api/products', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/products`, {
           method: 'GET',
           headers: headers,
         });
@@ -52,7 +52,7 @@ const ProductList = () => {
 
     const fetchNews = async () => {
       try {
-        const response = await fetch('https://komapay.p-kmt.com/api/news', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/news`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
