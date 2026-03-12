@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-const API_BASE_URL = 'https://komapay.p-kmt.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const PurchaseHistory = () => {
   const [orders, setOrders] = useState([]);

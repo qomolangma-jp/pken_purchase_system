@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = 'https://komapay.p-kmt.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -29,7 +29,7 @@ const ProductDetail = () => {
         }
 
         // 商品詳細の取得
-        const response = await fetch(`https://komapay.p-kmt.com/api/products/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
           method: 'GET',
           headers: headers,
         });
@@ -67,7 +67,7 @@ const ProductDetail = () => {
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch('https://komapay.p-kmt.com/api/products', {
+        const response = await fetch(`${API_BASE_URL}/api/products`, {
           method: 'GET',
           headers: headers,
         });
