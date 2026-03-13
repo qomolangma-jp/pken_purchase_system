@@ -22,6 +22,32 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   console.log('✅ State initialized');
 
+  const getSellerDisplayName = (productData) => {
+    if (typeof productData?.seller_name === 'string' && productData.seller_name.trim() !== '') {
+      return productData.seller_name;
+    }
+
+    const seller = productData?.seller;
+    if (typeof seller === 'string' && seller.trim() !== '') {
+      return seller;
+    }
+    if (seller && typeof seller === 'object') {
+      return seller.shop_name || seller.name_2nd || seller.name_1st || '';
+    }
+
+    return '';
+  };
+
+  const getAllergensList = (allergens) => {
+    if (Array.isArray(allergens)) {
+      return allergens.filter(Boolean);
+    }
+    if (typeof allergens === 'string' && allergens.trim() !== '') {
+      return allergens.split(/[・,、]/).map((item) => item.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
   useEffect(() => {
     const fetchProductDetail = async () => {
       try {
@@ -237,6 +263,9 @@ const ProductDetail = () => {
 
   console.log('✅ ProductDetail: Rendering product', { productName: product.name, productId: product.id });
 
+  const sellerDisplayName = getSellerDisplayName(product);
+  const allergensList = getAllergensList(product.allergens);
+
   return (
     <div className="min-h-screen bg-stone-50 pt-24">
       {/* Main Content */}
@@ -278,12 +307,12 @@ const ProductDetail = () => {
                       )}
                     </div>
 
-                    {(product.seller_name || product.category || typeof product.stock !== 'undefined') && (
+                    {(sellerDisplayName || product.category || typeof product.stock !== 'undefined') && (
                       <div className="flex flex-wrap gap-3 text-sm text-stone-600 mb-2">
-                        {product.seller_name && (
+                        {sellerDisplayName && (
                           <div>
                             販売者: <span className="font-semibold text-stone-700">
-                              {product.seller_name || '不明'}
+                              {sellerDisplayName || '不明'}
                             </span>
                           </div>
                         )}
@@ -313,11 +342,11 @@ const ProductDetail = () => {
                   {/* Allergens (Mock data as API might not return it yet based on message.txt) */}
                   {/* message.txtのAPIレスポンス例にはallergensが含まれていないが、
                       元のHTMLにはあったため、データがあれば表示する実装にしておく */}
-                  {Array.isArray(product.allergens) && product.allergens.length > 0 && (
+                  {allergensList.length > 0 && (
                     <div className="mb-6">
                       <h3 className="font-bold text-stone-700 mb-2">アレルゲン情報</h3>
                       <div className="flex flex-wrap gap-2">
-                        {product.allergens.map((allergen, index) => (
+                        {allergensList.map((allergen, index) => (
                           <span key={index} className="bg-stone-100 text-stone-600 text-sm px-3 py-1 rounded-full">
                             {allergen}
                           </span>

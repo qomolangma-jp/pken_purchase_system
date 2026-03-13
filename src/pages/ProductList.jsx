@@ -9,6 +9,32 @@ const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortType, setSortType] = useState('popularity');
 
+  const getSellerDisplayName = (product) => {
+    if (typeof product?.seller_name === 'string' && product.seller_name.trim() !== '') {
+      return product.seller_name;
+    }
+
+    const seller = product?.seller;
+    if (typeof seller === 'string' && seller.trim() !== '') {
+      return seller;
+    }
+    if (seller && typeof seller === 'object') {
+      return seller.shop_name || seller.name_2nd || seller.name_1st || '';
+    }
+
+    return '';
+  };
+
+  const getAllergensText = (allergens) => {
+    if (Array.isArray(allergens)) {
+      return allergens.filter(Boolean).join('・');
+    }
+    if (typeof allergens === 'string') {
+      return allergens;
+    }
+    return '';
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -46,11 +72,19 @@ const ProductList = () => {
               console.warn('⚠️ Filtered out invalid item:', item);
             }
             return isValidProduct;
-          });
+          }).map((item) => ({
+            ...item,
+            seller_name: getSellerDisplayName(item),
+          }));
           setProducts(productsData);
         } else if (Array.isArray(data)) {
           // 配列が直接返ってくる場合
-          productsData = data.filter(item => item.id && item.name && !item.username && !item.student_id);
+          productsData = data
+            .filter(item => item.id && item.name && !item.username && !item.student_id)
+            .map((item) => ({
+              ...item,
+              seller_name: getSellerDisplayName(item),
+            }));
           setProducts(productsData);
         } else {
           console.error('❌ Unexpected API response format:', data);
@@ -208,13 +242,20 @@ const ProductList = () => {
                         )}
                       </div>
                       <div className="p-4 relative">
-                        <div className="absolute -top-3 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                          人気
-                        </div>
+                        {product.label && (
+                          <div className="absolute -top-3 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                            {product.label}
+                          </div>
+                        )}
                         <h3 className="text-base md:text-lg font-bold text-stone-800 mb-2 truncate pt-6">{product.name}</h3>
 
-                        {(product.category || typeof product.stock !== 'undefined') && (
+                        {(product.category || typeof product.stock !== 'undefined' || product.seller_name || getAllergensText(product.allergens)) && (
                           <div className="flex flex-wrap gap-2 text-xs text-stone-500 mb-2">
+                            {product.seller_name && (
+                              <span className="px-2 py-1 bg-stone-100 rounded-full">
+                                販売者 {product.seller_name}
+                              </span>
+                            )}
                             {product.category && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
                                 {product.category}
@@ -223,6 +264,11 @@ const ProductList = () => {
                             {typeof product.stock !== 'undefined' && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
                                 {Number(product.stock) > 0 ? `在庫 ${product.stock}` : '在庫なし'}
+                              </span>
+                            )}
+                            {getAllergensText(product.allergens) && (
+                              <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded-full">
+                                アレルゲン {getAllergensText(product.allergens)}
                               </span>
                             )}
                           </div>
