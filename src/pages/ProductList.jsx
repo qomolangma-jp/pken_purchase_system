@@ -212,6 +212,22 @@ const ProductList = () => {
                           人気
                         </div>
                         <h3 className="text-base md:text-lg font-bold text-stone-800 mb-2 truncate pt-6">{product.name}</h3>
+
+                        {(product.category || typeof product.stock !== 'undefined') && (
+                          <div className="flex flex-wrap gap-2 text-xs text-stone-500 mb-2">
+                            {product.category && (
+                              <span className="px-2 py-1 bg-stone-100 rounded-full">
+                                {product.category}
+                              </span>
+                            )}
+                            {typeof product.stock !== 'undefined' && (
+                              <span className="px-2 py-1 bg-stone-100 rounded-full">
+                                {Number(product.stock) > 0 ? `在庫 ${product.stock}` : '在庫なし'}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         <div className="flex items-baseline gap-1">
                           <span className="text-2xl md:text-3xl font-black text-mos-green">¥{product.price ? product.price.toLocaleString() : '-'}</span>
                           <span className="text-xs text-stone-500">税込</span>

@@ -262,18 +262,46 @@ const ProductDetail = () => {
                 <div className="p-4 md:p-6 md:w-3/5 flex flex-col">
                   <div className="mb-4 md:mb-6">
                     <div className="flex justify-between items-start mb-2">
-                      <h1 className="text-3xl font-bold text-[#00873c]">{String(product.name)}</h1>
+                      <div className="flex items-start gap-2">
+                        <h1 className="text-3xl font-bold text-[#00873c]">{String(product.name)}</h1>
+                        {product.label && (
+                          <span className="text-xs font-bold text-white bg-mos-green px-2 py-1 rounded-full shadow-sm self-start">
+                            {product.label}
+                          </span>
+                        )}
+                      </div>
+
                       {product.popularity && (
                         <span className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                           人気度: {product.popularity}
                         </span>
                       )}
                     </div>
-                    {product.seller && (
-                      <div className="text-sm text-stone-600 mb-2">
-                        販売者: <span className="font-semibold text-stone-700">{product.seller}</span>
+
+                    {(product.seller || product.category || typeof product.stock !== 'undefined') && (
+                      <div className="flex flex-wrap gap-3 text-sm text-stone-600 mb-2">
+                        {product.seller && (
+                          <div>
+                            販売者: <span className="font-semibold text-stone-700">
+                              {typeof product.seller === 'string'
+                                ? product.seller
+                                : product.seller?.shop_name || product.seller?.name_2nd || product.seller?.name_1st || '不明'}
+                            </span>
+                          </div>
+                        )}
+                        {product.category && (
+                          <div>
+                            カテゴリ: <span className="font-semibold text-stone-700">{product.category}</span>
+                          </div>
+                        )}
+                        {typeof product.stock !== 'undefined' && (
+                          <div>
+                            在庫: <span className="font-semibold text-stone-700">{Number(product.stock) > 0 ? `${product.stock}個` : '在庫なし'}</span>
+                          </div>
+                        )}
                       </div>
                     )}
+
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl md:text-4xl font-black text-mos-green">¥{product.price ? product.price.toLocaleString() : '-'}</span>
                       <span className="text-xs text-stone-500">税込</span>
