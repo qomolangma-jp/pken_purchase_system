@@ -115,9 +115,9 @@ const ProductDetail = () => {
 
       console.log('トークン:', token ? `あり (長さ: ${token.length}, 最初の10文字: ${token.substring(0, 10)}...)` : 'なし');
       console.log('カート追加リクエスト:', requestData);
-      console.log('リクエストURL:', `${API_BASE_URL}/api/cart`);
+      console.log('リクエストURL:', `${API_BASE_URL}/api/cart/add`);
 
-      const response = await fetch(`${API_BASE_URL}/api/cart`, {
+      const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
