@@ -3,6 +3,11 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
+  // children が有効な React 要素であることを確認
+  if (!children || typeof children !== 'object' || !children.type) {
+    return <div className="min-h-screen flex justify-center items-center text-red-500">エラー: コンポーネントが正しく読み込まれませんでした</div>;
+  }
+  
   // 一時的にログイン機能を無効化
   return children;
 

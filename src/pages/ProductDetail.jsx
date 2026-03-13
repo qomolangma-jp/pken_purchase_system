@@ -5,15 +5,22 @@ import { useAuth } from '../contexts/AuthContext';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const ProductDetail = () => {
+  console.log('✅ ProductDetail component is rendering');
+  
   const { id } = useParams();
+  console.log('📝 Product ID from params:', id);
+  
   const navigate = useNavigate();
   const { fetchCartCount } = useAuth();
+  console.log('✅ Hooks initialized');
+  
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [addingToCart, setAddingToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  console.log('✅ State initialized');
 
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -181,10 +188,12 @@ const ProductDetail = () => {
   };
 
   if (loading) {
+    console.log('⏳ ProductDetail: Loading state');
     return <div className="min-h-screen flex justify-center items-center">読み込み中...</div>;
   }
 
   if (error || !product) {
+    console.log('❌ ProductDetail: Error or no product', { error, product });
     return (
       <div className="min-h-screen flex flex-col justify-center items-center gap-4">
         <p className="text-red-500">{error || '商品が見つかりませんでした。'}</p>
@@ -192,6 +201,8 @@ const ProductDetail = () => {
       </div>
     );
   }
+
+  console.log('✅ ProductDetail: Rendering product', { productName: product.name, productId: product.id });
 
   return (
     <div className="min-h-screen bg-stone-50 pt-24">
@@ -332,5 +343,10 @@ const ProductDetail = () => {
     </div>
   );
 };
+
+// Verification: Ensure ProductDetail is exported correctly
+if (typeof ProductDetail !== 'function') {
+  console.error('🔴 CRITICAL ERROR: ProductDetail is not a function!', typeof ProductDetail, ProductDetail);
+}
 
 export default ProductDetail;

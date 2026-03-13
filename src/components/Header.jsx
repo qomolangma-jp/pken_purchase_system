@@ -4,13 +4,20 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { cartCount, user, logout } = useAuth();
+  const authContext = useAuth();
+  
+  // useAuth の戻り値を検証
+  if (!authContext || !authContext.user === undefined || !authContext.cartCount === undefined) {
+    console.error('Header: Invalid auth context', authContext);
+  }
+  
+  const { cartCount, user, logout } = authContext;
   const navigate = useNavigate();
 
   // デバッグ用：userオブジェクトの内容を確認
   React.useEffect(() => {
     console.log('Header - user情報:', user);
-    if (user) {
+    if (user && typeof user === 'object') {
       console.log('Header - user.name:', user.name);
       console.log('Header - user.displayName:', user.displayName);
       console.log('Header - user.student_id:', user.student_id);
@@ -207,5 +214,10 @@ const Header = () => {
     </>
   );
 };
+
+// Verification: Ensure Header is exported correctly
+if (typeof Header !== 'function') {
+  console.error('🔴 CRITICAL ERROR: Header is not a function!', typeof Header, Header);
+}
 
 export default Header;

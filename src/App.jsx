@@ -90,4 +90,9 @@ function App() {
   );
 }
 
+// Verification: Ensure App is exported correctly
+if (typeof App !== 'function') {
+  console.error('🔴 CRITICAL ERROR: App is not a function!', typeof App, App);
+}
+
 export default App;
