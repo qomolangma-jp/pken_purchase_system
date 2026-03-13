@@ -35,12 +35,26 @@ const ProductList = () => {
         const data = await response.json();
         // APIレスポンスの構造に合わせてデータをセット
         // { success: true, data: [...], count: 5 }
+        let productsData = [];
+        
         if (data.success && Array.isArray(data.data)) {
-          setProducts(data.data);
+          // Filter out invalid products (e.g., user objects)
+          productsData = data.data.filter(item => {
+            // Valid products should have 'id' and 'name', but NOT 'username' or 'student_id'
+            const isValidProduct = item.id && item.name && !item.username && !item.student_id;
+            if (!isValidProduct) {
+              console.warn('⚠️ Filtered out invalid item:', item);
+            }
+            return isValidProduct;
+          });
+          setProducts(productsData);
+        } else if (Array.isArray(data)) {
+          // 配列が直接返ってくる場合
+          productsData = data.filter(item => item.id && item.name && !item.username && !item.student_id);
+          setProducts(productsData);
         } else {
-          // 配列が直接返ってくる場合やその他の形式へのフォールバック
-          setProducts(Array.isArray(data) ? data : []);
-          console.warn('Unexpected API response format:', data);
+          console.error('❌ Unexpected API response format:', data);
+          setProducts([]);
         }
       } catch (err) {
         setError('商品データの取得に失敗しました。');
@@ -79,18 +93,31 @@ const ProductList = () => {
 
   // Filter and Sort
   const getFilteredAndSortedProducts = () => {
-    let filtered = products.filter(product =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    // Ensure all products are valid before filtering
+    const validProducts = products.filter(product => 
+      product && product.id && product.name && !product.username
     );
+    
+    let filtered = validProducts.filter(product => {
+      const name = product.name && typeof product.name === 'string' ? product.name : '';
+      return name.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
     return filtered.sort((a, b) => {
-      if (sortType === 'price_asc') return a.price - b.price;
-      if (sortType === 'price_desc') return b.price - a.price;
-      if (sortType === 'name') return a.name.localeCompare(b.name);
-      // default: popularity (assuming higher number is more popular)
-      // APIデータにpopularityがない場合はid順などにする必要があるが、
-      // 既存のJSロジックに従い popularity を使用。なければ0として扱う。
-      return (b.popularity || 0) - (a.popularity || 0);
+      try {
+        if (sortType === 'price_asc') return (a.price || 0) - (b.price || 0);
+        if (sortType === 'price_desc') return (b.price || 0) - (a.price || 0);
+        if (sortType === 'name') {
+          const nameA = a.name || '';
+          const nameB = b.name || '';
+          return nameA.localeCompare(nameB);
+        }
+        // default: popularity
+        return (b.popularity || 0) - (a.popularity || 0);
+      } catch (err) {
+        console.error('Sort error:', err);
+        return 0;
+      }
     });
   };
 

@@ -4,23 +4,43 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const authContext = useAuth();
   
-  // useAuth の戻り値を検証
-  if (!authContext || !authContext.user === undefined || !authContext.cartCount === undefined) {
-    console.error('Header: Invalid auth context', authContext);
+  let cartCount = 0;
+  let user = null;
+  let logout = () => {};
+  
+  try {
+    const authContext = useAuth();
+    
+    // useAuth の戻り値を検証
+    if (!authContext) {
+      console.error('Header: useAuth returned null/undefined');
+    } else {
+      if (authContext.cartCount !== undefined) {
+        cartCount = authContext.cartCount;
+      }
+      if (authContext.user) {
+        user = authContext.user;
+      }
+      if (typeof authContext.logout === 'function') {
+        logout = authContext.logout;
+      }
+    }
+  } catch (err) {
+    console.error('Header: Error initializing auth:', err);
   }
   
-  const { cartCount, user, logout } = authContext;
   const navigate = useNavigate();
 
   // デバッグ用：userオブジェクトの内容を確認
   React.useEffect(() => {
     console.log('Header - user情報:', user);
-    if (user && typeof user === 'object') {
+    if (user && typeof user === 'object' && !user.username) {
       console.log('Header - user.name:', user.name);
       console.log('Header - user.displayName:', user.displayName);
       console.log('Header - user.student_id:', user.student_id);
+    } else if (user && user.username) {
+      console.warn('Header: Invalid user object (looks like DB user):', user);
     }
   }, [user]);
 

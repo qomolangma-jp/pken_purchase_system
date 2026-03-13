@@ -46,14 +46,37 @@ const ProductDetail = () => {
         }
 
         const data = await response.json();
+        console.log('APIレスポンス:', data);
+        console.log('data.success:', data.success);
+        console.log('data.data:', data.data);
+        console.log('data.dataの型:', typeof data.data);
+        if (data.data) {
+          console.log('data.dataのキー:', Object.keys(data.data));
+        }
         
-        if (data.success && data.data) {
-          setProduct(data.data);
-          
-          // 関連商品の取得
-          fetchRelatedProducts(data.data.category);
-        } else {
-          setError('商品が見つかりませんでした。');
+        // Safely extract product data
+        let productData = null;
+        
+        if (data.success && data.data && typeof data.data === 'object' && !Array.isArray(data.data)) {
+          // Check if data.data is actual product data (has product-like properties)
+          if (data.data.id && data.data.name && !data.data.username) {
+            productData = data.data;
+          }
+        }
+        
+        if (!productData) {
+          console.error('❌ Invalid product data from API:', data);
+          setError('サーバーから認識できない形式のデータが返されました');
+          setLoading(false);
+          return;
+        }
+        
+        console.log('✅ Valid product:', { id: productData.id, name: productData.name });
+        setProduct(productData);
+        
+        // 関連商品の取得
+        if (productData.category) {
+          fetchRelatedProducts(productData.category);
         }
       } catch (err) {
         setError('商品データの取得に失敗しました。');
@@ -83,9 +106,18 @@ const ProductDetail = () => {
           const data = await response.json();
           if (data.success && Array.isArray(data.data)) {
             // 同じカテゴリで、かつ現在のIDではない商品を抽出
+            // Invalid products (e.g., user objects) should be filtered out
             const related = data.data
-              .filter(p => p.category === category && p.id !== parseInt(id))
+              .filter(p => {
+                // Valid products have 'id' and 'name', but NOT 'username' or 'student_id'
+                const isValid = p && p.id && p.name && !p.username && !p.student_id;
+                if (p && !isValid) {
+                  console.warn('⚠️ Filtered out invalid product:', p);
+                }
+                return isValid && p.category === category && p.id !== parseInt(id);
+              })
               .slice(0, 4);
+            console.log('✅ Related products filtered:', related.length);
             setRelatedProducts(related);
           }
         }

@@ -165,6 +165,14 @@ export const AuthProvider = ({ children }) => {
         if (response.ok && data.user) {
           // ユーザーが見つかった場合、自動ログイン
           console.log('ユーザー認証成功:', data.user);
+          console.log('data.user keys:', Object.keys(data.user));
+          
+          // Validate user object - should be an actual user object, not something else
+          if (!data.user.id) {
+            console.error('❌ Invalid user object (no id):', data.user);
+            setUser(null);
+            return;
+          }
           
           // トークンが返されている場合は保存
           if (data.token) {
@@ -178,12 +186,15 @@ export const AuthProvider = ({ children }) => {
             console.log('LINE IDをトークンとして保存:', lineId.substring(0, 10) + '...');
           }
           
-          setUser({
+          const userObject = {
             ...data.user,
             lineId: lineId,
             displayName: profile.displayName,
             pictureUrl: profile.pictureUrl,
-          });
+          };
+          
+          console.log('✅ Setting user object:', { id: userObject.id, displayName: userObject.displayName });
+          setUser(userObject);
           
           // セッションストレージに保存
           sessionStorage.setItem('user', JSON.stringify(data.user));
