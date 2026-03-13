@@ -115,7 +115,15 @@ export const AuthProvider = ({ children }) => {
       if (token && storedUser) {
         console.log('保存された認証情報を使用');
         try {
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          // sessionStorage から復元されたユーザーを正規化
+          const normalizedUser = {
+            ...parsedUser,
+            displayName: parsedUser.displayName || parsedUser.display_name || parsedUser.name || parsedUser.student_id || 'ゲスト',
+            lineId: parsedUser.lineId || parsedUser.line_id,
+          };
+          console.log('✅ Restored normalized user:', { id: normalizedUser.id, displayName: normalizedUser.displayName });
+          setUser(normalizedUser);
           setLoading(false);
           return;
         } catch (e) {
