@@ -194,7 +194,7 @@ const Cart = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Fixed Header */}
-      <div className="fixed left-0 right-0 bg-white shadow-sm z-[90] h-12" style={{ top: '3.5rem' }}>
+      <div className="fixed left-0 right-0 bg-white shadow-sm z-[90] h-12" style={{ top: '3.5rem', backgroundColor: '#ffffff' }}>
         <div className="container px-3 h-full flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="text-stone-700 text-xl font-light">←</button>
           <h1 className="text-base font-bold text-stone-800">カート</h1>
@@ -225,13 +225,6 @@ const Cart = () => {
           </div>
         ) : (
           <div className="px-2">
-            {/* Campaign Banner */}
-            <div className="bg-yellow-300 border-b-4 border-yellow-400 p-2 rounded mb-2">
-              <p className="text-xs font-bold text-stone-800">
-                キャンペーン情報はこちら
-              </p>
-            </div>
-
             {/* Tap to expand notice */}
             <div className="text-center text-xs text-blue-600 font-bold mb-2 py-0.5 bg-blue-50 rounded">
               <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs inline-block">タップ</span>
