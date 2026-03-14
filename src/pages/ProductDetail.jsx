@@ -311,16 +311,16 @@ const ProductDetail = () => {
                       )}
                     </div>
 
-                    {(vendorDisplayName || categoryDisplayName || typeof product.stock !== 'undefined') && (
+                    {((vendorDisplayName && vendorDisplayName !== '') || (categoryDisplayName && categoryDisplayName !== '未入力') || typeof product.stock !== 'undefined') && (
                       <div className="flex flex-wrap gap-3 text-sm text-stone-600 mb-2">
-                        {vendorDisplayName && (
+                        {vendorDisplayName && vendorDisplayName !== '' && (
                           <div>
                             販売者: <span className="font-semibold text-stone-700">
-                              {vendorDisplayName || '不明'}
+                              {vendorDisplayName}
                             </span>
                           </div>
                         )}
-                        {categoryDisplayName && (
+                        {categoryDisplayName && categoryDisplayName !== '未入力' && (
                           <div>
                             カテゴリ: <span className="font-semibold text-stone-700">{categoryDisplayName}</span>
                           </div>
@@ -343,18 +343,24 @@ const ProductDetail = () => {
                     <p className="text-stone-600 leading-relaxed">{product.description}</p>
                   </div>
 
-                  <div className="mb-6 p-4 bg-stone-50 rounded-lg border border-stone-200">
-                    <h3 className="font-bold text-stone-700 mb-2">商品情報</h3>
-                    <div className="space-y-1 text-sm text-stone-700">
-                      <p>
-                        カテゴリ: <span className="font-semibold">{categoryDisplayName}</span>
-                      </p>
-                      <p>
-                        販売者: <span className="font-semibold">{vendorDisplayName}</span>
-                        {product.vendor_id ? <span className="text-stone-500">（ID: {product.vendor_id}）</span> : null}
-                      </p>
+                  {((vendorDisplayName && vendorDisplayName !== '') || (categoryDisplayName && categoryDisplayName !== '未入力')) && (
+                    <div className="mb-6 p-4 bg-stone-50 rounded-lg border border-stone-200">
+                      <h3 className="font-bold text-stone-700 mb-2">商品情報</h3>
+                      <div className="space-y-1 text-sm text-stone-700">
+                        {categoryDisplayName && categoryDisplayName !== '未入力' && (
+                          <p>
+                            カテゴリ: <span className="font-semibold">{categoryDisplayName}</span>
+                          </p>
+                        )}
+                        {vendorDisplayName && vendorDisplayName !== '' && (
+                          <p>
+                            販売者: <span className="font-semibold">{vendorDisplayName}</span>
+                            {product.vendor_id ? <span className="text-stone-500">（ID: {product.vendor_id}）</span> : null}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Allergens (Mock data as API might not return it yet based on message.txt) */}
                   {/* message.txtのAPIレスポンス例にはallergensが含まれていないが、

@@ -254,15 +254,15 @@ const ProductList = () => {
                         )}
                         <h3 className="text-base md:text-lg font-bold text-stone-800 mb-2 leading-snug break-words">{product.name}</h3>
 
-                        {(product.category_name || typeof product.stock !== 'undefined' || product.vendor_name || getAllergensText(product.allergens)) && (
+                        {((product.category_name && product.category_name !== '未入力') || typeof product.stock !== 'undefined' || (product.vendor_name && product.vendor_name !== '') || getAllergensText(product.allergens)) && (
                           <div className="flex flex-wrap gap-2 text-xs text-stone-500 mb-2">
-                            {product.vendor_name && (
+                            {product.vendor_name && product.vendor_name !== '' && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
                                 販売者 {product.vendor_name}
                                 {product.vendor_id ? ` (#${product.vendor_id})` : ''}
                               </span>
                             )}
-                            {product.category_name && (
+                            {product.category_name && product.category_name !== '未入力' && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
                                 カテゴリ {product.category_name}
                               </span>
