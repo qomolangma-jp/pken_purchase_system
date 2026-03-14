@@ -25,19 +25,6 @@ const ProductList = () => {
     return '';
   };
 
-  const getAllergensText = (allergens) => {
-    if (Array.isArray(allergens)) {
-      return allergens
-        .filter((item) => hasDisplayValue(item))
-        .map((item) => item.trim())
-        .join('・');
-    }
-    if (hasDisplayValue(allergens)) {
-      return allergens.trim();
-    }
-    return '';
-  };
-
   const getLabelText = (label) => {
     if (hasDisplayValue(label)) {
       return label.trim();
@@ -265,7 +252,7 @@ const ProductList = () => {
                         )}
                         <h3 className="text-base md:text-lg font-bold text-stone-800 mb-2 leading-snug break-words">{product.name}</h3>
 
-                        {((product.category_name && product.category_name !== '未入力') || (product.vendor_name && product.vendor_name !== '未入力') || getAllergensText(product.allergens)) && (
+                        {((product.category_name && product.category_name !== '未入力') || (product.vendor_name && product.vendor_name !== '未入力')) && (
                           <div className="flex flex-wrap gap-2 text-xs text-stone-500 mb-2">
                             {product.vendor_name && product.vendor_name !== '未入力' && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
@@ -276,11 +263,6 @@ const ProductList = () => {
                             {product.category_name && product.category_name !== '未入力' && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
                                 カテゴリ {product.category_name}
-                              </span>
-                            )}
-                            {getAllergensText(product.allergens) && (
-                              <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded-full">
-                                アレルゲン {getAllergensText(product.allergens)}
                               </span>
                             )}
                           </div>
