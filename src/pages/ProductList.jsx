@@ -9,20 +9,21 @@ const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortType, setSortType] = useState('popularity');
 
-  const getSellerDisplayName = (product) => {
-    if (typeof product?.seller_name === 'string' && product.seller_name.trim() !== '') {
-      return product.seller_name;
+  const getVendorDisplayName = (product) => {
+    if (typeof product?.vendor_name === 'string' && product.vendor_name.trim() !== '') {
+      return product.vendor_name;
     }
+    return '未入力';
+  };
 
-    const seller = product?.seller;
-    if (typeof seller === 'string' && seller.trim() !== '') {
-      return seller;
+  const getCategoryDisplayName = (product) => {
+    if (typeof product?.category_name === 'string' && product.category_name.trim() !== '') {
+      return product.category_name;
     }
-    if (seller && typeof seller === 'object') {
-      return seller.shop_name || seller.name_2nd || seller.name_1st || '';
+    if (typeof product?.category === 'string' && product.category.trim() !== '') {
+      return product.category;
     }
-
-    return '';
+    return '未入力';
   };
 
   const getAllergensText = (allergens) => {
@@ -74,7 +75,8 @@ const ProductList = () => {
             return isValidProduct;
           }).map((item) => ({
             ...item,
-            seller_name: getSellerDisplayName(item),
+            category_name: getCategoryDisplayName(item),
+            vendor_name: getVendorDisplayName(item),
           }));
           setProducts(productsData);
         } else if (Array.isArray(data)) {
@@ -83,7 +85,8 @@ const ProductList = () => {
             .filter(item => item.id && item.name && !item.username && !item.student_id)
             .map((item) => ({
               ...item,
-              seller_name: getSellerDisplayName(item),
+              category_name: getCategoryDisplayName(item),
+              vendor_name: getVendorDisplayName(item),
             }));
           setProducts(productsData);
         } else {
@@ -251,16 +254,17 @@ const ProductList = () => {
                         )}
                         <h3 className="text-base md:text-lg font-bold text-stone-800 mb-2 leading-snug break-words">{product.name}</h3>
 
-                        {(product.category || typeof product.stock !== 'undefined' || product.seller_name || getAllergensText(product.allergens)) && (
+                        {(product.category_name || typeof product.stock !== 'undefined' || product.vendor_name || getAllergensText(product.allergens)) && (
                           <div className="flex flex-wrap gap-2 text-xs text-stone-500 mb-2">
-                            {product.seller_name && (
+                            {product.vendor_name && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
-                                販売者 {product.seller_name}
+                                販売者 {product.vendor_name}
+                                {product.vendor_id ? ` (#${product.vendor_id})` : ''}
                               </span>
                             )}
-                            {product.category && (
+                            {product.category_name && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
-                                {product.category}
+                                カテゴリ {product.category_name}
                               </span>
                             )}
                             {typeof product.stock !== 'undefined' && (

@@ -22,20 +22,21 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   console.log('✅ State initialized');
 
-  const getSellerDisplayName = (productData) => {
-    if (typeof productData?.seller_name === 'string' && productData.seller_name.trim() !== '') {
-      return productData.seller_name;
+  const getVendorDisplayName = (productData) => {
+    if (typeof productData?.vendor_name === 'string' && productData.vendor_name.trim() !== '') {
+      return productData.vendor_name;
     }
+    return '未入力';
+  };
 
-    const seller = productData?.seller;
-    if (typeof seller === 'string' && seller.trim() !== '') {
-      return seller;
+  const getCategoryDisplayName = (productData) => {
+    if (typeof productData?.category_name === 'string' && productData.category_name.trim() !== '') {
+      return productData.category_name;
     }
-    if (seller && typeof seller === 'object') {
-      return seller.shop_name || seller.name_2nd || seller.name_1st || '';
+    if (typeof productData?.category === 'string' && productData.category.trim() !== '') {
+      return productData.category;
     }
-
-    return '';
+    return '未入力';
   };
 
   const getAllergensList = (allergens) => {
@@ -102,8 +103,9 @@ const ProductDetail = () => {
         setProduct(productData);
         
         // 関連商品の取得
-        if (productData.category) {
-          fetchRelatedProducts(productData.category);
+        const relatedCategoryKey = productData.category_name || productData.category || '';
+        if (relatedCategoryKey) {
+          fetchRelatedProducts(relatedCategoryKey);
         }
       } catch (err) {
         setError('商品データの取得に失敗しました。');
@@ -141,7 +143,8 @@ const ProductDetail = () => {
                 if (p && !isValid) {
                   console.warn('⚠️ Filtered out invalid product:', p);
                 }
-                return isValid && p.category === category && p.id !== parseInt(id);
+                const categoryKey = p.category_name || p.category || '';
+                return isValid && categoryKey === category && p.id !== parseInt(id);
               })
               .slice(0, 4);
             console.log('✅ Related products filtered:', related.length);
@@ -263,7 +266,8 @@ const ProductDetail = () => {
 
   console.log('✅ ProductDetail: Rendering product', { productName: product.name, productId: product.id });
 
-  const sellerDisplayName = getSellerDisplayName(product);
+  const vendorDisplayName = getVendorDisplayName(product);
+  const categoryDisplayName = getCategoryDisplayName(product);
   const allergensList = getAllergensList(product.allergens);
 
   return (
@@ -307,18 +311,18 @@ const ProductDetail = () => {
                       )}
                     </div>
 
-                    {(sellerDisplayName || product.category || typeof product.stock !== 'undefined') && (
+                    {(vendorDisplayName || categoryDisplayName || typeof product.stock !== 'undefined') && (
                       <div className="flex flex-wrap gap-3 text-sm text-stone-600 mb-2">
-                        {sellerDisplayName && (
+                        {vendorDisplayName && (
                           <div>
                             販売者: <span className="font-semibold text-stone-700">
-                              {sellerDisplayName || '不明'}
+                              {vendorDisplayName || '不明'}
                             </span>
                           </div>
                         )}
-                        {product.category && (
+                        {categoryDisplayName && (
                           <div>
-                            カテゴリ: <span className="font-semibold text-stone-700">{product.category}</span>
+                            カテゴリ: <span className="font-semibold text-stone-700">{categoryDisplayName}</span>
                           </div>
                         )}
                         {typeof product.stock !== 'undefined' && (
@@ -337,6 +341,19 @@ const ProductDetail = () => {
 
                   <div className="mb-6">
                     <p className="text-stone-600 leading-relaxed">{product.description}</p>
+                  </div>
+
+                  <div className="mb-6 p-4 bg-stone-50 rounded-lg border border-stone-200">
+                    <h3 className="font-bold text-stone-700 mb-2">商品情報</h3>
+                    <div className="space-y-1 text-sm text-stone-700">
+                      <p>
+                        カテゴリ: <span className="font-semibold">{categoryDisplayName}</span>
+                      </p>
+                      <p>
+                        販売者: <span className="font-semibold">{vendorDisplayName}</span>
+                        {product.vendor_id ? <span className="text-stone-500">（ID: {product.vendor_id}）</span> : null}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Allergens (Mock data as API might not return it yet based on message.txt) */}
