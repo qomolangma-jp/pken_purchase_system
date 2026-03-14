@@ -16,6 +16,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [liffInitialized, setLiffInitialized] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasApiToken, setHasApiToken] = useState(false);
 
   useEffect(() => {
     initializeLiff();
@@ -52,6 +54,7 @@ export const AuthProvider = ({ children }) => {
         if (response.status === 401 || response.status === 403) {
           console.warn('認証エラー: トークンが無効です');
           localStorage.removeItem('authToken');
+          setHasApiToken(false);
         }
         setCartCount(0);
       }
@@ -62,13 +65,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      fetchCartCount();
-    } else {
+    if (!isAuthenticated || !hasApiToken) {
       setCartCount(0);
+      return;
     }
-  }, [user]);
+    fetchCartCount();
+  }, [user, isAuthenticated, hasApiToken]);
 
   const initializeLiff = async () => {
     try {
@@ -124,6 +126,8 @@ export const AuthProvider = ({ children }) => {
           };
           console.log('✅ Restored normalized user:', { id: normalizedUser.id, displayName: normalizedUser.displayName });
           setUser(normalizedUser);
+          setIsAuthenticated(true);
+          setHasApiToken(true);
           setLoading(false);
           return;
         } catch (e) {
@@ -179,6 +183,8 @@ export const AuthProvider = ({ children }) => {
           if (!data.user.id) {
             console.error('❌ Invalid user object (no id):', data.user);
             setUser(null);
+            setIsAuthenticated(false);
+            setHasApiToken(false);
             return;
           }
           
@@ -186,12 +192,16 @@ export const AuthProvider = ({ children }) => {
           if (data.token) {
             console.log('トークン取得:', data.token.substring(0, 20) + '...');
             localStorage.setItem('authToken', data.token);
+            setHasApiToken(true);
             console.log('トークン保存完了');
           } else {
-            // トークンが返されない場合は、LINE IDをトークンとして使用（暫定対処）
-            console.warn('警告: APIからトークンが返されていません。LINE IDをトークンとして使用します。');
-            localStorage.setItem('authToken', lineId);
-            console.log('LINE IDをトークンとして保存:', lineId.substring(0, 10) + '...');
+            console.warn('警告: APIからトークンが返されていないため /api/cart の取得は行いません。');
+            localStorage.removeItem('authToken');
+            setHasApiToken(false);
+          }
+
+          if (typeof data.cart_count === 'number') {
+            setCartCount(data.cart_count);
           }
           
           const userObject = {
@@ -203,6 +213,7 @@ export const AuthProvider = ({ children }) => {
           
           console.log('✅ Setting user object:', { id: userObject.id, displayName: userObject.displayName });
           setUser(userObject);
+          setIsAuthenticated(true);
           
           // セッションストレージに保存（setUser と同じ形式で保存）
           sessionStorage.setItem('user', JSON.stringify(userObject));
@@ -210,6 +221,9 @@ export const AuthProvider = ({ children }) => {
           // ユーザーが見つからない場合はnullのまま（ログインページへリダイレクト）
           console.log('ユーザーが見つかりません');
           setUser(null);
+          setIsAuthenticated(false);
+          setHasApiToken(false);
+          setCartCount(0);
         }
       } catch (fetchError) {
         console.error('認証API接続エラー:', fetchError);
@@ -224,11 +238,17 @@ export const AuthProvider = ({ children }) => {
         
         // API接続失敗時も、ログインページへ遷移できるようにする
         setUser(null);
+        setIsAuthenticated(false);
+        setHasApiToken(false);
+        setCartCount(0);
       }
     } catch (error) {
       console.error('認証チェックエラー:', error);
       console.error('エラー詳細:', error.message, error.stack);
       setUser(null);
+      setIsAuthenticated(false);
+      setHasApiToken(false);
+      setCartCount(0);
     } finally {
       setLoading(false);
     }
@@ -253,11 +273,17 @@ export const AuthProvider = ({ children }) => {
     });
     
     setUser(normalizedUser);
+    setIsAuthenticated(true);
+    setHasApiToken(Boolean(localStorage.getItem('authToken')));
     sessionStorage.setItem('user', JSON.stringify(normalizedUser));
   };
 
   const logout = () => {
     setUser(null);
+    setIsAuthenticated(false);
+    setHasApiToken(false);
+    setCartCount(0);
+    localStorage.removeItem('authToken');
     sessionStorage.removeItem('user');
     if (liffInitialized && liff.isLoggedIn()) {
       liff.logout();
@@ -268,6 +294,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     liffInitialized,
+    isAuthenticated,
     cartCount,
     fetchCartCount,
     login,

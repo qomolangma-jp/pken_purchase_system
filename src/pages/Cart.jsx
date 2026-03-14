@@ -9,11 +9,18 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { fetchCartCount } = useAuth();
+  const { fetchCartCount, user, isAuthenticated, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+    if (!isAuthenticated || !user) {
+      setLoading(false);
+      return;
+    }
     fetchCart();
-  }, []);
+  }, [authLoading, isAuthenticated, user]);
 
   const fetchCart = async () => {
     try {
