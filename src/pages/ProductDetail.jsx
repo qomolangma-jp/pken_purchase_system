@@ -22,31 +22,39 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   console.log('✅ State initialized');
 
+  const hasDisplayValue = (value) => typeof value === 'string' && value.trim() !== '' && value.trim() !== '未入力';
+
   const getVendorDisplayName = (productData) => {
-    if (typeof productData?.vendor_name === 'string' && productData.vendor_name.trim() !== '') {
-      return productData.vendor_name;
+    if (hasDisplayValue(productData?.vendor_name)) {
+      return productData.vendor_name.trim();
     }
-    return '未入力';
+    return '';
   };
 
   const getCategoryDisplayName = (productData) => {
-    if (typeof productData?.category_name === 'string' && productData.category_name.trim() !== '') {
-      return productData.category_name;
+    if (hasDisplayValue(productData?.category_name)) {
+      return productData.category_name.trim();
     }
-    if (typeof productData?.category === 'string' && productData.category.trim() !== '') {
-      return productData.category;
-    }
-    return '未入力';
+    return '';
   };
 
   const getAllergensList = (allergens) => {
     if (Array.isArray(allergens)) {
-      return allergens.filter(Boolean);
+      return allergens
+        .filter((item) => hasDisplayValue(item))
+        .map((item) => item.trim());
     }
-    if (typeof allergens === 'string' && allergens.trim() !== '') {
+    if (hasDisplayValue(allergens)) {
       return allergens.split(/[・,、]/).map((item) => item.trim()).filter(Boolean);
     }
     return [];
+  };
+
+  const getLabelText = (label) => {
+    if (hasDisplayValue(label)) {
+      return label.trim();
+    }
+    return '';
   };
 
   useEffect(() => {
@@ -103,7 +111,7 @@ const ProductDetail = () => {
         setProduct(productData);
         
         // 関連商品の取得
-        const relatedCategoryKey = productData.category_name || productData.category || '';
+        const relatedCategoryKey = getCategoryDisplayName(productData);
         if (relatedCategoryKey) {
           fetchRelatedProducts(relatedCategoryKey);
         }
@@ -143,7 +151,7 @@ const ProductDetail = () => {
                 if (p && !isValid) {
                   console.warn('⚠️ Filtered out invalid product:', p);
                 }
-                const categoryKey = p.category_name || p.category || '';
+                const categoryKey = getCategoryDisplayName(p);
                 return isValid && categoryKey === category && p.id !== parseInt(id);
               })
               .slice(0, 4);
@@ -269,6 +277,7 @@ const ProductDetail = () => {
   const vendorDisplayName = getVendorDisplayName(product);
   const categoryDisplayName = getCategoryDisplayName(product);
   const allergensList = getAllergensList(product.allergens);
+  const labelText = getLabelText(product.label);
 
   return (
     <div className="min-h-screen bg-stone-50 pt-6">
@@ -297,9 +306,9 @@ const ProductDetail = () => {
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-start gap-2">
                         <h1 className="text-3xl font-bold text-[#00873c]">{String(product.name)}</h1>
-                        {product.label && (
+                        {labelText && (
                           <span className="text-xs font-bold text-white bg-mos-green px-2 py-1 rounded-full shadow-sm self-start">
-                            {product.label}
+                            {labelText}
                           </span>
                         )}
                       </div>
@@ -311,9 +320,9 @@ const ProductDetail = () => {
                       )}
                     </div>
 
-                    {((vendorDisplayName && vendorDisplayName !== '') || (categoryDisplayName && categoryDisplayName !== '未入力') || typeof product.stock !== 'undefined') && (
+                    {((vendorDisplayName && vendorDisplayName !== '未入力') || (categoryDisplayName && categoryDisplayName !== '未入力') || allergensList.length > 0) && (
                       <div className="flex flex-wrap gap-3 text-sm text-stone-600 mb-2">
-                        {vendorDisplayName && vendorDisplayName !== '' && (
+                        {vendorDisplayName && vendorDisplayName !== '未入力' && (
                           <div>
                             販売者: <span className="font-semibold text-stone-700">
                               {vendorDisplayName}
@@ -325,9 +334,9 @@ const ProductDetail = () => {
                             カテゴリ: <span className="font-semibold text-stone-700">{categoryDisplayName}</span>
                           </div>
                         )}
-                        {typeof product.stock !== 'undefined' && (
+                        {allergensList.length > 0 && (
                           <div>
-                            在庫: <span className="font-semibold text-stone-700">{Number(product.stock) > 0 ? `${product.stock}個` : '在庫なし'}</span>
+                            アレルギー: <span className="font-semibold text-stone-700">{allergensList.join('・')}</span>
                           </div>
                         )}
                       </div>
@@ -343,7 +352,7 @@ const ProductDetail = () => {
                     <p className="text-stone-600 leading-relaxed">{product.description}</p>
                   </div>
 
-                  {((vendorDisplayName && vendorDisplayName !== '') || (categoryDisplayName && categoryDisplayName !== '未入力')) && (
+                  {((vendorDisplayName && vendorDisplayName !== '未入力') || (categoryDisplayName && categoryDisplayName !== '未入力')) && (
                     <div className="mb-6 p-4 bg-stone-50 rounded-lg border border-stone-200">
                       <h3 className="font-bold text-stone-700 mb-2">商品情報</h3>
                       <div className="space-y-1 text-sm text-stone-700">
@@ -352,7 +361,7 @@ const ProductDetail = () => {
                             カテゴリ: <span className="font-semibold">{categoryDisplayName}</span>
                           </p>
                         )}
-                        {vendorDisplayName && vendorDisplayName !== '' && (
+                        {vendorDisplayName && vendorDisplayName !== '未入力' && (
                           <p>
                             販売者: <span className="font-semibold">{vendorDisplayName}</span>
                             {product.vendor_id ? <span className="text-stone-500">（ID: {product.vendor_id}）</span> : null}

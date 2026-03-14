@@ -9,29 +9,38 @@ const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortType, setSortType] = useState('popularity');
 
+  const hasDisplayValue = (value) => typeof value === 'string' && value.trim() !== '' && value.trim() !== '未入力';
+
   const getVendorDisplayName = (product) => {
-    if (typeof product?.vendor_name === 'string' && product.vendor_name.trim() !== '') {
-      return product.vendor_name;
+    if (hasDisplayValue(product?.vendor_name)) {
+      return product.vendor_name.trim();
     }
-    return '未入力';
+    return '';
   };
 
   const getCategoryDisplayName = (product) => {
-    if (typeof product?.category_name === 'string' && product.category_name.trim() !== '') {
-      return product.category_name;
+    if (hasDisplayValue(product?.category_name)) {
+      return product.category_name.trim();
     }
-    if (typeof product?.category === 'string' && product.category.trim() !== '') {
-      return product.category;
-    }
-    return '未入力';
+    return '';
   };
 
   const getAllergensText = (allergens) => {
     if (Array.isArray(allergens)) {
-      return allergens.filter(Boolean).join('・');
+      return allergens
+        .filter((item) => hasDisplayValue(item))
+        .map((item) => item.trim())
+        .join('・');
     }
-    if (typeof allergens === 'string') {
-      return allergens;
+    if (hasDisplayValue(allergens)) {
+      return allergens.trim();
+    }
+    return '';
+  };
+
+  const getLabelText = (label) => {
+    if (hasDisplayValue(label)) {
+      return label.trim();
     }
     return '';
   };
@@ -77,6 +86,7 @@ const ProductList = () => {
             ...item,
             category_name: getCategoryDisplayName(item),
             vendor_name: getVendorDisplayName(item),
+            label: getLabelText(item.label),
           }));
           setProducts(productsData);
         } else if (Array.isArray(data)) {
@@ -87,6 +97,7 @@ const ProductList = () => {
               ...item,
               category_name: getCategoryDisplayName(item),
               vendor_name: getVendorDisplayName(item),
+              label: getLabelText(item.label),
             }));
           setProducts(productsData);
         } else {
@@ -254,9 +265,9 @@ const ProductList = () => {
                         )}
                         <h3 className="text-base md:text-lg font-bold text-stone-800 mb-2 leading-snug break-words">{product.name}</h3>
 
-                        {((product.category_name && product.category_name !== '未入力') || typeof product.stock !== 'undefined' || (product.vendor_name && product.vendor_name !== '') || getAllergensText(product.allergens)) && (
+                        {((product.category_name && product.category_name !== '未入力') || (product.vendor_name && product.vendor_name !== '未入力') || getAllergensText(product.allergens)) && (
                           <div className="flex flex-wrap gap-2 text-xs text-stone-500 mb-2">
-                            {product.vendor_name && product.vendor_name !== '' && (
+                            {product.vendor_name && product.vendor_name !== '未入力' && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
                                 販売者 {product.vendor_name}
                                 {product.vendor_id ? ` (#${product.vendor_id})` : ''}
@@ -265,11 +276,6 @@ const ProductList = () => {
                             {product.category_name && product.category_name !== '未入力' && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
                                 カテゴリ {product.category_name}
-                              </span>
-                            )}
-                            {typeof product.stock !== 'undefined' && (
-                              <span className="px-2 py-1 bg-stone-100 rounded-full">
-                                {Number(product.stock) > 0 ? `在庫 ${product.stock}` : '在庫なし'}
                               </span>
                             )}
                             {getAllergensText(product.allergens) && (
