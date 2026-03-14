@@ -269,27 +269,27 @@ const Cart = () => {
                             {product.description || ''}
                           </p>
                           
-                          {/* Quantity Controls - Ultra Compact */}
-                          <div className="flex items-center gap-1">
+                          {/* Quantity Controls */}
+                          <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-stone-600">数量:</span>
-                            <div className="flex items-center gap-0.5 bg-stone-100 rounded">
+                            <div className="flex items-center gap-1 bg-stone-100 rounded">
                               <button
                                 onClick={() => updateQuantity(item.id, quantity - 1)}
-                                className="w-5 h-5 text-xs font-bold text-mos-green flex items-center justify-center hover:bg-green-200 transition-colors"
+                                className="w-8 h-8 text-base font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l"
                               >
                                 −
                               </button>
-                              <span className="w-4 text-center text-xs font-semibold">{quantity}</span>
+                              <span className="w-6 text-center text-sm font-semibold">{quantity}</span>
                               <button
                                 onClick={() => updateQuantity(item.id, quantity + 1)}
-                                className="w-5 h-5 text-xs font-bold text-mos-green flex items-center justify-center hover:bg-green-200 transition-colors"
+                                className="w-8 h-8 text-base font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r"
                               >
                                 +
                               </button>
                             </div>
                             <button
                               onClick={() => removeItem(item.id)}
-                              className="text-red-600 hover:text-red-700 text-lg leading-none ml-1"
+                              className="text-red-500 hover:text-red-700 text-xl leading-none ml-1 w-8 h-8 flex items-center justify-center"
                             >
                               ✕
                             </button>
@@ -297,7 +297,7 @@ const Cart = () => {
                         </div>
 
                         {/* Price - Right Side */}
-                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0 pr-2">
                           <p className="text-sm font-bold text-mos-green whitespace-nowrap">
                             ¥{productPrice.toLocaleString()}
                           </p>
@@ -308,7 +308,7 @@ const Cart = () => {
                       </div>
 
                       {/* Subtotal Line */}
-                      <div className="mt-2 text-right border-t border-stone-100 pt-1.5">
+                      <div className="mt-1 text-right pr-2">
                         <p className="text-xs text-mos-green font-bold">
                           計: ¥{(productPrice * quantity).toLocaleString()}
                         </p>
