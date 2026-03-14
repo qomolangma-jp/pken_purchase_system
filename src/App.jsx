@@ -21,7 +21,7 @@ function App() {
         <Header />
         {/* 開発環境でのみデバッグログを表示 */}
         <DebugLogger />
-        <main style={{ paddingTop: 'var(--global-header-height)' }}>
+        <main style={{ paddingTop: '56px' }}>
           <Routes>
           {/* 認証が必要なルート */}
           <Route

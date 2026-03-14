@@ -30,7 +30,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full h-14 bg-green-600 shadow-md z-[100] flex items-center justify-between px-4 md:px-6 border-b border-green-700" style={{ backgroundColor: '#16a34a' }}>
+      <header className="fixed top-0 left-0 w-full bg-green-600 shadow-md z-[100] flex items-center justify-between px-4 md:px-6 border-b border-green-700" style={{ backgroundColor: '#16a34a', height: '56px' }}>
         {/* 左側：ロゴとナビゲーション */}
         <div className="flex items-center gap-6">
           {/* モバイルメニューボタン */}
