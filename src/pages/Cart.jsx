@@ -194,7 +194,7 @@ const Cart = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Fixed Header */}
-      <div className="fixed left-0 right-0 bg-white shadow-sm z-50 h-12" style={{top: '3.5rem'}}>
+      <div className="fixed left-0 right-0 bg-white shadow-sm z-[90] h-12" style={{ top: '3.5rem' }}>
         <div className="container px-3 h-full flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="text-stone-700 text-xl font-light">←</button>
           <h1 className="text-base font-bold text-stone-800">カート</h1>
@@ -208,7 +208,7 @@ const Cart = () => {
       </div>
 
       {/* Main Content */}
-      <main className="pb-20" style={{paddingTop: '3rem'}}>
+  <main className="pb-20" style={{ paddingTop: '3rem' }}>
         {error && (
           <div className="bg-red-50 border-l-4 border-red-600 text-red-700 px-3 py-2 m-2 mt-2 rounded text-xs">
             <p className="font-semibold">⚠️ エラー</p>

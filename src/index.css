@@ -22,7 +22,6 @@ body {
     background-color: #fafaf9; /* stone-50 */
     color: #292524; /* stone-800 */
     line-height: 1.5;
-    padding-top: 3.5rem; /* fixed header height (h-14) */
 }
 
 a {
