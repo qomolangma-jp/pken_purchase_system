@@ -257,7 +257,6 @@ const ProductList = () => {
                             {product.vendor_name && product.vendor_name !== '未入力' && (
                               <span className="px-2 py-1 bg-stone-100 rounded-full">
                                 販売者 {product.vendor_name}
-                                {product.vendor_id ? ` (#${product.vendor_id})` : ''}
                               </span>
                             )}
                             {product.category_name && product.category_name !== '未入力' && (

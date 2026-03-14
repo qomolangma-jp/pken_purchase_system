@@ -278,6 +278,7 @@ const ProductDetail = () => {
   const categoryDisplayName = getCategoryDisplayName(product);
   const allergensList = getAllergensList(product.allergens);
   const labelText = getLabelText(product.label);
+  const descriptionText = hasDisplayValue(product.description) ? product.description.trim() : '';
 
   return (
     <div className="min-h-screen bg-stone-50 pt-6">
@@ -320,7 +321,7 @@ const ProductDetail = () => {
                       )}
                     </div>
 
-                    {((vendorDisplayName && vendorDisplayName !== '未入力') || (categoryDisplayName && categoryDisplayName !== '未入力') || allergensList.length > 0) && (
+                    {((vendorDisplayName && vendorDisplayName !== '未入力') || (categoryDisplayName && categoryDisplayName !== '未入力')) && (
                       <div className="flex flex-wrap gap-3 text-sm text-stone-600 mb-2">
                         {vendorDisplayName && vendorDisplayName !== '未入力' && (
                           <div>
@@ -334,11 +335,6 @@ const ProductDetail = () => {
                             カテゴリ: <span className="font-semibold text-stone-700">{categoryDisplayName}</span>
                           </div>
                         )}
-                        {allergensList.length > 0 && (
-                          <div>
-                            アレルギー: <span className="font-semibold text-stone-700">{allergensList.join('・')}</span>
-                          </div>
-                        )}
                       </div>
                     )}
 
@@ -348,9 +344,12 @@ const ProductDetail = () => {
                     </div>
                   </div>
 
-                  <div className="mb-6">
-                    <p className="text-stone-600 leading-relaxed">{product.description}</p>
-                  </div>
+                  {descriptionText && (
+                    <div className="mb-6">
+                      <h3 className="font-bold text-stone-700 mb-2">商品説明</h3>
+                      <p className="text-stone-600 leading-relaxed">{descriptionText}</p>
+                    </div>
+                  )}
 
                   {((vendorDisplayName && vendorDisplayName !== '未入力') || (categoryDisplayName && categoryDisplayName !== '未入力')) && (
                     <div className="mb-6 p-4 bg-stone-50 rounded-lg border border-stone-200">
