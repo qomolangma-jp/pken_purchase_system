@@ -262,6 +262,24 @@ img {
     color: #6b7280;
 }
 
+/* Utility: 2-line text clamp */
+.truncate-2-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Utility: hide scrollbar (for chip scroll) */
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
 /* Forms (Login/Register) */
 .form-card {
     background-color: #ffffff;
