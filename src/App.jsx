@@ -33,7 +33,7 @@ function App() {
             }
           />
           <Route
-            path="/product/:id"
+            path="/products/:id"
             element={
               <ProtectedRoute>
                 <ProductDetail />

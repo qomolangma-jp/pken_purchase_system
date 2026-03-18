@@ -435,7 +435,7 @@ const ProductDetail = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {relatedProducts.map(related => (
                     <Link 
-                      to={`/product/${related.id}`} 
+                      to={`/products/${related.id}`} 
                       key={related.id} 
                       className="block bg-white rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-95 group"
                     >
