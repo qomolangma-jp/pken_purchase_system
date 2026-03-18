@@ -45,14 +45,12 @@ const Header = () => {
             Mobile Order
           </Link>
 
-          {/* ベルアイコン */}
-          <button
-            className="flex items-center justify-center rounded-full text-white active:bg-green-700"
-            style={{ width: '40px', height: '40px' }}
-            aria-label="通知"
+          {/* 白い丸 */}
+          <div
+            className="rounded-full"
+            style={{ width: '40px', height: '40px', backgroundColor: '#ffffff' }}
           >
-            <span className="material-icons" style={{ fontSize: '22px' }}>notifications</span>
-          </button>
+          </div>
 
           {/* ハンバーガーメニュー（モバイル） */}
           <button
