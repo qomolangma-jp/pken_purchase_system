@@ -163,7 +163,7 @@ const ProductList = () => {
                 {/* 商品画像（正方形） */}
                 <div
                   className="relative w-full"
-                  style={{ aspectRatio: '1 / 1', backgroundColor: '#f0ebe3' }}
+                  style={{ aspectRatio: '1 / 1', backgroundColor: '#f0ebe3', overflow: 'hidden' }}
                 >
                   {product.image_url ? (
                     <img
@@ -177,19 +177,27 @@ const ProductList = () => {
                       <span className="text-xs text-gray-400">No Image</span>
                     </div>
                   )}
-                  {/* ラベルバッジ（画像左下） */}
+                  {/* ドロップリボン（画像左上角） */}
                   {product.label && (
-                    <span
-                      className="absolute bottom-1.5 left-1.5 text-white font-bold"
+                    <div
+                      className="absolute text-white font-bold"
                       style={{
-                        backgroundColor: '#e50012',
+                        top: '8px',
+                        left: '-28px',
+                        width: '100px',
+                        textAlign: 'center',
+                        backgroundColor: '#ff6b35',
+                        transform: 'rotate(-45deg)',
+                        transformOrigin: 'center',
                         fontSize: '10px',
-                        lineHeight: '1.4',
-                        padding: '1px 5px',
+                        lineHeight: '1.6',
+                        padding: '3px 0',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                        zIndex: 10,
                       }}
                     >
                       {product.label}
-                    </span>
+                    </div>
                   )}
                 </div>
 
