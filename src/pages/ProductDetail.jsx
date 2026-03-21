@@ -287,15 +287,15 @@ const ProductDetail = () => {
         <div className="container">
           <div className="product-detail-container">
             <div className="detail-card bg-white rounded-lg shadow-md overflow-hidden max-w-6xl mx-auto">
-              <div className="flex flex-col md:flex-row">
+              <div className="flex flex-col md:flex-row md:min-h-[600px]">
                 {/* Image Section - 左側 */}
                 <div className="w-full md:w-1/2 bg-gradient-to-br from-stone-100 to-stone-200 flex items-center justify-center p-6 md:p-8">
-                  <div className="w-full max-h-[400px] md:max-h-[500px] flex items-center justify-center">
+                  <div className="w-full h-[300px] md:h-full flex items-center justify-center">
                     {product.image_url ? (
                       <img 
                         src={product.image_url} 
                         alt={product.name} 
-                        className="max-w-full max-h-[400px] md:max-h-[500px] object-contain drop-shadow-2xl" 
+                        className="max-w-full max-h-full object-contain drop-shadow-2xl" 
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-stone-400">
