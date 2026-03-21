@@ -91,15 +91,9 @@ const Cart = () => {
   };
 
   const updateQuantity = async (itemId, newQuantity) => {
-    if (newQuantity < 0) return;
+    if (newQuantity < 1) return;
 
     try {
-      // 数量が0の場合は削除（確認なし）
-      if (newQuantity === 0) {
-        await removeItem(itemId, false);
-        return;
-      }
-
       const token = localStorage.getItem('authToken');
       if (!token) return;
       
@@ -281,8 +275,9 @@ const Cart = () => {
                             <span className="text-xs text-stone-600">数量:</span>
                             <div className="flex items-center gap-1 bg-stone-100 rounded">
                               <button
-                                onClick={() => updateQuantity(item.id, quantity - 1)}
-                                className="w-8 h-8 text-base font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l"
+                                onClick={() => updateQuantity(item.id, Math.max(1, quantity - 1))}
+                                disabled={quantity <= 1}
+                                className="w-8 h-8 text-base font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
                                 −
                               </button>
