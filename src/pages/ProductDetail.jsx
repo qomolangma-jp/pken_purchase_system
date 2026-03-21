@@ -287,10 +287,10 @@ const ProductDetail = () => {
         <div className="container">
           <div className="product-detail-container">
             <div className="detail-card bg-white rounded-lg shadow-md overflow-hidden max-w-6xl mx-auto">
-              <div className="flex flex-col md:flex-row md:min-h-[600px]">
+              <div className="flex flex-col lg:flex-row lg:min-h-[600px]">
                 {/* Image Section - 左側 */}
-                <div className="w-full md:w-1/2 bg-gradient-to-br from-stone-100 to-stone-200 flex items-center justify-center p-6 md:p-8">
-                  <div className="w-full h-[300px] md:h-full flex items-center justify-center">
+                <div className="w-full lg:w-1/2 bg-gradient-to-br from-stone-100 to-stone-200 flex items-center justify-center p-6 lg:p-8">
+                  <div className="w-full h-[300px] lg:h-full flex items-center justify-center">
                     {product.image_url ? (
                       <img 
                         src={product.image_url} 
@@ -309,11 +309,11 @@ const ProductDetail = () => {
                 </div>
 
                 {/* Content Section - 右側 */}
-                <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col">
+                <div className="w-full lg:w-1/2 p-6 lg:p-8 flex flex-col">
                   {/* 商品名 */}
                   <div className="mb-4">
                     <div className="flex items-start gap-3 mb-2">
-                      <h1 className="text-xl md:text-2xl font-bold text-stone-800 leading-tight">
+                      <h1 className="text-xl lg:text-2xl font-bold text-stone-800 leading-tight">
                         {String(product.name)}
                       </h1>
                       {labelText && (
@@ -352,7 +352,7 @@ const ProductDetail = () => {
                   <div className="mb-6 pb-4 border-b border-stone-200">
                     <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-mos-green">
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl md:text-4xl font-black text-mos-green">
+                        <span className="text-3xl lg:text-4xl font-black text-mos-green">
                           ¥{product.price ? product.price.toLocaleString() : '-'}
                         </span>
                         <span className="text-sm text-stone-600 font-medium">税込</span>
@@ -391,7 +391,7 @@ const ProductDetail = () => {
                     <button 
                       onClick={handleAddToCart}
                       disabled={addingToCart}
-                      className="w-full h-14 md:h-16 bg-mos-green hover:bg-[#006b30] text-white font-bold px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base md:text-lg flex items-center justify-center shadow-lg hover:shadow-xl active:scale-[0.98]"
+                      className="w-full h-14 lg:h-16 bg-mos-green hover:bg-[#006b30] text-white font-bold px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base lg:text-lg flex items-center justify-center shadow-lg hover:shadow-xl active:scale-[0.98]"
                     >
                       {addingToCart ? (
                         <span className="flex items-center gap-2">
