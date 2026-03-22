@@ -286,9 +286,7 @@ const ProductDetail = () => {
       <main className="main-content pb-20">
         <div className="w-full max-w-5xl mx-auto px-4 py-6">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {/* md:flex-row を確実に適用し、items-start で高さを固定しない */}
-           <div className="flex flex-col md:flex-row gap-6 md:gap-10 p-4 md:p-8">
-              
+            <div className="flex flex-col md:flex-row gap-6 md:gap-10 p-4 md:p-8">
               {/* Image Section - 左側（PC時） */}
               <div className="w-full md:w-1/2 flex-shrink-0">
                 <div className="bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg overflow-hidden aspect-[4/3]">
