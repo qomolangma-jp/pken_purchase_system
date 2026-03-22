@@ -431,8 +431,9 @@ const ProductDetail = () => {
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Related Products - TEMPORARILY DISABLED FOR DEBUGGING */}
+          {/* Related Products - TEMPORARILY DISABLED FOR DEBUGGING */}
             {false && relatedProducts.length > 0 && (
               <div className="mt-12">
                 <h2 className="text-xl font-bold text-stone-800 mb-4">関連商品</h2>
