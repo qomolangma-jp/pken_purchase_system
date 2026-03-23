@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import logoImg from '../assets/logo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,10 +40,10 @@ const Header = () => {
           {/* 1. コマペイのロゴ */}
           <Link
             to="/"
-            className="font-extrabold text-white text-lg tracking-tight"
-            style={{ letterSpacing: '-0.5px' }}
+            aria-label="ホームへ"
+            className="flex items-center"
           >
-            Mobile Order
+            <img src={logoImg} alt="ロゴ" style={{ height: '36px', width: 'auto' }} />
           </Link>
 
           {/* スペーサー */}
