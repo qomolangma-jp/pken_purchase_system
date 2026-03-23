@@ -96,16 +96,18 @@ const Header = () => {
       </header>
 
       {/* ドロワーメニュー */}
-      {isMenuOpen && (
-        <>
+      <>
           {/* オーバーレイ */}
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-[110]"
+            className={`fixed inset-0 bg-black bg-opacity-50 z-[110] transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             onClick={() => setIsMenuOpen(false)}
           />
           
-          {/* メニューパネル */}
-          <div className="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-[120] transform transition-transform duration-300 flex flex-col border-r-4 border-stone-300" style={{ backgroundColor: '#ffffff' }}>
+          {/* メニューパネル（右からスライド） */}
+          <div
+            className={`fixed top-0 right-0 w-72 h-full bg-white shadow-2xl z-[120] flex flex-col border-l-4 border-stone-300 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            style={{ backgroundColor: '#ffffff' }}
+          >
             <div className="p-4 border-b-2 border-stone-200 bg-stone-50" style={{ backgroundColor: '#fafaf9' }}>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-stone-800">メニュー</h2>
@@ -213,7 +215,6 @@ const Header = () => {
             </nav>
           </div>
         </>
-      )}
     </>
   );
 };
