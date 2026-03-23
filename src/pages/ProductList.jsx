@@ -2,6 +2,19 @@
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+const PLACEHOLDER_IMAGE = '/no-image.png';
+
+const toAbsoluteUrl = (url) => {
+  if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
+
+  const normalizedUrl = url.trim();
+  if (!normalizedUrl) return PLACEHOLDER_IMAGE;
+  if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
+
+  const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+  return `${base}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
+};
+
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -149,34 +162,36 @@ const ProductList = () => {
               該当する商品が見つかりませんでした。
             </p>
           ) : (
-            displayedProducts.map(product => (
-              <Link
-                to={`/products/${product.id}`}
-                key={product.id}
-                className="block bg-white"
-                style={{
-                  borderRadius: '4px',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* 商品画像（正方形） */}
+            displayedProducts.map(product => {
+              const imageSrc = toAbsoluteUrl(product.thumbnail_url || product.image_url || product.image_original_url);
+
+              return (
+                <Link
+                  to={`/products/${product.id}`}
+                  key={product.id}
+                  className="block bg-white"
+                  style={{
+                    borderRadius: '4px',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+                    overflow: 'hidden',
+                  }}
+                >
+                {/* 商品画像（4:3） */}
                 <div
                   className="relative w-full"
-                  style={{ aspectRatio: '1 / 1', backgroundColor: '#f0ebe3', overflow: 'hidden' }}
+                  style={{ aspectRatio: '4 / 3', backgroundColor: '#f0ebe3', overflow: 'hidden' }}
                 >
-                  {product.image_url ? (
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-xs text-gray-400">No Image</span>
-                    </div>
-                  )}
+                  <img
+                    src={imageSrc}
+                    alt={product.name}
+                    className="w-full h-full"
+                    style={{ objectFit: 'fill' }}
+                    loading="lazy"
+                    onError={(e) => {
+                      if (e.currentTarget.src.endsWith(PLACEHOLDER_IMAGE)) return;
+                      e.currentTarget.src = PLACEHOLDER_IMAGE;
+                    }}
+                  />
                   {/* ドロップリボン（画像左上角） */}
                   {product.label && (
                     <div
@@ -226,8 +241,9 @@ const ProductList = () => {
                     ¥{Number(product.price).toLocaleString()}
                   </p>
                 </div>
-              </Link>
-            ))
+                </Link>
+              );
+            })
           )}
         </div>
       </div>
