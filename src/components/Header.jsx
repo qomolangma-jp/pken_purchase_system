@@ -34,45 +34,21 @@ const Header = () => {
         className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-3"
         style={{ backgroundColor: '#00873c', height: '56px', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
       >
-        {/* 左側：ロゴ ＋ アイコン群 */}
-        <div className="flex items-center gap-1">
-          {/* ロゴ */}
+        {/* 左から右へ：ロゴ → カート → 通知 → メニュー */}
+        <div className="flex items-center gap-2 flex-1">
+          {/* 1. コマペイのロゴ */}
           <Link
             to="/"
-            className="font-extrabold text-white text-lg tracking-tight mr-2"
+            className="font-extrabold text-white text-lg tracking-tight"
             style={{ letterSpacing: '-0.5px' }}
           >
             Mobile Order
           </Link>
 
-          {/* 白い丸 */}
-          <div
-            className="rounded-full"
-            style={{ width: '40px', height: '40px', backgroundColor: '#ffffff' }}
-          >
-          </div>
+          {/* スペーサー */}
+          <div className="flex-1"></div>
 
-          {/* ハンバーガーメニュー（モバイル） */}
-          <button
-            className="flex items-center justify-center rounded-full text-white active:bg-green-700 md:hidden"
-            style={{ width: '40px', height: '40px' }}
-            aria-label="メニューを開く"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <span className="material-icons" style={{ fontSize: '22px' }}>menu</span>
-          </button>
-
-          {/* デスクトップナビゲーション */}
-          <nav className="hidden md:flex items-center gap-1 ml-2">
-            <Link to="/" className="px-3 py-2 text-white hover:bg-green-700 rounded text-sm">商品一覧</Link>
-            <Link to="/news" className="px-3 py-2 text-white hover:bg-green-700 rounded text-sm">ニュース</Link>
-            <Link to="/purchase-history" className="px-3 py-2 text-white hover:bg-green-700 rounded text-sm">購入履歴</Link>
-          </nav>
-        </div>
-
-        {/* 右側：カート ＋ ログイン/ユーザーボタン */}
-        <div className="flex items-center gap-2">
-          {/* カートアイコン */}
+          {/* 2. カートアイコン */}
           <Link
             to="/cart"
             aria-label="カート画面へ"
@@ -90,44 +66,31 @@ const Header = () => {
             )}
           </Link>
 
-          {/* ログイン／ユーザーボタン（MOS Burgerスタイル：白背景・グリーン枠） */}
-          {user ? (
-            <button
-              onClick={handleLogout}
-              style={{
-                backgroundColor: '#fff',
-                color: '#00873c',
-                border: '1.5px solid #fff',
-                borderRadius: '4px',
-                padding: '5px 10px',
-                fontSize: '12px',
-                fontWeight: '700',
-                whiteSpace: 'nowrap',
-                minHeight: '32px',
-              }}
+          {/* 3. 通知アイコン */}
+          <button
+            className="relative flex items-center justify-center text-white active:bg-green-700 rounded-full"
+            style={{ width: '40px', height: '40px' }}
+            aria-label="通知"
+          >
+            <span className="material-icons" style={{ fontSize: '22px' }}>notifications</span>
+            {/* 通知バッジ（必要に応じて表示） */}
+            {/* <span
+              className="absolute flex items-center justify-center bg-red-500 text-white font-bold rounded-full"
+              style={{ top: '4px', right: '4px', minWidth: '16px', height: '16px', fontSize: '9px', padding: '0 3px' }}
             >
-              {user.name || user.displayName || user.student_id || 'ログアウト'}
-            </button>
-          ) : (
-            <Link
-              to="/login"
-              style={{
-                backgroundColor: '#fff',
-                color: '#00873c',
-                border: '1.5px solid #fff',
-                borderRadius: '4px',
-                padding: '5px 12px',
-                fontSize: '13px',
-                fontWeight: '700',
-                whiteSpace: 'nowrap',
-                minHeight: '32px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              ログイン
-            </Link>
-          )}
+              1
+            </span> */}
+          </button>
+
+          {/* 4. メニューボタン */}
+          <button
+            className="flex items-center justify-center rounded-full text-white active:bg-green-700"
+            style={{ width: '40px', height: '40px' }}
+            aria-label="メニューを開く"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <span className="material-icons" style={{ fontSize: '22px' }}>menu</span>
+          </button>
         </div>
       </header>
 
