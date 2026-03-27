@@ -209,20 +209,24 @@ const Cart = () => {
       </div>
 
       {/* Main Content */}
-      <main className="pb-20" style={{ paddingTop: '48px' }}>
+      <main className="pb-20 w-full flex flex-col items-center" style={{ paddingTop: '48px' }}>
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-600 text-red-700 px-3 py-2 m-2 mt-2 rounded text-xs">
-            <p className="font-semibold">⚠️ エラー</p>
-            <p className="text-xs">{error}</p>
+          <div className="w-full max-w-4xl px-2 md:px-4 lg:px-6">
+            <div className="bg-red-50 border-l-4 border-red-600 text-red-700 px-3 py-2 m-2 mt-2 rounded text-xs">
+              <p className="font-semibold">⚠️ エラー</p>
+              <p className="text-xs">{error}</p>
+            </div>
           </div>
         )}
 
         {cartItems.length === 0 ? (
-          <div className="text-center py-8 px-3">
-            <p className="text-stone-600 mb-3 text-sm font-semibold">カートに商品がありません</p>
-            <Link to="/" className="inline-block bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2 px-4 rounded text-sm transition-all">
-              商品を見る
-            </Link>
+          <div className="w-full max-w-4xl px-2 md:px-4 lg:px-6">
+            <div className="text-center py-8 px-3">
+              <p className="text-stone-600 mb-3 text-sm font-semibold">カートに商品がありません</p>
+              <Link to="/" className="inline-block bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2 px-4 rounded text-sm transition-all">
+                商品を見る
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="w-full max-w-4xl mx-auto px-2 md:px-4 lg:px-6">
