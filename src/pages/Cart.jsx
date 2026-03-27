@@ -199,12 +199,6 @@ const Cart = () => {
         <div className="container px-3 h-full flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="text-stone-700 text-xl font-light">←</button>
           <h1 className="text-base font-bold text-stone-800">カート</h1>
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded transition-colors text-xs"
-            onClick={() => alert('購入機能はまだ実装されていません')}
-          >
-            お会計へ進む
-          </button>
         </div>
       </div>
 
@@ -230,11 +224,6 @@ const Cart = () => {
           </div>
         ) : (
           <div className="w-full max-w-4xl mx-auto px-2 md:px-4 lg:px-6">
-            {/* Tap to expand notice */}
-            <div className="text-center text-xs text-blue-600 font-bold mb-2 py-0.5 bg-blue-50 rounded">
-              <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs inline-block">タップ</span>
-            </div>
-
             {/* Cart Summary Line */}
             <div className="bg-white rounded px-2 py-1.5 mb-2 text-xs md:text-sm">
               <p className="text-stone-700 font-semibold">
@@ -345,7 +334,7 @@ const Cart = () => {
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 md:py-3 px-3 md:px-4 rounded text-xs md:text-base transition-all mb-1.5 md:mb-2"
                 onClick={() => alert('購入機能はまだ実装されていません')}
               >
-                お会計へ進む
+                注文を行う
               </button>
 
               <Link to="/" className="block text-center text-mos-green hover:text-mos-green-dark font-semibold py-2 md:py-3 px-3 md:px-4 border border-mos-green rounded transition-all text-xs md:text-base">
