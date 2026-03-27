@@ -129,6 +129,50 @@ img {
 .main-content {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
+    width: 100%;
+    max-width: 100vw;
+}
+
+/* Responsive Product Detail Container */
+.product-detail-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.product-detail-content {
+    width: 100%;
+    max-width: 80rem; /* max-w-6xl equivalent */
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* Responsive padding for different screen sizes */
+@media (max-width: 639px) {
+    .product-detail-content {
+        padding: 1rem;
+    }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+    .product-detail-content {
+        padding: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .product-detail-content {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .product-detail-content {
+        padding: 2rem;
+    }
 }
 
 /* Search & Sort Area */

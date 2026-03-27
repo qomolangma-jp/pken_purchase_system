@@ -18,6 +18,9 @@ export default {
           dark: '#E64A19',
         },
       },
+      spacing: {
+        'responsive-px': 'clamp(1rem, 4vw, 2rem)',
+      },
     },
   },
   plugins: [],
