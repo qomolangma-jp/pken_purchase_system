@@ -1,12 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.)",
-      "destination": "https://komapay.p-kmt.com/api/$1"
-    },
-    {
-      "source": "/((?!api/|assets/|favicon.ico).)",
-      "destination": "/index.html"
+      "source": "/api/:path",
+      "destination": "https://komapay.p-kmt.com/api/:path"
     }
   ]
 }
