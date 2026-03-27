@@ -14,6 +14,7 @@ import Checkout from './pages/Checkout';
 import OrderComplete from './pages/OrderComplete';
 import PurchaseHistory from './pages/PurchaseHistory';
 import News from './pages/News';
+import NewsDetail from './pages/NewsDetail';
 import './App.css';
 
 function App() {
@@ -79,6 +80,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <News />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/news/:id"
+            element={
+              <ProtectedRoute>
+                <NewsDetail />
               </ProtectedRoute>
             }
           />

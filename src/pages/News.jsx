@@ -78,54 +78,57 @@ const News = () => {
     <div className="min-h-screen bg-stone-50 pt-6">
       {/* Main Content */}
       <main className="main-content min-h-screen pb-20 w-full flex flex-col items-center">
-        <div className="w-full max-w-4xl mx-auto px-2 md:px-4 lg:px-6">
-          <div className="mb-8">
-            <h1 className="page-title text-3xl md:text-4xl lg:text-5xl font-bold text-stone-800">ニュース</h1>
-            <p className="text-stone-600 mt-2 text-base md:text-lg lg:text-xl">最新のお知らせやニュースをお伝えします</p>
+        <div className="w-full max-w-5xl mx-auto px-4 md:px-6 lg:px-8">
+          {/* Header Section */}
+          <div className="mb-10">
+            <h1 className="page-title text-3xl md:text-4xl lg:text-5xl font-bold text-stone-800 mb-3">ニュース</h1>
+            <p className="text-stone-600 text-base md:text-lg">最新のお知らせやニュースをお伝えします</p>
           </div>
 
           {newsList.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-stone-600 mb-4 text-base md:text-lg lg:text-xl">ニュースはありません</p>
+              <p className="text-stone-600 mb-4 text-base md:text-lg">ニュースはありません</p>
               <Link to="/" className="link-text">ホームに戻る</Link>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-6">
               {newsList.map((newsItem) => (
-                <details key={newsItem.id} className="accordion-item bg-white border-b border-stone-200">
-                  <summary className="flex items-center justify-between p-4 md:p-6 cursor-pointer hover:bg-stone-50 transition-colors focus:outline-none">
-                    <div className="flex items-start gap-3 flex-1">
-                      <span className="font-bold text-mos-green text-lg md:text-xl lg:text-2xl flex-shrink-0 pt-0.5">Q</span>
-                      <h2 className="text-base md:text-lg lg:text-xl font-bold text-stone-800 leading-relaxed">
-                        {newsItem.title}
-                      </h2>
+                <Link
+                  key={newsItem.id}
+                  to={`/news/${newsItem.id}`}
+                  className="block bg-white rounded-lg border border-stone-200 hover:shadow-md hover:border-stone-300 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+                >
+                  <article className="p-4 md:p-6 lg:p-7">
+                    {/* Top Info Row */}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4 mb-3">
+                      <time className="text-xs md:text-sm text-stone-500 font-medium">
+                        {formatDate(newsItem.created_at)}
+                      </time>
+                      {newsItem.category && (
+                        <span className="inline-block bg-blue-100 text-blue-700 text-xs md:text-sm font-bold px-3 py-1 rounded-full w-fit">
+                          {newsItem.category}
+                        </span>
+                      )}
+                      {newsItem.is_published === 1 && (
+                        <span className="inline-block bg-green-100 text-green-700 text-xs md:text-sm font-bold px-3 py-1 rounded-full w-fit">
+                          公開中
+                        </span>
+                      )}
                     </div>
-                    {newsItem.is_published === 1 && (
-                      <span className="ml-2 md:ml-4 bg-green-100 text-green-700 text-xs font-bold px-2 md:px-3 py-1 rounded-full flex-shrink-0">
-                        公開中
-                      </span>
-                    )}
-                    {/* Toggle Icon */}
-                    <span className="toggle-icon text-mos-green font-bold text-xl md:text-2xl lg:text-3xl ml-2 flex-shrink-0 transition-transform duration-300">
-                      +
-                    </span>
-                  </summary>
 
-                  {/* Content */}
-                  <div className="bg-gray-100 p-4 md:p-6 border-t border-stone-200">
-                    <div className="flex gap-3">
-                      <span className="font-bold text-orange-500 text-lg md:text-xl lg:text-2xl flex-shrink-0">A</span>
-                      <div className="flex-1">
-                        <div className="text-xs md:text-sm lg:text-base text-stone-500 mb-3">
-                          {formatDate(newsItem.created_at)}
-                        </div>
-                        <p className="text-stone-700 text-sm md:text-base lg:text-lg leading-relaxed whitespace-pre-wrap">
-                          {newsItem.content}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </details>
+                    {/* Title */}
+                    <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-stone-800 mb-3 line-clamp-2 hover:text-blue-600 transition-colors">
+                      {newsItem.title}
+                    </h2>
+
+                    {/* Preview */}
+                    {newsItem.content && (
+                      <p className="text-sm md:text-base text-stone-600 line-clamp-2">
+                        {newsItem.content}
+                      </p>
+                    )}
+                  </article>
+                </Link>
               ))}
             </div>
           )}
