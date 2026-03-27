@@ -146,8 +146,14 @@ export const AuthProvider = ({ children }) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒タイムアウト
 
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        console.log('認証API - ベースURL:', apiBaseUrl);
+
         // まず /api/auth/line-login を試す（トークン生成用）
-        let response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/auth/line-login`, {
+        let apiUrl = `${apiBaseUrl}/api/auth/line-login`;
+        console.log('認証API - 試行URL:', apiUrl);
+
+        let response = await fetch(apiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -156,10 +162,17 @@ export const AuthProvider = ({ children }) => {
           signal: controller.signal,
         });
 
+        console.log('認証APIレスポンス状態:', response.status);
+        const contentType = response.headers.get('content-type');
+        console.log('認証APIレスポンス Content-Type:', contentType);
+
         // /api/auth/line-login が存在しない場合は /api/auth/check を使用
         if (!response.ok && response.status === 404) {
           console.log('/api/auth/line-login が見つかりません。/api/auth/check を使用します。');
-          response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/auth/check`, {
+          apiUrl = `${apiBaseUrl}/api/auth/check`;
+          console.log('認証API - フォールバックURL:', apiUrl);
+          
+          response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -167,10 +180,21 @@ export const AuthProvider = ({ children }) => {
             body: JSON.stringify({ line_id: lineId }),
             signal: controller.signal,
           });
+
+          console.log('認証API（フォールバック）レスポンス状態:', response.status);
         }
 
         clearTimeout(timeoutId);
-        console.log('認証APIレスポンス:', response.status);
+        
+        // コンテンツタイプをチェック
+        const responseCT = response.headers.get('content-type');
+        console.log('認証API最終ステータス:', response.status, '| Content-Type:', responseCT);
+
+        if (!responseCT || !responseCT.includes('application/json')) {
+          const responseText = await response.text();
+          console.error('認証API: JSON でないレスポンス:', responseText.substring(0, 500));
+          throw new Error(`認証API が無効なレスポンス形式を返しました。Content-Type: ${responseCT}`);
+        }
         
         const data = await response.json();
         console.log('認証APIレスポンスデータ（全体）:', data);

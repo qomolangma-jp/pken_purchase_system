@@ -41,9 +41,22 @@ const Checkout = () => {
         },
       });
 
+      console.log('カート取得 - API URL:', API_BASE_URL + '/api/cart');
+      console.log('カート取得 - ステータス:', response.status);
+
       const contentType = response.headers.get('content-type');
+      console.log('カート取得 - Content-Type:', contentType);
+
+      if (!response.ok) {
+        const responseText = await response.text();
+        console.error('カート取得エラーレスポンス:', responseText.substring(0, 500));
+        throw new Error(`API エラー (${response.status}): カート情報の取得に失敗しました`);
+      }
+
       if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('サーバーから正しい応答が得られませんでした');
+        const responseText = await response.text();
+        console.error('JSON でないレスポンス:', responseText.substring(0, 500));
+        throw new Error(`無効なレスポンス形式です。サーバーが JSON を返していません。`);
       }
 
       const data = await response.json();
@@ -119,8 +132,15 @@ const Checkout = () => {
         body: JSON.stringify(orderData),
       });
 
+      console.log('注文送信 - API URL:', API_BASE_URL + '/api/orders');
+      console.log('注文送信 - ステータス:', response.status);
+
       const contentType = response.headers.get('content-type');
+      console.log('注文送信 - Content-Type:', contentType);
+
       if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text();
+        console.error('JSON でないレスポンス:', responseText.substring(0, 500));
         throw new Error('サーバーから正しい応答が得られませんでした');
       }
 

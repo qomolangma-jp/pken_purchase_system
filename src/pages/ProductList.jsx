@@ -35,8 +35,28 @@ const ProductList = () => {
         const headers = { 'Content-Type': 'application/json' };
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/products`, { headers });
-        if (!response.ok) throw new Error('商品データの取得に失敗しました');
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL || ''}/api/products`;
+        console.log('API URL:', apiUrl);
+        console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+
+        const response = await fetch(apiUrl, { headers });
+        
+        // コンテンツタイプをチェック
+        const contentType = response.headers.get('content-type');
+        console.log('Response status:', response.status);
+        console.log('Content-Type:', contentType);
+
+        if (!response.ok) {
+          const responseText = await response.text();
+          console.error('Response body:', responseText.substring(0, 500));
+          throw new Error(`API エラー (${response.status}): 商品データの取得に失敗しました`);
+        }
+
+        if (!contentType || !contentType.includes('application/json')) {
+          const responseText = await response.text();
+          console.error('JSON でないレスポンス:', responseText.substring(0, 500));
+          throw new Error(`無効なレスポンス形式です。サーバーが JSON を返していません。レスポンス: ${responseText.substring(0, 100)}`);
+        }
 
         const data = await response.json();
         let productsData = [];
