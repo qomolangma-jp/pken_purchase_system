@@ -225,16 +225,16 @@ const Cart = () => {
             </Link>
           </div>
         ) : (
-          <div className="px-2">
+          <div className="w-full max-w-4xl mx-auto px-2 md:px-4 lg:px-6">
             {/* Tap to expand notice */}
             <div className="text-center text-xs text-blue-600 font-bold mb-2 py-0.5 bg-blue-50 rounded">
               <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs inline-block">タップ</span>
             </div>
 
             {/* Cart Summary Line */}
-            <div className="bg-white rounded px-2 py-1.5 mb-2 text-xs">
+            <div className="bg-white rounded px-2 py-1.5 mb-2 text-xs md:text-sm">
               <p className="text-stone-700 font-semibold">
-                小計（アイテム）: <span className="text-mos-green font-bold text-sm">¥{getTotalPrice().toLocaleString()}</span>
+                小計（アイテム）: <span className="text-mos-green font-bold text-sm md:text-base">¥{getTotalPrice().toLocaleString()}</span>
               </p>
             </div>
 
@@ -249,11 +249,11 @@ const Cart = () => {
 
                 return (
                   <React.Fragment key={item.id}>
-                    <div className="bg-white rounded-lg shadow-sm p-2">
+                    <div className="bg-white rounded-lg shadow-sm p-2 md:p-4">
                       {/* Top Row: Image + Product Info + Price */}
-                      <div className="flex gap-2 items-start">
-                        {/* Product Image - Thumbnail (70px max) */}
-                        <Link to={`/product/${product.id}`} className="w-[70px] h-[70px] bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
+                      <div className="flex gap-2 md:gap-4 items-start">
+                        {/* Product Image - Thumbnail (70px → md:128px) */}
+                        <Link to={`/product/${product.id}`} className="w-[70px] h-[70px] md:w-32 md:h-32 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
                           {productImage ? (
                             <img src={productImage} alt={productName} className="w-full h-full object-contain" style={{ width: '70px', height: 'auto' }} />
                           ) : (
@@ -263,59 +263,59 @@ const Cart = () => {
 
                         {/* Product Info and Controls - Center Section */}
                         <div className="flex-1 min-w-0">
-                          <Link to={`/product/${product.id}`} className="font-bold text-xs text-stone-800 hover:text-mos-green line-clamp-2 block mb-0.5">
+                          <Link to={`/product/${product.id}`} className="font-bold text-xs md:text-base text-stone-800 hover:text-mos-green line-clamp-2 block mb-0.5 md:mb-1">
                             {productName}
                           </Link>
-                          <p className="text-xs text-stone-600 mb-1 line-clamp-1">
+                          <p className="text-xs md:text-sm text-stone-600 mb-1 md:mb-2 line-clamp-1">
                             {product.description || ''}
                           </p>
                           
                           {/* Quantity Controls */}
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-stone-600">数量:</span>
-                            <div className="flex items-center gap-1 bg-stone-100 rounded">
+                          <div className="flex items-center gap-2 md:gap-3 mt-1 md:mt-2">
+                            <span className="text-xs md:text-sm text-stone-600">数量:</span>
+                            <div className="flex items-center gap-1 md:gap-1.5 bg-stone-100 rounded">
                               <button
                                 onClick={() => updateQuantity(item.id, Math.max(1, quantity - 1))}
                                 disabled={quantity <= 1}
-                                className="w-8 h-8 text-base font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
+                                className="w-8 h-8 md:w-10 md:h-10 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
                                 −
                               </button>
-                              <span className="w-6 text-center text-sm font-semibold">{quantity}</span>
+                              <span className="w-6 md:w-8 text-center text-sm md:text-base font-semibold">{quantity}</span>
                               <button
                                 onClick={() => updateQuantity(item.id, Math.min(product.stock || 999, quantity + 1))}
                                 disabled={quantity >= (product.stock || 999)}
-                                className="w-8 h-8 text-base font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
+                                className="w-8 h-8 md:w-10 md:h-10 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
                                 +
                               </button>
                             </div>
                             <button
                               onClick={() => removeItem(item.id)}
-                              className="text-red-500 hover:text-red-700 text-xl leading-none ml-1 w-8 h-8 flex items-center justify-center"
+                              className="text-red-500 hover:text-red-700 text-xl md:text-2xl leading-none ml-1 md:ml-2 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center"
                             >
                               ✕
                             </button>
                           </div>
                           {product.stock && (
-                            <p className="text-xs text-stone-500 mt-0.5">在庫: {product.stock}個</p>
+                            <p className="text-xs md:text-sm text-stone-500 mt-0.5 md:mt-1">在庫: {product.stock}個</p>
                           )}
                         </div>
 
                         {/* Price - Right Side */}
-                        <div className="flex flex-col items-end gap-1 flex-shrink-0 pr-2">
-                          <p className="text-sm font-bold text-mos-green whitespace-nowrap">
+                        <div className="flex flex-col items-end gap-1 md:gap-1.5 flex-shrink-0 pr-2 md:pr-3">
+                          <p className="text-sm md:text-lg font-bold text-mos-green whitespace-nowrap">
                             ¥{productPrice.toLocaleString()}
                           </p>
-                          <p className="text-xs text-stone-600 whitespace-nowrap">
+                          <p className="text-xs md:text-sm text-stone-600 whitespace-nowrap">
                             × {quantity}
                           </p>
                         </div>
                       </div>
 
                       {/* Subtotal Line */}
-                      <div className="mt-1 text-right pr-2">
-                        <p className="text-xs text-mos-green font-bold">
+                      <div className="mt-1 md:mt-2 text-right pr-2 md:pr-3">
+                        <p className="text-xs md:text-sm text-mos-green font-bold">
                           計: ¥{(productPrice * quantity).toLocaleString()}
                         </p>
                       </div>
@@ -329,22 +329,22 @@ const Cart = () => {
             </div>
 
             {/* Bottom Summary Card */}
-            <div className="bg-white rounded-lg shadow-md p-2.5 mt-3 sticky bottom-0">
-              <div className="text-center mb-2 pb-2 border-b border-stone-200">
-                <p className="text-xs text-stone-600 mb-0.5">合計</p>
-                <p className="text-2xl font-black text-mos-green">
+            <div className="bg-white rounded-lg shadow-md p-2.5 md:p-4 mt-3 md:mt-5 sticky bottom-0">
+              <div className="text-center mb-2 md:mb-3 pb-2 md:pb-3 border-b border-stone-200">
+                <p className="text-xs md:text-sm text-stone-600 mb-0.5 md:mb-1">合計</p>
+                <p className="text-2xl md:text-4xl font-black text-mos-green">
                   ¥{getTotalPrice().toLocaleString()}
                 </p>
               </div>
 
               <button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-3 rounded text-xs transition-all mb-1.5"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 md:py-3 px-3 md:px-4 rounded text-xs md:text-base transition-all mb-1.5 md:mb-2"
                 onClick={() => alert('購入機能はまだ実装されていません')}
               >
                 お会計へ進む
               </button>
 
-              <Link to="/" className="block text-center text-mos-green hover:text-mos-green-dark font-semibold py-2 px-3 border border-mos-green rounded transition-all text-xs">
+              <Link to="/" className="block text-center text-mos-green hover:text-mos-green-dark font-semibold py-2 md:py-3 px-3 md:px-4 border border-mos-green rounded transition-all text-xs md:text-base">
                 買い物を続ける
               </Link>
             </div>
