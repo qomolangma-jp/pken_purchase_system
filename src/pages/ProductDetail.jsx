@@ -174,7 +174,7 @@ const ProductDetail = () => {
     
     // 商品が変わったら数量を1にリセット
     setQuantity(1);
-  }, [id, authLoading, user]);
+  }, [id]);
 
   const handleAddToCart = async () => {
     setAddingToCart(true);

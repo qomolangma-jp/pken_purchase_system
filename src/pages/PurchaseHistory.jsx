@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -8,22 +8,23 @@ const PurchaseHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const hasFetchedRef = useRef(false); // 一度だけ実行するためのフラグ
   
   // 認証状態を取得
   const { loading: authLoading, user } = useAuth();
 
   useEffect(() => {
+    // ガード節: 認証が完了し、user が存在し、まだフェッチしていない場合のみ実行
+    if (authLoading || !user || hasFetchedRef.current) {
+      return;
+    }
+
+    hasFetchedRef.current = true; // 実行フラグを立てる
     fetchPurchaseHistory();
   }, [authLoading, user]);
 
   const fetchPurchaseHistory = async () => {
     try {
-      // ガード節: 認証が完了し、user が存在するまで API をコールしない
-      if (authLoading || !user) {
-        setLoading(false);
-        return;
-      }
-
       const token = localStorage.getItem('authToken');
       if (!token) {
         setError('購入履歴を表示するにはログインが必要です');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -6,18 +6,21 @@ const News = () => {
   const [newsList, setNewsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const hasFetchedRef = useRef(false); // 一度だけ実行するためのフラグ
   
   // 認証状態を取得
   const { loading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchNews = async () => {
-      // ガード節: 認証が完了するまで API をコールしない
-      if (authLoading) {
+      // ガード節: 認証が完了し、まだフェッチしていない場合のみ実行
+      if (authLoading || hasFetchedRef.current) {
         setLoading(false);
         return;
       }
 
+      hasFetchedRef.current = true; // 実行フラグを立てる
+      
       try {
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/news`, {
           method: 'GET',

@@ -22,6 +22,7 @@ const ProductList = () => {
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState('すべて');
   const categoryBarRef = useRef(null);
+  const hasFetchedRef = useRef(false); // 一度だけ実行するためのフラグ
   
   // 認証状態を取得
   const { loading: authLoading, user } = useAuth();
@@ -66,12 +67,13 @@ const ProductList = () => {
       }
     };
 
-    // ガード節: 認証が完了し、user が存在するまで API をコールしない
-    if (authLoading || !user) {
+    // ガード節: 認証が完了し、user が存在し、まだフェッチしていない場合のみ実行
+    if (authLoading || !user || hasFetchedRef.current) {
       setLoading(false);
       return;
     }
 
+    hasFetchedRef.current = true; // 実行フラグを立てる
     fetchProducts();
   }, [authLoading, user]);
 
