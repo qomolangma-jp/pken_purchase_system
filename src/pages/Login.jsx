@@ -74,16 +74,35 @@ const Login = () => {
       // Content-Typeをチェック
       const contentType = response.headers.get('content-type');
       console.log('Content-Type:', contentType);
+      
+      // まずテキストで全て取得
+      const responseText = await response.text();
+      console.log('レスポンステキスト（最初の500文字）:', responseText.substring(0, 500));
+      
       let data;
       
       if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-        console.log('レスポンスデータ:', data);
+        try {
+          data = JSON.parse(responseText);
+          console.log('レスポンスデータ:', data);
+        } catch (parseErr) {
+          console.error('JSON パースエラー:', parseErr);
+          throw new Error(`JSONパースに失敗しました: ${parseErr.message}`);
+        }
       } else {
         // JSONでない場合（HTMLなど）
-        const text = await response.text();
-        console.error('Non-JSON response (最初の500文字):', text.substring(0, 500));
-        throw new Error(`サーバーエラー: APIが正しく応答していません (Status: ${response.status})`);
+        console.error('❌ HTMLレスポンスが返されました（APIエンドポイントが見つからない可能性）');
+        console.error('ステータス:', response.status);
+        console.error('Content-Type:', contentType);
+        console.error('レスポンス内容（最初の1000文字）:', responseText.substring(0, 1000));
+        
+        if (response.status === 404) {
+          throw new Error('APIエンドポイント /api/auth/login が見つかりません。バックエンドが正しく起動しているか確認してください。');
+        } else if (response.status >= 500) {
+          throw new Error(`バックエンドサーバーエラー (Status: ${response.status})`);
+        } else {
+          throw new Error(`サーバーからHTMLが返されました (Status: ${response.status})。バックエンドが正しく応答していません。`);
+        }
       }
 
       if (!response.ok) {
