@@ -151,7 +151,8 @@ const ProductList = () => {
               onClick={() => setActiveCategory(cat)}
               className="flex-shrink-0 px-4 text-sm transition-colors"
               style={{
-                height: '34px',
+                padding: '7px 14px',
+                lineHeight: '1.2',
                 marginRight: '8px',
                 fontWeight: activeCategory === cat ? '700' : '400',
                 color: activeCategory === cat ? '#00873c' : '#444',
