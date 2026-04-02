@@ -144,17 +144,20 @@ const ProductList = () => {
           <ChevronLeft size={18} />
         </button>
 
-        <div ref={categoryBarRef} className="flex overflow-x-auto no-scrollbar flex-1">
+        <div ref={categoryBarRef} className="flex overflow-x-auto no-scrollbar flex-1 items-center py-2">
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className="flex-shrink-0 px-4 text-sm transition-colors"
               style={{
-                height: '46px',
+                height: '34px',
+                marginRight: '8px',
                 fontWeight: activeCategory === cat ? '700' : '400',
                 color: activeCategory === cat ? '#00873c' : '#444',
-                borderBottom: activeCategory === cat ? '3px solid #00873c' : '3px solid transparent',
+                backgroundColor: activeCategory === cat ? '#e8f5ed' : '#fffaf2',
+                border: activeCategory === cat ? '1px solid #00873c' : '1px solid #d6c9b8',
+                borderRadius: '999px',
                 whiteSpace: 'nowrap',
               }}
             >
