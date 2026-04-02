@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://komapay.p-kmt.com';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
 const Register = () => {
   const [name2nd, setName2nd] = useState('');
@@ -76,22 +76,27 @@ const Register = () => {
       // Content-Typeをチェック
       const contentType = response.headers.get('content-type');
       console.log('Content-Type:', contentType);
-      
+
       let data;
-      
+      const responseText = await response.text();
+
       if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-        console.log('レスポンスデータ:', data);
+        try {
+          data = responseText ? JSON.parse(responseText) : {};
+          console.log('レスポンスデータ:', data);
+        } catch {
+          console.error('JSON parse error response (最初の1000文字):', responseText.substring(0, 1000));
+          throw new Error(`バックエンド応答の解析に失敗しました (Status ${response.status})`);
+        }
       } else {
         // JSONでない場合（HTMLなど）
-        const text = await response.text();
-        console.error('Non-JSON response (最初の1000文字):', text.substring(0, 1000));
-        
+        console.error('Non-JSON response (最初の1000文字):', responseText.substring(0, 1000));
+
         // HTMLからエラーメッセージを抽出を試みる
-        const titleMatch = text.match(/<title>(.*?)<\/title>/i);
-        const h1Match = text.match(/<h1[^>]*>(.*?)<\/h1>/i);
+        const titleMatch = responseText.match(/<title>(.*?)<\/title>/i);
+        const h1Match = responseText.match(/<h1[^>]*>(.*?)<\/h1>/i);
         const errorInfo = titleMatch ? titleMatch[1] : (h1Match ? h1Match[1] : 'サーバーエラー');
-        
+
         throw new Error(`バックエンドエラー (Status ${response.status}): ${errorInfo}\n\nバックエンド側のログを確認してください。`);
       }
 
