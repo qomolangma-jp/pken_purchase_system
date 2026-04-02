@@ -71,12 +71,16 @@ const ProductList = () => {
 
         const validProducts = productsData
           .filter(item => item.id && item.name && !item.username && !item.student_id)
-          .map(item => ({
-            ...item,
-            category_name: item.category_name?.trim() || 'その他',
-            vendor_name: item.vendor_name?.trim() || '',
-            label: item.label?.trim() || '',
-          }));
+          .map(item => {
+            const normalizedLabel = (item.label || '').trim();
+
+            return {
+              ...item,
+              category_name: item.category_name?.trim() || 'その他',
+              vendor_name: item.vendor_name?.trim() || '',
+              label: normalizedLabel && normalizedLabel !== '未入力' ? normalizedLabel : '',
+            };
+          });
 
         setProducts(validProducts);
       } catch (err) {
