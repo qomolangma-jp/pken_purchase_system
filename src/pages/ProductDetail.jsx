@@ -288,7 +288,7 @@ const ProductDetail = () => {
   const categoryDisplayName = getCategoryDisplayName(product);
   const allergensList = getAllergensList(product.allergens);
   const labelText = getLabelText(product.label);
-  const descriptionText = hasDisplayValue(product.description) ? product.description.trim().replace(/^\{+/, '') : '';
+  const descriptionText = hasDisplayValue(product.description) ? product.description.trim().replace(/^[\{\【「『※*\s]+/, '') : '';
   
   // 在庫警告色の判定
   const getStockColor = () => {
