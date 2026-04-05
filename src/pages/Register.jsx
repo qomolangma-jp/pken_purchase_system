@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://komapay.p-kmt.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const Register = () => {
   const [name2nd, setName2nd] = useState('');

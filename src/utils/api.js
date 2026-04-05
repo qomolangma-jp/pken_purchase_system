@@ -1,5 +1,5 @@
 // バックエンドAPIのベースURL（環境変数から取得）
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 /**
  * LINE IDでユーザーをチェックし、存在すれば返す
