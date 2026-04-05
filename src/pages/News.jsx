@@ -62,12 +62,12 @@ const News = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex justify-center items-center">読み込み中...</div>;
+    return <div className="min-h-screen flex justify-center items-center px-8">読み込み中...</div>;
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col justify-center items-center gap-4">
+      <div className="min-h-screen flex flex-col justify-center items-center gap-4 px-8">
         <p className="text-red-500">{error}</p>
         <Link to="/" className="link-text">ホームに戻る</Link>
       </div>
@@ -78,7 +78,10 @@ const News = () => {
     <div className="min-h-screen bg-stone-50 pt-6">
       {/* Main Content */}
       <main className="main-content min-h-screen pb-20 w-full flex flex-col items-center">
-        <div className="w-full max-w-5xl mx-auto px-4 md:px-6 lg:px-8">
+        <div
+          className="w-full max-w-4xl mx-auto"
+          style={{ paddingLeft: 'clamp(24px, 7vw, 120px)', paddingRight: 'clamp(24px, 7vw, 120px)' }}
+        >
           {/* Header Section */}
           <div className="mb-10">
             <h1 className="page-title text-3xl md:text-4xl lg:text-5xl font-bold text-stone-800 mb-3">ニュース</h1>

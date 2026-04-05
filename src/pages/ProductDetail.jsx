@@ -285,6 +285,14 @@ const ProductDetail = () => {
   const allergensList = getAllergensList(product.allergens);
   const labelText = getLabelText(product.label);
   const descriptionText = hasDisplayValue(product.description) ? product.description.trim() : '';
+  
+  // 在庫警告色の判定
+  const getStockColor = () => {
+    if (product.stock && product.stock <= 5) {
+      return 'text-red-600';
+    }
+    return 'text-stone-700';
+  };
 
  return (
     <div className="min-h-screen bg-stone-50 pt-6">
@@ -318,78 +326,94 @@ const ProductDetail = () => {
               {/* Content Section - 右側（PC時） */}
               {/* md:flex-1 と min-w-0 で横幅を正しく計算させる */}
               <div className="w-full md:flex-1 flex flex-col justify-center min-w-0">
+                {/* 店舗名とカテゴリタグ - 商品名の上 */}
+                {((categoryDisplayName && categoryDisplayName !== '未入力') || 
+                  (vendorDisplayName && vendorDisplayName !== '未入力')) && (
+                  <div className="flex flex-wrap items-center gap-3 mb-6">
+                    {/* カテゴリタグ */}
+                    {categoryDisplayName && categoryDisplayName !== '未入力' && (
+                      <span className="inline-flex items-center bg-gradient-to-r from-amber-100 to-amber-50 text-amber-900 text-xs md:text-sm font-bold px-4 py-2 rounded-full border-2 border-amber-300 shadow-sm">
+                        {categoryDisplayName}
+                      </span>
+                    )}
+                    {/* 店舗名タグ - ピンアイコン付き */}
+                    {vendorDisplayName && vendorDisplayName !== '未入力' && (
+                      <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-100 to-blue-50 text-blue-900 text-xs md:text-sm font-bold px-4 py-2 rounded-full border-2 border-blue-300 shadow-sm">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                        </svg>
+                        {vendorDisplayName}
+                      </span>
+                    )}
+                  </div>
+                )}
+                
                 {/* 商品名とラベル */}
-                <div className="mb-4">
-                  <div className="flex flex-wrap items-start gap-3 mb-2">
-                    <h1 className="text-2xl md:text-3xl font-bold text-stone-900 leading-tight">
+                <div className="mb-6">
+                  <div className="flex flex-wrap items-start gap-3 mb-3">
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 leading-tight">
                       {String(product.name)}
                     </h1>
                     {labelText && (
-                      <span className="text-xs font-bold text-white bg-mos-green px-3 py-1 rounded-full shadow-sm whitespace-nowrap mt-1">
+                      <span className="text-xs md:text-sm font-bold text-white bg-mos-green px-4 py-2 rounded-full shadow-md whitespace-nowrap mt-1">
                         {labelText}
                       </span>
                     )}
                   </div>
-                  
-                  {/* カテゴリー・販売者タグ */}
-                  {((categoryDisplayName && categoryDisplayName !== '未入力') || 
-                    (vendorDisplayName && vendorDisplayName !== '未入力')) && (
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      {categoryDisplayName && categoryDisplayName !== '未入力' && (
-                        <span className="bg-stone-100 text-stone-700 px-3 py-1 rounded-full">
-                          {categoryDisplayName}
-                        </span>
-                      )}
-                      {vendorDisplayName && vendorDisplayName !== '未入力' && (
-                        <span className="bg-stone-100 text-stone-700 px-3 py-1 rounded-full">
-                          {vendorDisplayName}
-                        </span>
-                      )}
-                    </div>
-                  )}
                 </div>
 
                 {/* 商品説明 */}
                 {descriptionText && (
-                  <div className="mb-6">
-                    <p className="text-sm md:text-base text-stone-600 leading-relaxed">
+                  <div className="mb-8">
+                    <p className="text-sm md:text-base text-stone-600 leading-relaxed bg-stone-50 p-4 rounded-lg border-l-4 border-mos-green">
                       {descriptionText}
                     </p>
                   </div>
                 )}
 
-                {/* 価格表示 */}
-                <div className="mb-6">
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border-2 border-mos-green">
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-4xl md:text-5xl font-black text-mos-green">
-                        ¥{product.price ? product.price.toLocaleString() : '-'}
-                      </span>
-                      <span className="text-base text-stone-600 font-medium">税込</span>
-                    </div>
-                    {product.stock && (
-                      <p className="text-xs text-stone-600">在庫: {product.stock}個</p>
-                    )}
+                {/* 価格表示 - 独立した区画 */}
+                <div className="mb-8 px-6 py-6 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-2xl border-2 border-mos-green shadow-md">
+                  <div className="flex items-baseline gap-3 mb-2">
+                    <span className="text-5xl md:text-6xl font-black text-mos-green">
+                      ¥{product.price ? product.price.toLocaleString() : '-'}
+                    </span>
+                    <span className="text-lg md:text-xl text-stone-600 font-semibold">税込</span>
                   </div>
                 </div>
 
+                {/* 在庫情報 - 数量選択の上に配置 */}
+                <div className="mb-8 px-5 py-4 bg-blue-50 rounded-xl border-2 border-blue-200">
+                  <p className={`text-lg md:text-xl font-bold ${getStockColor()}`}>
+                    {product.stock ? (
+                      <>
+                        残り <span className="text-2xl md:text-3xl">{product.stock}</span> 個
+                        {product.stock <= 5 && (
+                          <span className="ml-2 text-xs md:text-sm text-red-600 font-bold">（在庫わずか）</span>
+                        )}
+                      </>
+                    ) : (
+                      '在庫数は不明です'
+                    )}
+                  </p>
+                </div>
+
                 {/* 数量選択 */}
-                <div className="mb-6">
-                  <label className="block text-base font-bold text-stone-900 mb-3">数量</label>
-                  <div className="flex items-center gap-4">
+                <div className="mb-8">
+                  <label className="block text-lg font-bold text-stone-900 mb-4">数量を選択</label>
+                  <div className="flex items-center gap-4 bg-stone-50 p-5 rounded-xl">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-14 h-14 md:w-16 md:h-16 rounded-lg border-2 border-stone-300 text-stone-700 flex items-center justify-center hover:border-mos-green hover:bg-green-50 hover:text-mos-green transition-all duration-200 font-bold text-2xl active:scale-95 touch-manipulation"
+                      className="w-14 h-14 md:w-16 md:h-16 rounded-lg border-2 border-stone-300 text-stone-700 flex items-center justify-center hover:border-mos-green hover:bg-green-50 hover:text-mos-green transition-all duration-200 font-bold text-3xl active:scale-95 touch-manipulation"
                     >
                       −
                     </button>
-                    <span className="text-3xl md:text-4xl font-bold text-stone-900 min-w-[5rem] text-center">
+                    <span className="text-4xl md:text-5xl font-bold text-stone-900 min-w-[5rem] text-center">
                       {quantity}
                     </span>
                     <button
                       onClick={() => setQuantity(Math.min(product.stock || 999, quantity + 1))}
                       disabled={quantity >= (product.stock || 999)}
-                      className="w-14 h-14 md:w-16 md:h-16 rounded-lg border-2 border-stone-300 text-stone-700 flex items-center justify-center hover:border-mos-green hover:bg-green-50 hover:text-mos-green transition-all duration-200 font-bold text-2xl active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation"
+                      className="w-14 h-14 md:w-16 md:h-16 rounded-lg border-2 border-stone-300 text-stone-700 flex items-center justify-center hover:border-mos-green hover:bg-green-50 hover:text-mos-green transition-all duration-200 font-bold text-3xl active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation"
                     >
                       ＋
                     </button>
@@ -397,27 +421,35 @@ const ProductDetail = () => {
                 </div>
 
                 {/* カートに入れるボタン */}
-                <div className="mb-6">
+                <div className="mb-8">
                   <button 
                     onClick={handleAddToCart}
                     disabled={addingToCart}
-                    className="w-full h-16 md:h-20 bg-mos-green hover:bg-[#006b30] text-white font-bold px-8 rounded-xl transition-all duration-200 disabled:opacity-50 text-lg md:text-xl flex items-center justify-center shadow-lg active:scale-[0.98]"
+                    className="w-full h-16 md:h-20 bg-mos-green hover:bg-[#006b30] text-white font-bold px-8 rounded-xl transition-all duration-200 disabled:opacity-50 text-lg md:text-2xl flex items-center justify-center shadow-lg active:scale-[0.98]"
                   >
                     {addingToCart ? "追加中..." : "カートに入れる"}
                   </button>
                 </div>
 
-                {/* アレルゲン情報 */}
+                {/* アレルゲン情報 - 改善版 */}
                 {allergensList.length > 0 && (
-                  <div className="pt-4 border-t border-stone-200">
-                    <h3 className="font-bold text-stone-900 mb-3 text-sm">アレルゲン情報</h3>
-                    <div className="flex flex-wrap gap-2">
+                  <div className="pt-8 border-t-4 border-amber-300">
+                    <h3 className="font-black text-amber-900 mb-4 text-lg md:text-xl flex items-center gap-2">
+                      <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+                      </svg>
+                      アレルゲン情報
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
                       {allergensList.map((allergen, index) => (
-                        <span key={index} className="bg-amber-50 text-amber-800 text-xs px-3 py-1.5 rounded-full border border-amber-200 font-medium">
+                        <span key={index} className="bg-amber-100 text-amber-900 font-bold text-sm md:text-base px-4 py-2 rounded-lg border-2 border-amber-300 shadow-sm">
                           {allergen}
                         </span>
                       ))}
                     </div>
+                    <p className="text-xs md:text-sm text-amber-800 mt-4 italic">
+                      ※ 詳しい成分確認はお店のスタッフへお問い合わせください。
+                    </p>
                   </div>
                 )}
               </div> {/* Content Section 閉じ */}

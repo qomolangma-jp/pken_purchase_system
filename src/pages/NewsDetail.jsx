@@ -64,7 +64,7 @@ const NewsDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-stone-50 pt-20">
+      <div className="min-h-screen flex justify-center items-center bg-stone-50 pt-20 px-8">
         <p className="text-stone-600">読み込み中...</p>
       </div>
     );
@@ -74,14 +74,17 @@ const NewsDetail = () => {
     return (
       <div className="min-h-screen bg-stone-50 pt-20">
         <main className="main-content min-h-screen pb-20 w-full flex flex-col items-center">
-          <div className="w-full max-w-3xl mx-auto px-4 md:px-6 lg:px-8">
+          <div
+            className="w-full max-w-2xl mx-auto"
+            style={{ paddingLeft: 'clamp(24px, 7vw, 120px)', paddingRight: 'clamp(24px, 7vw, 120px)' }}
+          >
             <div className="text-center py-12">
               <p className="text-red-500 mb-6 text-base md:text-lg">
                 {error || 'ニュースが見つかりません'}
               </p>
               <Link
                 to="/news"
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-colors"
+                className="inline-block bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-colors"
               >
                 ニュース一覧に戻る
               </Link>
@@ -95,12 +98,15 @@ const NewsDetail = () => {
   return (
     <div className="min-h-screen bg-stone-50 pt-20">
       <main className="main-content pb-20 w-full flex flex-col items-center">
-        <article className="w-full max-w-3xl mx-auto px-4 md:px-6 lg:px-8">
+        <article
+          className="w-full max-w-2xl mx-auto"
+          style={{ paddingLeft: 'clamp(24px, 7vw, 120px)', paddingRight: 'clamp(24px, 7vw, 120px)' }}
+        >
           {/* Back Button */}
           <div className="mb-8">
             <Link
               to="/news"
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="inline-flex items-center text-stone-700 hover:text-emerald-700 font-semibold transition-colors"
             >
               <span className="mr-2">←</span>
               ニュース一覧に戻る
@@ -151,7 +157,7 @@ const NewsDetail = () => {
           <div className="mt-12 md:mt-16 pt-8 md:pt-10 border-t border-stone-200">
             <Link
               to="/news"
-              className="inline-block w-full md:w-auto text-center bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 md:py-4 px-6 md:px-8 rounded-lg transition-colors duration-200"
+              className="inline-block w-full md:w-auto text-center bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-bold py-3 md:py-4 px-6 md:px-8 rounded-lg transition-colors duration-200"
             >
               ニュース一覧に戻る
             </Link>
