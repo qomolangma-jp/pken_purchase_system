@@ -133,14 +133,26 @@ const Login = () => {
       alert('ログインしました！');
       navigate('/');
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('❌ Login error:', err);
       console.error('エラー詳細:', {
         message: err.message,
         stack: err.stack,
         name: err.name,
+        type: err.constructor.name,
         fullError: err
       });
-      setError(err.message || 'ログイン中にエラーが発生しました');
+      
+      // "Failed to fetch" エラーの詳細を出力
+      if (err.message === 'Failed to fetch') {
+        console.error('⚠️ ネットワークレベルのエラーが発生しました。以下を確認してください：');
+        console.error('  1. バックエンド（https://komapay.p-kmt.com）が起動しているか');
+        console.error('  2. Network タブでリクエストの詳細を確認');
+        console.error('  3. リクエストがタイムアウトしていないか');
+        console.error('  4. CORS エラーが出ていないか');
+        setError('バックエンドに接続できません。バックエンドが起動しているか確認してください。');
+      } else {
+        setError(err.message || 'ログイン中にエラーが発生しました');
+      }
     } finally {
       setLoading(false);
     }
