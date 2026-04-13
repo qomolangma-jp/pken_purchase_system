@@ -98,7 +98,7 @@ const Cart = () => {
       if (!token) return;
       
       const response = await fetch(`${API_BASE_URL}/api/cart/${itemId}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -128,11 +128,12 @@ const Cart = () => {
       if (!token) return;
       
       const response = await fetch(`${API_BASE_URL}/api/cart/${itemId}`, {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({ _method: 'DELETE' }),
       });
 
       const data = await response.json();
@@ -157,11 +158,12 @@ const Cart = () => {
       if (!token) return;
       
       const response = await fetch(`${API_BASE_URL}/api/cart`, {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({ _method: 'DELETE' }),
       });
 
       const data = await response.json();
