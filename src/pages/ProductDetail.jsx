@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { getFavorites, toggleFavorite } from '../utils/favorites';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -20,6 +22,7 @@ const ProductDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [addingToCart, setAddingToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [favorites, setFavorites] = useState([]);
   console.log('✅ State initialized');
 
   const hasDisplayValue = (value) => {
@@ -60,6 +63,11 @@ const ProductDetail = () => {
     }
     return '';
   };
+
+  useEffect(() => {
+    // マウント時にお気に入り情報を読み込む
+    setFavorites(getFavorites());
+  }, []);
 
   useEffect(() => {
     // ガード節: 認証が完了するまで待機（authLoading が false && user が存在するまで）
@@ -180,6 +188,12 @@ const ProductDetail = () => {
     // 商品が変わったら数量を1にリセット
     setQuantity(1);
   }, [id]);
+
+  // お気に入りボタンのクリックハンドラー
+  const handleFavoriteClick = () => {
+    toggleFavorite(parseInt(id));
+    setFavorites(getFavorites()); // 状態を更新
+  };
 
   const handleAddToCart = async () => {
     setAddingToCart(true);
@@ -308,7 +322,7 @@ const ProductDetail = () => {
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10 p-4 md:p-6 lg:p-8">
               {/* Image Section - 左側（PC時） */}
               <div className="w-full md:w-1/2 flex-shrink-0">
-                <div className="bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg overflow-hidden aspect-[4/3]">
+                <div className="relative bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg overflow-hidden aspect-[4/3]">
                   <div className="w-full h-full flex items-center justify-center p-4">
                     {product.image_url ? (
                       <img 
@@ -325,6 +339,22 @@ const ProductDetail = () => {
                       </div>
                     )}
                   </div>
+                  {/* お気に入りボタン（右上） */}
+                  <button
+                    onClick={handleFavoriteClick}
+                    className="absolute top-4 right-4 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white/80 shadow-lg hover:bg-white hover:scale-110 transition-transform active:scale-95"
+                    aria-label="お気に入りに追加"
+                    style={{ backdropFilter: 'blur(4px)' }}
+                  >
+                    <Heart
+                      size={24}
+                      className={`transition-colors ${
+                        favorites.includes(parseInt(id))
+                          ? 'fill-red-500 text-red-500'
+                          : 'text-gray-400'
+                      }`}
+                    />
+                  </button>
                 </div>
               </div>
 

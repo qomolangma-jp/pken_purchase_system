@@ -1,7 +1,8 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { getFavorites, toggleFavorite } from '../utils/favorites';
 
 const PLACEHOLDER_IMAGE = '/no-image.png';
 
@@ -21,11 +22,17 @@ const ProductList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState('すべて');
+  const [favorites, setFavorites] = useState([]);
   const categoryBarRef = useRef(null);
   const hasFetchedRef = useRef(false); // 一度だけ実行するためのフラグ
   
   // 認証状態を取得
   const { loading: authLoading, user } = useAuth();
+  
+  // マウント時にお気に入り情報を読み込む
+  useEffect(() => {
+    setFavorites(getFavorites());
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -115,6 +122,14 @@ const ProductList = () => {
 
   const scrollCategories = (dir) => {
     categoryBarRef.current?.scrollBy({ left: dir * 140, behavior: 'smooth' });
+  };
+
+  // お気に入りボタンのクリックハンドラー
+  const handleFavoriteClick = (e, productId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(productId);
+    setFavorites(getFavorites()); // 状態を更新
   };
 
   if (loading) {
@@ -232,6 +247,22 @@ const ProductList = () => {
                       e.currentTarget.src = PLACEHOLDER_IMAGE;
                     }}
                   />
+                  {/* お気に入りボタン（右上） */}
+                  <button
+                    onClick={(e) => handleFavoriteClick(e, product.id)}
+                    className="absolute top-2 right-2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/80 shadow-md hover:bg-white hover:scale-110 transition-transform active:scale-95"
+                    aria-label="お気に入りに追加"
+                    style={{ backdropFilter: 'blur(4px)' }}
+                  >
+                    <Heart
+                      size={20}
+                      className={`transition-colors ${
+                        favorites.includes(product.id)
+                          ? 'fill-red-500 text-red-500'
+                          : 'text-gray-400'
+                      }`}
+                    />
+                  </button>
                   {/* ドロップリボン（画像左上角） */}
                   {product.label && (
                     <div
