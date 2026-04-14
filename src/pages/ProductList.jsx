@@ -117,7 +117,7 @@ const ProductList = () => {
   // 表示商品
   const displayedProducts = useMemo(() => {
     if (activeCategory === 'すべて') {
-      // お気に入りを上に出すようにソート
+      // お気に入りを上に出すようにソート（favoritesに依存させない=リロードまで順序が変わらない）
       const favorited = products.filter(p => favorites.includes(p.id));
       const notFavorited = products.filter(p => !favorites.includes(p.id));
       return [...favorited, ...notFavorited];
@@ -126,10 +126,19 @@ const ProductList = () => {
       return products.filter(p => favorites.includes(p.id));
     }
     return products.filter(p => p.category_name === activeCategory);
-  }, [products, activeCategory, favorites]);
+  }, [products, activeCategory]);
 
   const scrollCategories = (dir) => {
     categoryBarRef.current?.scrollBy({ left: dir * 140, behavior: 'smooth' });
+  };
+
+  // カテゴリ変更ハンドラー
+  const handleCategoryChange = (category) => {
+    setActiveCategory(category);
+    // お気に入りタブを選択した時のみ、最新の状態を取得
+    if (category === 'お気に入り') {
+      setFavorites(getFavorites());
+    }
   };
 
   // お気に入りボタンのクリックハンドラー
@@ -137,7 +146,7 @@ const ProductList = () => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(productId);
-    setFavorites(getFavorites()); // 状態を更新
+    // setFavorites は呼ばない = リロードまで順序が変わらない
   };
 
   if (loading) {
@@ -175,7 +184,7 @@ const ProductList = () => {
           {categories.map(cat => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => handleCategoryChange(cat)}
               className="flex-shrink-0 px-4 text-sm transition-colors"
               style={{
                 padding: '7px 14px',
