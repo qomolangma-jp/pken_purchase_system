@@ -150,7 +150,8 @@ const ProductList = () => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(productId);
-    // setFavorites は呼ばない = リロードまで順序が変わらない
+    // ハートの色を更新（displayedProductsの順序は変わらない）
+    setFavorites(getFavorites());
   };
 
   if (loading) {
