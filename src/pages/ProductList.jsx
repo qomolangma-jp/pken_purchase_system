@@ -116,16 +116,20 @@ const ProductList = () => {
 
   // 表示商品
   const displayedProducts = useMemo(() => {
+    let filtered;
+    
     if (activeCategory === 'すべて') {
-      // お気に入りを上に出すようにソート（favoritesに依存させない=リロードまで順序が変わらない）
-      const favorited = products.filter(p => favorites.includes(p.id));
-      const notFavorited = products.filter(p => !favorites.includes(p.id));
-      return [...favorited, ...notFavorited];
-    }
-    if (activeCategory === 'お気に入り') {
+      filtered = products;
+    } else if (activeCategory === 'お気に入り') {
       return products.filter(p => favorites.includes(p.id));
+    } else {
+      filtered = products.filter(p => p.category_name === activeCategory);
     }
-    return products.filter(p => p.category_name === activeCategory);
+    
+    // お気に入りを上に出すようにソート（『お気に入り』タブ以外）
+    const favorited = filtered.filter(p => favorites.includes(p.id));
+    const notFavorited = filtered.filter(p => !favorites.includes(p.id));
+    return [...favorited, ...notFavorited];
   }, [products, activeCategory]);
 
   const scrollCategories = (dir) => {
