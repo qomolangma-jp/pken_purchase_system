@@ -4,7 +4,7 @@ import { Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
 const ProductDetail = () => {
   console.log('✅ ProductDetail component is rendering');

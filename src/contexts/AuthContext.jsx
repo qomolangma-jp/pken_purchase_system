@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/cart`, {
+      const response = await fetch(`${(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')}/api/cart`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ export const AuthProvider = ({ children }) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒タイムアウト
 
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
         console.log('認証API - ベースURL:', apiBaseUrl);
 
         // まず /api/auth/line-login を試す（トークン生成用）
