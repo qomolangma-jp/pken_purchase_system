@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import liff from '@line/liff';
+import { getLineProfile } from '../services/lineAuth';
 
 const AuthContext = createContext();
 
@@ -175,7 +176,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       // LINEプロフィールを取得
-      const profile = await liff.getProfile();
+      const profile = await getLineProfile();
       const lineId = profile.userId;
       console.log('LINEプロフィール取得成功:', { lineId, displayName: profile.displayName });
 

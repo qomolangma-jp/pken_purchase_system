@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getLineProfile } from '../services/lineAuth';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
@@ -26,7 +27,7 @@ const Register = () => {
     const getLineId = async () => {
       if (liffInitialized && liff.isLoggedIn()) {
         try {
-          const profile = await liff.getProfile();
+          const profile = await getLineProfile();
           setLineId(profile.userId);
           console.log('LINE ID取得:', profile.userId);
         } catch (err) {
