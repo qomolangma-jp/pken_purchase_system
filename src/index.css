@@ -7,39 +7,41 @@
 }
 
 /* Reset & Base Styles */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+@layer base {
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-html, body {
-    max-width: 100vw;
-}
+    html, body {
+        max-width: 100vw;
+    }
 
-#root {
-    overflow-x: hidden;
-}
+    #root {
+        overflow-x: hidden;
+    }
 
-body {
-    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-    background-color: #fafaf9; /* stone-50 */
-    color: #292524; /* stone-800 */
-    line-height: 1.5;
-}
+    body {
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+        background-color: #fafaf9; /* stone-50 */
+        color: #292524; /* stone-800 */
+        line-height: 1.5;
+    }
 
-a {
-    text-decoration: none;
-    color: inherit;
-}
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
 
-ul {
-    list-style: none;
-}
+    ul {
+        list-style: none;
+    }
 
-img {
-    max-width: 100%;
-    height: auto;
+    img {
+        max-width: 100%;
+        height: auto;
+    }
 }
 
 /* Layout Utilities */
