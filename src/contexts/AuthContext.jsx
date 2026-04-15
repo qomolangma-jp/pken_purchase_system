@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import liff from '@line/liff';
 import { getLineProfile } from '../services/lineAuth';
-
+console.log("VITE_DEBUG_MOCKの値:", import.meta.env.VITE_DEBUG_MOCK);
 const AuthContext = createContext();
 
 export const useAuth = () => {
