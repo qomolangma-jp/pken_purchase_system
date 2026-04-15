@@ -212,12 +212,18 @@ export const AuthProvider = ({ children }) => {
         let apiUrl = `${apiBaseUrl}/api/auth/line-login`;
         console.log('認証API - 試行URL:', apiUrl);
 
+        // モックモードでユーザーID 2 を強制する場合のボディ
+        const isMockEnabled = import.meta.env.VITE_DEBUG_MOCK === 'true';
+        const requestBody = isMockEnabled 
+          ? { user_id: 2 } // ユーザーIDを直接指定（バックエンドが対応している前提）
+          : { line_id: lineId };
+
         let response = await fetch(apiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ line_id: lineId }),
+          body: JSON.stringify(requestBody),
           signal: controller.signal,
         });
 
@@ -236,7 +242,7 @@ export const AuthProvider = ({ children }) => {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ line_id: lineId }),
+            body: JSON.stringify(requestBody),
             signal: controller.signal,
           });
 
