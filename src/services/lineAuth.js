@@ -13,10 +13,10 @@ export const getLineProfile = async () => {
   if (isMockEnabled) {
     console.warn('⚠️ LINE LIFF Mock Mode is ENABLED.');
     
-    // モック用のテストユーザー情報
+    // モック用のテストユーザー情報 (ユーザーID: 2 を想定)
     return {
-      userId: 'U1234567890abcdef1234567890abcdef',
-      displayName: 'テストユーザー (MOCK)',
+      userId: '2',
+      displayName: 'テストユーザー (MOCK ID:2)',
       pictureUrl: 'https://profile.line-scdn.net/mock-image-url'
     };
   }
