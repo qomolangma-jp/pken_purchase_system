@@ -2,17 +2,16 @@ import liff from '@line/liff';
 
 /**
  * LINEプロフィール情報を取得する共通関数
- * 開発環境かつモックモードが有効な場合は、テスト用のユーザー情報を返します。
+ * モックモードが有効な場合は、テスト用のユーザー情報を返します。
  * 
  * @returns {Promise<{userId: string, displayName: string, pictureUrl: string}>}
  */
 export const getLineProfile = async () => {
   // 環境変数の確認 (Vite では import.meta.env を使用)
-  const isDev = import.meta.env.MODE === 'development';
   const isMockEnabled = import.meta.env.VITE_DEBUG_MOCK === 'true';
 
-  if (isDev && isMockEnabled) {
-    console.warn('⚠️ LINE LIFF Mock Mode is ENABLED. Returning test user profile.');
+  if (isMockEnabled) {
+    console.warn('⚠️ LINE LIFF Mock Mode is ENABLED.');
     
     // モック用のテストユーザー情報
     return {

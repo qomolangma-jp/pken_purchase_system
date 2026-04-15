@@ -76,6 +76,26 @@ export const AuthProvider = ({ children }) => {
 
   const initializeLiff = async () => {
     try {
+      // モックモードの判定
+      const isMockEnabled = import.meta.env.VITE_DEBUG_MOCK === 'true';
+
+      if (isMockEnabled) {
+        console.warn('⚠️ LINE LIFF Mock Mode is ENABLED. Skipping liff.init().');
+        // モックモード時はストレージから復元、または getLineProfile() での取得に任せる
+        // ここでは restoreAuthenticationFromStorage を呼び出して既存のセッションがあれば復元
+        await restoreAuthenticationFromStorage();
+        
+        // 認証情報がなければ、getLineProfile() を使用して強制的にログイン状態にする
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          console.log('認証情報がないため、モックユーザーで認証を開始します');
+          await checkAndAuthenticateUser();
+        }
+        
+        setLoading(false);
+        return;
+      }
+
       // LIFF IDは環境変数から取得（後で設定が必要）
       const liffId = import.meta.env.VITE_LIFF_ID;
       
