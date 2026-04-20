@@ -316,10 +316,10 @@ const ProductDetail = () => {
  return (
     <div className="min-h-screen bg-stone-50 pt-6">
       {/* Main Content */}
-      <main className="main-content pb-20 product-detail-container">
-        <div className="product-detail-content">
+      <main className="main-content pb-20 product-detail-container px-2 sm:px-4 lg:px-6">
+        <div className="w-full max-w-4xl mx-auto">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10 p-4 md:p-6 lg:p-8">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6 lg:gap-8 p-4 md:p-5 lg:p-6">
               {/* Image Section - 左側（PC時） */}
               <div className="w-full md:w-1/2 flex-shrink-0">
                 <div className="relative bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg overflow-hidden aspect-[4/3]">
