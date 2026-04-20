@@ -212,11 +212,8 @@ export const AuthProvider = ({ children }) => {
         let apiUrl = `${apiBaseUrl}/api/auth/line-login`;
         console.log('認証API - 試行URL:', apiUrl);
 
-        // モックモードでユーザーID 2 を強制する場合のボディ
-        const isMockEnabled = import.meta.env.VITE_DEBUG_MOCK === 'true';
-        const requestBody = isMockEnabled 
-          ? { user_id: 2 } // ユーザーIDを直接指定（バックエンドが対応している前提）
-          : { line_id: lineId };
+        // リクエストボディ（モック時も通常のLINE ID送信を使用）
+        const requestBody = { line_id: lineId };
 
         let response = await fetch(apiUrl, {
           method: 'POST',
