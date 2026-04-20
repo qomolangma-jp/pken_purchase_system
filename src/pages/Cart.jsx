@@ -40,6 +40,7 @@ const Cart = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
       });
 
       console.log('カートレスポンス:', response.status);
@@ -105,8 +106,7 @@ const Cart = () => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ quantity: newQuantity }),
+        },        credentials: 'include',        body: JSON.stringify({ quantity: newQuantity }),
       });
 
       console.log('📦 カート更新レスポンス:', { status: response.status, url });
@@ -141,6 +141,7 @@ const Cart = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
       });
 
       console.log('🗑️ カート削除レスポンス:', { status: response.status, url });
@@ -175,6 +176,7 @@ const Cart = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
       });
 
       console.log('🗑️ カート全削除レスポンス:', { status: response.status, url });

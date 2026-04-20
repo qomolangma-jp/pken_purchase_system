@@ -39,6 +39,7 @@ const PurchaseHistory = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
       });
 
       console.log('購入履歴レスポンス:', response.status);
