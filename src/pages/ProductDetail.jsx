@@ -314,16 +314,16 @@ const ProductDetail = () => {
   };
 
  return (
-    <div className="min-h-screen bg-stone-50 pt-8 md:pt-12">
+    <div className="min-h-screen bg-white md:bg-stone-50 md:pt-8 lg:pt-12">
       {/* Main Content */}
-      <main className="main-content pb-20 product-detail-container px-4 sm:px-6 lg:px-8">
+      <main className="main-content pb-24 md:pb-20 product-detail-container md:px-6 lg:px-8 pt-0">
         <div className="w-full max-w-6xl mx-auto">
-          <div className="bg-white rounded-3xl shadow-sm overflow-hidden border border-stone-100">
-            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 xl:gap-16 p-6 md:p-10 lg:p-12 xl:p-16">
+          <div className="bg-white sm:rounded-3xl sm:shadow-sm overflow-hidden sm:border sm:border-stone-100">
+            <div className="flex flex-col lg:flex-row gap-5 md:gap-8 lg:gap-12 xl:gap-16 sm:p-6 md:p-10 lg:p-12 xl:p-16">
               {/* Image Section - 左側（PC時） */}
               <div className="w-full md:w-1/2 flex-shrink-0">
-                <div className="relative bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg overflow-hidden aspect-[4/3]">
-                  <div className="w-full h-full flex items-center justify-center p-4">
+                <div className="relative bg-stone-50 md:bg-gradient-to-br md:from-stone-100 md:to-stone-200 sm:rounded-lg overflow-hidden aspect-square sm:aspect-[4/3]">
+                  <div className="w-full h-full flex items-center justify-center md:p-4">
                     {product.image_url ? (
                       <img 
                         src={product.image_url} 
@@ -360,7 +360,7 @@ const ProductDetail = () => {
 
               {/* Content Section - 右側（PC時） */}
               {/* md:flex-1 と min-w-0 で横幅を正しく計算させる */}
-              <div className="w-full md:flex-1 flex flex-col justify-center min-w-0">
+              <div className="w-full md:flex-1 flex flex-col justify-center min-w-0 px-4 sm:px-0">
                 {/* 店舗名とカテゴリタグ - 商品名の上 */}
                 {(categoryDisplayName || vendorDisplayName) && (
                   <div className="flex flex-wrap items-center gap-4 mb-8">
@@ -406,21 +406,21 @@ const ProductDetail = () => {
                 )}
 
                 {/* 価格表示 - 独立した区画 */}
-                <div className="mb-8 px-6 py-6 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-2xl border-2 border-mos-green shadow-md">
-                  <div className="flex items-baseline gap-3 mb-2">
-                    <span className="text-5xl md:text-6xl font-black text-mos-green">
+                <div className="mb-6 md:mb-8 px-4 py-4 md:px-6 md:py-6 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-2xl border md:border-2 border-mos-green shadow-sm md:shadow-md">
+                  <div className="flex items-baseline gap-1 md:gap-3 mb-1">
+                    <span className="text-4xl sm:text-5xl md:text-6xl font-black text-mos-green">
                       ¥{product.price ? product.price.toLocaleString() : '-'}
                     </span>
-                    <span className="text-lg md:text-xl text-stone-600 font-semibold">税込</span>
+                    <span className="text-base sm:text-lg md:text-xl text-stone-600 font-semibold">税込</span>
                   </div>
                 </div>
 
                 {/* 在庫情報 - 数量選択の上に配置 */}
-                <div className="mb-8 px-5 py-4 bg-blue-50 rounded-xl border-2 border-blue-200">
-                  <p className={`text-lg md:text-xl font-bold ${getStockColor()}`}>
+                <div className="mb-6 md:mb-8 px-4 py-3 md:px-5 md:py-4 bg-blue-50 rounded-xl border border-blue-200 md:border-2">
+                  <p className={`text-base md:text-xl font-bold ${getStockColor()}`}>
                     {product.stock !== undefined && product.stock !== null ? (
                       <>
-                        残り <span className="text-2xl md:text-3xl">{product.stock}</span> 個
+                        残り <span className="text-xl md:text-3xl">{product.stock}</span> 個
                         {product.stock <= 5 && product.stock > 0 && (
                           <span className="ml-2 text-xs md:text-sm text-red-600 font-bold">（在庫わずか）</span>
                         )}
@@ -432,22 +432,22 @@ const ProductDetail = () => {
                 </div>
 
                 {/* 数量選択 */}
-                <div className="mb-8">
-                  <label className="block text-lg font-bold text-stone-900 mb-4">数量を選択</label>
-                  <div className="flex items-center gap-4 bg-stone-50 p-5 rounded-xl">
+                <div className="mb-6 md:mb-8">
+                  <label className="block text-base md:text-lg font-bold text-stone-900 mb-3 md:mb-4">数量を選択</label>
+                  <div className="flex items-center gap-3 md:gap-4 bg-stone-50 p-3 md:p-5 rounded-xl">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-14 h-14 md:w-16 md:h-16 rounded-lg border-2 border-stone-300 text-stone-700 flex items-center justify-center hover:border-mos-green hover:bg-green-50 hover:text-mos-green transition-all duration-200 font-bold text-3xl active:scale-95 touch-manipulation"
+                      className="w-12 h-12 md:w-16 md:h-16 rounded-lg border-2 border-stone-300 text-stone-700 flex items-center justify-center hover:border-mos-green hover:bg-green-50 hover:text-mos-green transition-all duration-200 font-bold text-2xl md:text-3xl active:scale-95 touch-manipulation"
                     >
                       −
                     </button>
-                    <span className="text-4xl md:text-5xl font-bold text-stone-900 min-w-[5rem] text-center">
+                    <span className="text-3xl md:text-5xl font-bold text-stone-900 min-w-[4rem] md:min-w-[5rem] text-center">
                       {quantity}
                     </span>
                     <button
                       onClick={() => setQuantity(Math.min(product.stock || 999, quantity + 1))}
                       disabled={quantity >= (product.stock || 999)}
-                      className="w-14 h-14 md:w-16 md:h-16 rounded-lg border-2 border-stone-300 text-stone-700 flex items-center justify-center hover:border-mos-green hover:bg-green-50 hover:text-mos-green transition-all duration-200 font-bold text-3xl active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation"
+                      className="w-12 h-12 md:w-16 md:h-16 rounded-lg border-2 border-stone-300 text-stone-700 flex items-center justify-center hover:border-mos-green hover:bg-green-50 hover:text-mos-green transition-all duration-200 font-bold text-2xl md:text-3xl active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation"
                     >
                       ＋
                     </button>
