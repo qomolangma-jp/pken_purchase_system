@@ -78,10 +78,7 @@ const News = () => {
     <div className="min-h-screen bg-stone-50 pt-6">
       {/* Main Content */}
       <main className="main-content min-h-screen pb-20 w-full flex flex-col items-center">
-        <div
-          className="w-full max-w-4xl mx-auto"
-          style={{ paddingLeft: 'clamp(24px, 7vw, 120px)', paddingRight: 'clamp(24px, 7vw, 120px)' }}
-        >
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Section */}
           <div className="mb-10">
             <h1 className="page-title text-3xl md:text-4xl lg:text-5xl font-bold text-stone-800 mb-3">ニュース</h1>
