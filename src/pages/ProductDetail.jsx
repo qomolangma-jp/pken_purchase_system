@@ -316,8 +316,8 @@ const ProductDetail = () => {
  return (
     <div className="min-h-screen bg-stone-50 pt-6">
       {/* Main Content */}
-      <main className="main-content pb-20 product-detail-container">
-        <div className="product-detail-content">
+      <main className="main-content pb-20 product-detail-container px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-5xl mx-auto">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10 p-4 md:p-6 lg:p-8">
               {/* Image Section - 左側（PC時） */}

@@ -74,10 +74,7 @@ const NewsDetail = () => {
     return (
       <div className="min-h-screen bg-stone-50 pt-20">
         <main className="main-content min-h-screen pb-20 w-full flex flex-col items-center">
-          <div
-            className="w-full max-w-2xl mx-auto"
-            style={{ paddingLeft: 'clamp(24px, 7vw, 120px)', paddingRight: 'clamp(24px, 7vw, 120px)' }}
-          >
+          <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center py-12">
               <p className="text-red-500 mb-6 text-base md:text-lg">
                 {error || 'ニュースが見つかりません'}
@@ -98,10 +95,7 @@ const NewsDetail = () => {
   return (
     <div className="min-h-screen bg-stone-50 pt-20">
       <main className="main-content pb-20 w-full flex flex-col items-center">
-        <article
-          className="w-full max-w-2xl mx-auto"
-          style={{ paddingLeft: 'clamp(24px, 7vw, 120px)', paddingRight: 'clamp(24px, 7vw, 120px)' }}
-        >
+        <article className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Button */}
           <div className="mb-8">
             <Link
