@@ -88,7 +88,8 @@ export const AuthProvider = ({ children }) => {
         
         // 認証情報がなければ、getLineProfile() を使用して強制的にログイン状態にする
         const token = localStorage.getItem('authToken');
-        if (!token) {
+        const storedUser = sessionStorage.getItem('user');
+        if (!token || !storedUser) {
           console.log('認証情報がないため、モックユーザーで認証を開始します');
           await checkAndAuthenticateUser();
         }
