@@ -256,17 +256,8 @@ const News = () => {
                         />
                       </div>
                     )}
-                    <Link
-                      to={isEditMode ? '#' : `/news/${newsItem.id}`}
-                      onClick={(e) => isEditMode && e.preventDefault()}
-                      className={`block flex-grow bg-white rounded-lg border transition-all duration-300 overflow-hidden relative ${
-                        selectedIds.includes(newsItem.id) 
-                          ? 'border-green-300 bg-green-50/50 shadow-inner' 
-                          : 'border-stone-200 hover:shadow-md hover:border-stone-300'
-                      } ${!isEditMode && 'hover:-translate-y-1'}`}
-                    >
-                      {!isEditMode && (
-                        /* Delete Button */
+                      {isEditMode ? (
+                        /* Delete Button (Only in Edit Mode) */
                         <button
                           onClick={(e) => handleDelete(e, newsItem.id)}
                           className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-red-500 transition-colors bg-white/80 rounded-full hover:bg-stone-50"
@@ -276,7 +267,7 @@ const News = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
-                      )}
+                      ) : null}
 
                       <article className="p-4 md:p-6 lg:p-7" onClick={() => isEditMode && toggleSelect(newsItem.id)}>
                         {/* Top Info Row */}
