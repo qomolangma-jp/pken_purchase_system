@@ -239,14 +239,59 @@ const ProductDetail = () => {
       console.log('カート追加リクエスト:', requestData);
       console.log('リクエストURL:', `${API_BASE_URL}/api/cart/add`);
 
-      const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestData),
-      });
+      // 既存のカートアイテムを確認（重複チェック）
+      let existingCartItem = null;
+      try {
+        const cartResponse = await fetch(`${API_BASE_URL}/api/cart`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (cartResponse.ok) {
+          const cartResult = await cartResponse.json();
+          const items = cartResult.data?.items || cartResult;
+          if (Array.isArray(items)) {
+            existingCartItem = items.find(item => 
+              (item.product?.id || item.product_id) === parseInt(id)
+            );
+          }
+        }
+      } catch (e) {
+        console.error('既存カート検索エラー:', e);
+      }
+
+      let response;
+      if (existingCartItem) {
+        // すでにカートに存在する場合、数量を更新
+        const newTotalQuantity = existingCartItem.quantity + quantity;
+        
+        // 在庫チェック
+        if (product.stock !== undefined && product.stock !== null && newTotalQuantity > product.stock) {
+          throw new Error(`在庫数（${product.stock}個）を超えるため追加できません。すでにカートに${existingCartItem.quantity}個入っています。`);
+        }
+
+        console.log(`既存の商品を発見: ID ${existingCartItem.id}, 数量更新 ${existingCartItem.quantity} -> ${newTotalQuantity}`);
+        response = await fetch(`${API_BASE_URL}/api/cart/${existingCartItem.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ quantity: newTotalQuantity }),
+        });
+      } else {
+        // 在庫チェック（新規追加時）
+        if (product.stock !== undefined && product.stock !== null && quantity > product.stock) {
+          throw new Error(`在庫数（${product.stock}個）を超える数量は指定できません。`);
+        }
+
+        response = await fetch(`${API_BASE_URL}/api/cart/add`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(requestData),
+        });
+      }
 
       console.log('レスポンスステータス:', response.status);
       console.log('レスポンスヘッダー:', response.headers.get('content-type'));

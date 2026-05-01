@@ -73,10 +73,10 @@ const Cart = () => {
       if (data.success && data.data && Array.isArray(data.data.items)) {
         console.log('カートアイテム数:', data.data.items.length);
         console.log('合計金額:', data.data.total);
-        setCartItems(data.data.items);
+        setCartItems(mergeCartItems(data.data.items));
       } else if (Array.isArray(data)) {
         console.log('カートアイテム数:', data.length);
-        setCartItems(data);
+        setCartItems(mergeCartItems(data));
       } else {
         console.warn('カートデータが期待する構造ではありません:', data);
         setCartItems([]);
@@ -93,8 +93,44 @@ const Cart = () => {
     }
   };
 
-  const updateQuantity = async (itemId, newQuantity) => {
+  /**
+   * カート内の重複商品をIDごとに統合する
+   */
+  const mergeCartItems = (items) => {
+    if (!Array.isArray(items)) return [];
+    
+    const mergedMap = new Map();
+    
+    items.forEach(item => {
+      const productId = item.product?.id || item.product_id || item.id;
+      if (mergedMap.has(productId)) {
+        const existingItem = mergedMap.get(productId);
+        // 数量を合算
+        existingItem.quantity += (item.quantity || 1);
+        // 重複があった場合、サーバー側でも後でクリーンアップが必要かもしれないが
+        // フロントエンドの表示上はここでまとめる
+        console.log(`表示上で商品を統合: ID ${productId}, 新しい数量: ${existingItem.quantity}`);
+      } else {
+        // Deep copy to avoid mutating original data
+        mergedMap.set(productId, { ...item });
+      }
+    });
+    
+    return Array.from(mergedMap.values());
+  };
+
+  const updateQuantity = async (itemId, newQuantity, maxStock = 999) => {
     if (newQuantity < 1) return;
+    
+    // 在庫チェック
+    if (newQuantity > maxStock) {
+      openModal({
+        type: 'warning',
+        title: '在庫数エラー',
+        message: `在庫数（${maxStock}個）を超えて注文することはできません。`
+      });
+      return;
+    }
 
     try {
       const token = localStorage.getItem('authToken');
@@ -315,7 +351,7 @@ const Cart = () => {
                             <span className="text-xs md:text-sm text-stone-600">数量:</span>
                             <div className="flex items-center gap-1 md:gap-1.5 bg-stone-100 rounded">
                               <button
-                                onClick={() => updateQuantity(item.id, Math.max(1, quantity - 1))}
+                                onClick={() => updateQuantity(item.id, Math.max(1, quantity - 1), product.stock || 999)}
                                 disabled={quantity <= 1}
                                 className="w-8 h-8 md:w-10 md:h-10 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
@@ -323,7 +359,7 @@ const Cart = () => {
                               </button>
                               <span className="w-6 md:w-8 text-center text-sm md:text-base font-semibold">{quantity}</span>
                               <button
-                                onClick={() => updateQuantity(item.id, Math.min(product.stock || 999, quantity + 1))}
+                                onClick={() => updateQuantity(item.id, quantity + 1, product.stock || 999)}
                                 disabled={quantity >= (product.stock || 999)}
                                 className="w-8 h-8 md:w-10 md:h-10 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
