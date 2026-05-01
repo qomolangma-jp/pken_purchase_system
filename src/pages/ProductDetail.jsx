@@ -23,6 +23,7 @@ const ProductDetail = () => {
   const [addingToCart, setAddingToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [favorites, setFavorites] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   console.log('✅ State initialized');
 
   const hasDisplayValue = (value) => {
@@ -185,8 +186,9 @@ const ProductDetail = () => {
 
     fetchProductDetail();
     
-    // 商品が変わったら数量を1にリセット
+    // 商品が変わったら数量と画像インデックスをリセット
     setQuantity(1);
+    setCurrentImageIndex(0);
   }, [id]);
 
   // お気に入りボタンのクリックハンドラー
@@ -305,6 +307,12 @@ const ProductDetail = () => {
   const labelText = getLabelText(product.label);
   const descriptionText = hasDisplayValue(product.description) ? product.description.trim() : '';
   
+  // 画像リストの正規化
+  const allImages = [
+    product.image_url,
+    ...(Array.isArray(product.additional_image_urls) ? product.additional_image_urls : [])
+  ].filter(url => hasDisplayValue(url));
+
   // 在庫警告色の判定
   const getStockColor = () => {
     if (product.stock && product.stock <= 5) {
@@ -323,12 +331,13 @@ const ProductDetail = () => {
               {/* Image Section - 左側（PC時） */}
               <div className="w-full md:w-1/2 flex-shrink-0">
                 <div className="relative bg-stone-50 md:bg-gradient-to-br md:from-stone-100 md:to-stone-200 sm:rounded-lg overflow-hidden aspect-square sm:aspect-[4/3]">
-                  <div className="w-full h-full flex items-center justify-center md:p-4">
-                    {product.image_url ? (
+                  <div className="w-full h-full flex items-center justify-center md:p-4 transition-opacity duration-300">
+                    {allImages.length > 0 ? (
                       <img 
-                        src={product.image_url} 
-                        alt={product.name} 
-                        className="w-full h-full object-contain drop-shadow-2xl" 
+                        key={allImages[currentImageIndex]}
+                        src={allImages[currentImageIndex]} 
+                        alt={`${product.name} - ${currentImageIndex + 1}`} 
+                        className="w-full h-full object-contain drop-shadow-2xl animate-fade-in" 
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-stone-400">
@@ -356,6 +365,29 @@ const ProductDetail = () => {
                     />
                   </button>
                 </div>
+
+                {/* Thumbnail List */}
+                {allImages.length > 1 && (
+                  <div className="flex flex-wrap gap-2 mt-4 px-2 sm:px-0">
+                    {allImages.map((imgUrl, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`w-16 h-16 sm:w-20 sm:h-20 rounded-md overflow-hidden border-2 transition-all duration-200 bg-white ${
+                          currentImageIndex === index 
+                            ? 'border-mos-green shadow-md scale-105' 
+                            : 'border-transparent hover:border-stone-300 opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        <img 
+                          src={imgUrl} 
+                          alt={`${product.name} thumbnail ${index + 1}`} 
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Content Section - 右側（PC時） */}
