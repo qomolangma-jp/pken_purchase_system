@@ -307,18 +307,20 @@ const ProductDetail = () => {
   const labelText = getLabelText(product.label);
   const descriptionText = hasDisplayValue(product.description) ? product.description.trim() : '';
   
-  // 画像リストの正規化（存在チェックを強化）
-  const allImages = [];
-  if (hasDisplayValue(product.image_url)) {
-    allImages.push(product.image_url.trim());
+  // 画像リストの生成ロジックの修正（安全に配列を作成）
+  const images = [];
+  // メイン画像がある場合は追加
+  if (product.image_url && product.image_url.trim() !== "") {
+    images.push(product.image_url);
   }
+  // 追加画像配列が存在する場合のみ結合（存在しない場合もエラーにしない）
   if (Array.isArray(product.additional_image_urls)) {
-    product.additional_image_urls.forEach(url => {
-      if (hasDisplayValue(url)) {
-        allImages.push(url.trim());
-      }
-    });
+    // 空文字を除外して追加
+    const validAdditionalImages = product.additional_image_urls.filter(url => typeof url === 'string' && url.trim() !== "");
+    images.push(...validAdditionalImages);
   }
+  
+  const allImages = images;
 
   console.log('🖼️ Normalized images list:', allImages);
   console.log('🖼️ Selected image URL:', allImages[currentImageIndex]);
