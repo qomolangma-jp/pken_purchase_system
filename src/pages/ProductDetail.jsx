@@ -286,21 +286,32 @@ const ProductDetail = () => {
       // カート数を更新
       await fetchCartCount();
 
+      // デバッグ用ログ: モーダルに渡す直前のデータ
+      console.log('📦 モーダル表示用データ:', {
+        name: product.name,
+        price: product.price,
+        quantity: quantity,
+        images: product.images,
+        first_image_url: product.images?.[0]?.image_url,
+        absolute_url: toAbsoluteUrl(product.images?.[0]?.image_url)
+      });
+
       // リッチなカート追加完了モーダルを表示
       openModal({
         type: 'confirm',
         title: '商品をカートに追加しました',
         data: (
           <div className="flex items-center gap-4 py-2">
-            <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 relative animate-pulse">
+            <div className="w-16 h-16 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 relative animate-pulse">
               <img 
                 src={toAbsoluteUrl(product.images?.[0]?.image_url)} 
                 alt={product.name} 
-                className="w-full h-full object-cover relative z-10"
+                className="w-full h-full object-cover relative z-10 rounded-2xl"
                 onLoad={(e) => {
                   e.target.parentElement.classList.remove('animate-pulse', 'bg-gray-200');
                 }}
                 onError={(e) => {
+                  console.error('❌ 画像読み込み失敗:', e.target.src);
                   e.target.onerror = null;
                   e.target.src = 'https://via.placeholder.com/150?text=No+Image';
                   e.target.parentElement.classList.remove('animate-pulse');
