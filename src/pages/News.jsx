@@ -256,6 +256,15 @@ const News = () => {
                         />
                       </div>
                     )}
+                    <Link
+                      to={isEditMode ? '#' : `/news/${newsItem.id}`}
+                      onClick={(e) => isEditMode && e.preventDefault()}
+                      className={`block flex-grow bg-white rounded-lg border transition-all duration-300 overflow-hidden relative ${
+                        selectedIds.includes(newsItem.id) 
+                          ? 'border-green-300 bg-green-50/50 shadow-inner' 
+                          : 'border-stone-200 hover:shadow-md hover:border-stone-300'
+                      } ${!isEditMode && 'hover:-translate-y-1'}`}
+                    >
                       {isEditMode ? (
                         /* Delete Button (Only in Edit Mode) */
                         <button
