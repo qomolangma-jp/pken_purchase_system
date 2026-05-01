@@ -307,11 +307,18 @@ const ProductDetail = () => {
   const labelText = getLabelText(product.label);
   const descriptionText = hasDisplayValue(product.description) ? product.description.trim() : '';
   
-  // 画像リストの正規化
-  const allImages = [
-    product.image_url,
-    ...(Array.isArray(product.additional_image_urls) ? product.additional_image_urls : [])
-  ].filter(url => typeof url === 'string' && url.trim() !== "");
+  // 画像リストの正規化（存在チェックを強化）
+  const allImages = [];
+  if (hasDisplayValue(product.image_url)) {
+    allImages.push(product.image_url.trim());
+  }
+  if (Array.isArray(product.additional_image_urls)) {
+    product.additional_image_urls.forEach(url => {
+      if (hasDisplayValue(url)) {
+        allImages.push(url.trim());
+      }
+    });
+  }
 
   console.log('🖼️ Normalized images list:', allImages);
   console.log('🖼️ Selected image URL:', allImages[currentImageIndex]);
