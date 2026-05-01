@@ -292,14 +292,18 @@ const ProductDetail = () => {
         title: '商品をカートに追加しました',
         data: (
           <div className="flex items-center gap-4 py-2">
-            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 relative animate-pulse">
               <img 
                 src={toAbsoluteUrl(product.images?.[0]?.image_url)} 
                 alt={product.name} 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover relative z-10"
+                onLoad={(e) => {
+                  e.target.parentElement.classList.remove('animate-pulse', 'bg-gray-200');
+                }}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = PLACEHOLDER_IMAGE;
+                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+                  e.target.parentElement.classList.remove('animate-pulse');
                 }}
               />
             </div>
