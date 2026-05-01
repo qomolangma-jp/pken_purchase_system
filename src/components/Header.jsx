@@ -49,49 +49,54 @@ const Header = () => {
           {/* スペーサー */}
           <div className="flex-1"></div>
 
-          {/* 2. カートアイコン */}
-          <Link
-            to="/cart"
-            aria-label="カート画面へ"
-            className="relative flex items-center justify-center text-white active:bg-green-700 rounded-full"
-            style={{ width: '40px', height: '40px' }}
-          >
-            <span className="material-icons" style={{ fontSize: '22px' }}>shopping_cart</span>
-            {cartCount > 0 && (
-              <span
-                className="absolute flex items-center justify-center bg-red-500 text-white font-bold rounded-full"
-                style={{ top: '4px', right: '4px', minWidth: '16px', height: '16px', fontSize: '9px', padding: '0 3px' }}
+          {/* ログインユーザーのみ表示されるアイコン群 */}
+          {user && (
+            <>
+              {/* 2. カートアイコン */}
+              <Link
+                to="/cart"
+                aria-label="カート画面へ"
+                className="relative flex items-center justify-center text-white active:bg-green-700 rounded-full"
+                style={{ width: '40px', height: '40px' }}
               >
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            )}
-          </Link>
+                <span className="material-icons" style={{ fontSize: '22px' }}>shopping_cart</span>
+                {cartCount > 0 && (
+                  <span
+                    className="absolute flex items-center justify-center bg-red-500 text-white font-bold rounded-full"
+                    style={{ top: '4px', right: '4px', minWidth: '16px', height: '16px', fontSize: '9px', padding: '0 3px' }}
+                  >
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </Link>
 
-          {/* 3. 通知アイコン */}
-          <button
-            className="relative flex items-center justify-center text-white active:bg-green-700 rounded-full"
-            style={{ width: '40px', height: '40px' }}
-            aria-label="通知"
-          >
-            <span className="material-icons" style={{ fontSize: '22px' }}>notifications</span>
-            {/* 通知バッジ（必要に応じて表示） */}
-            {/* <span
-              className="absolute flex items-center justify-center bg-red-500 text-white font-bold rounded-full"
-              style={{ top: '4px', right: '4px', minWidth: '16px', height: '16px', fontSize: '9px', padding: '0 3px' }}
-            >
-              1
-            </span> */}
-          </button>
+              {/* 3. 通知アイコン */}
+              <button
+                className="relative flex items-center justify-center text-white active:bg-green-700 rounded-full"
+                style={{ width: '40px', height: '40px' }}
+                aria-label="通知"
+              >
+                <span className="material-icons" style={{ fontSize: '22px' }}>notifications</span>
+                {/* 通知バッジ（必要に応じて表示） */}
+                {/* <span
+                  className="absolute flex items-center justify-center bg-red-500 text-white font-bold rounded-full"
+                  style={{ top: '4px', right: '4px', minWidth: '16px', height: '16px', fontSize: '9px', padding: '0 3px' }}
+                >
+                  1
+                </span> */}
+              </button>
 
-          {/* 4. メニューボタン */}
-          <button
-            className="flex items-center justify-center rounded-full text-white active:bg-green-700"
-            style={{ width: '40px', height: '40px' }}
-            aria-label="メニューを開く"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <span className="material-icons" style={{ fontSize: '22px' }}>menu</span>
-          </button>
+              {/* 4. メニューボタン */}
+              <button
+                className="flex items-center justify-center rounded-full text-white active:bg-green-700"
+                style={{ width: '40px', height: '44px' }}
+                aria-label="メニューを開く"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <span className="material-icons" style={{ fontSize: '22px' }}>menu</span>
+              </button>
+            </>
+          )}
         </div>
       </header>
 
