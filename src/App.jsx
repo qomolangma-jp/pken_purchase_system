@@ -23,7 +23,7 @@ function App() {
       <AuthProvider>
         <Header />
         {/* 開発環境でのみデバッグログを表示 */}
-        <DebugLogger />
+        {import.meta.env.DEV && <DebugLogger />}
         <main style={{ paddingTop: '56px' }}>
           <Routes>
           {/* 認証が必要なルート */}
