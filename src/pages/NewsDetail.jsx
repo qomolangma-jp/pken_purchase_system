@@ -132,6 +132,17 @@ const NewsDetail = () => {
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-stone-800 leading-tight mb-4">
               {newsItem.title}
             </h1>
+
+            {/* Main Image */}
+            {newsItem.image_url && (
+              <div className="mt-8 rounded-xl overflow-hidden shadow-lg border border-stone-200 bg-white">
+                <img 
+                  src={newsItem.image_url} 
+                  alt={newsItem.title}
+                  className="w-full h-auto max-h-[500px] object-contain mx-auto"
+                />
+              </div>
+            )}
           </header>
 
           {/* Article Content */}

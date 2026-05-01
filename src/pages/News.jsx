@@ -265,46 +265,61 @@ const News = () => {
                           : 'border-stone-200 hover:shadow-md hover:border-stone-300'
                       } ${!isEditMode && 'hover:-translate-y-1'}`}
                     >
-                      {isEditMode ? (
-                        /* Delete Button (Only in Edit Mode) */
-                        <button
-                          onClick={(e) => handleDelete(e, newsItem.id)}
-                          className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-red-500 transition-colors bg-white/80 rounded-full hover:bg-stone-50"
-                          title="削除"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      ) : null}
-
-                      <article className="p-4 md:p-6 lg:p-7" onClick={() => isEditMode && toggleSelect(newsItem.id)}>
-                        {/* Top Info Row */}
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4 mb-3 pr-10">
-                          <time className="text-xs md:text-sm text-stone-500 font-medium">
-                            {formatDate(newsItem.created_at)}
-                          </time>
-                          {newsItem.category && (
-                            <span className="inline-block bg-blue-100 text-blue-700 text-xs md:text-sm font-bold px-3 py-1 rounded-full w-fit">
-                              {newsItem.category}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Title */}
-                        <h2 className={`text-lg md:text-xl lg:text-2xl font-bold mb-3 line-clamp-2 transition-colors ${
-                          selectedIds.includes(newsItem.id) ? 'text-green-800' : 'text-stone-800 hover:text-blue-600'
-                        }`}>
-                          {newsItem.title}
-                        </h2>
-
-                        {/* Preview */}
-                        {newsItem.content && (
-                          <p className="text-sm md:text-base text-stone-600 line-clamp-2">
-                            {newsItem.content}
-                          </p>
+                      <div className="flex flex-col md:flex-row">
+                        {/* Thumbnail Image */}
+                        {newsItem.image_url && (
+                          <div className="w-full md:w-48 lg:w-64 h-48 md:h-auto flex-shrink-0 overflow-hidden bg-stone-100 border-b md:border-b-0 md:border-r border-stone-100">
+                            <img 
+                              src={newsItem.image_url} 
+                              alt={newsItem.title}
+                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                            />
+                          </div>
                         )}
-                      </article>
+
+                        <div className="flex-grow relative">
+                          {isEditMode ? (
+                            /* Delete Button (Only in Edit Mode) */
+                            <button
+                              onClick={(e) => handleDelete(e, newsItem.id)}
+                              className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-red-500 transition-colors bg-white/80 rounded-full hover:bg-stone-50"
+                              title="削除"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          ) : null}
+
+                          <article className="p-4 md:p-6 lg:p-7" onClick={() => isEditMode && toggleSelect(newsItem.id)}>
+                            {/* Top Info Row */}
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4 mb-3 pr-10">
+                              <time className="text-xs md:text-sm text-stone-500 font-medium">
+                                {formatDate(newsItem.created_at)}
+                              </time>
+                              {newsItem.category && (
+                                <span className="inline-block bg-blue-100 text-blue-700 text-xs md:text-sm font-bold px-3 py-1 rounded-full w-fit">
+                                  {newsItem.category}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Title */}
+                            <h2 className={`text-lg md:text-xl lg:text-2xl font-bold mb-3 line-clamp-2 transition-colors ${
+                              selectedIds.includes(newsItem.id) ? 'text-green-800' : 'text-stone-800 hover:text-blue-600'
+                            }`}>
+                              {newsItem.title}
+                            </h2>
+
+                            {/* Preview */}
+                            {newsItem.content && (
+                              <p className="text-sm md:text-base text-stone-600 line-clamp-2">
+                                {newsItem.content}
+                              </p>
+                            )}
+                          </article>
+                        </div>
+                      </div>
                     </Link>
                   </div>
                 </div>
