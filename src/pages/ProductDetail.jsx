@@ -291,10 +291,11 @@ const ProductDetail = () => {
         name: product.name,
         price: product.price,
         quantity: quantity,
-        images: product.images,
-        first_image_url: product.images?.[0]?.image_url,
-        absolute_url: toAbsoluteUrl(product.images?.[0]?.image_url)
+        product_object: product, // 商品オブジェクト全体を確認
+        image_to_use: product.thumbnail_url || product.image_url || product.image_original_url || product.images?.[0]?.image_url
       });
+
+      const displayImageUrl = product.thumbnail_url || product.image_url || product.image_original_url || product.images?.[0]?.image_url;
 
       // リッチなカート追加完了モーダルを表示
       openModal({
@@ -304,7 +305,7 @@ const ProductDetail = () => {
           <div className="flex items-center gap-4 py-2">
             <div className="w-16 h-16 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 relative animate-pulse">
               <img 
-                src={toAbsoluteUrl(product.images?.[0]?.image_url)} 
+                src={toAbsoluteUrl(displayImageUrl)} 
                 alt={product.name} 
                 className="w-full h-full object-cover relative z-10 rounded-2xl"
                 onLoad={(e) => {
