@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useModal } from '../contexts/ModalContext';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
@@ -10,6 +11,7 @@ const Cart = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { fetchCartCount, user, isAuthenticated, loading: authLoading } = useAuth();
+  const { openModal } = useModal();
 
   useEffect(() => {
     if (authLoading) {
@@ -121,13 +123,28 @@ const Cart = () => {
       await fetchCart();
     } catch (err) {
       console.error('Update quantity error:', err);
-      alert(err.message || '数量の更新に失敗しました');
+      openModal({
+        type: 'error',
+        title: '更新エラー',
+        message: err.message || '数量の更新に失敗しました'
+      });
     }
   };
 
   const removeItem = async (itemId, showConfirm = true) => {
-    if (showConfirm && !confirm('この商品をカートから削除しますか？')) return;
+    if (showConfirm) {
+      openModal({
+        type: 'confirm',
+        title: '商品の削除',
+        message: 'この商品をカートから削除しますか？',
+        onConfirm: () => executeRemoveItem(itemId)
+      });
+      return;
+    }
+    executeRemoveItem(itemId);
+  };
 
+  const executeRemoveItem = async (itemId) => {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) return;
@@ -156,45 +173,58 @@ const Cart = () => {
       await fetchCart();
     } catch (err) {
       console.error('Remove item error:', err);
-      alert(err.message || '削除に失敗しました');
+      openModal({
+        type: 'error',
+        title: '削除エラー',
+        message: err.message || '削除に失敗しました'
+      });
     }
   };
 
   const clearCart = async () => {
-    if (!confirm('カートを空にしますか？')) return;
+    openModal({
+      type: 'confirm',
+      title: 'カートを空にする',
+      message: 'カートを空にしますか？',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('authToken');
+          if (!token) return;
+          
+          const url = `${API_BASE_URL}/api/cart`;
+          console.log('🗑️ カート全削除リクエスト:', { url, method: 'DELETE' });
+          
+          const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            credentials: 'include',
+          });
 
-    try {
-      const token = localStorage.getItem('authToken');
-      if (!token) return;
-      
-      const url = `${API_BASE_URL}/api/cart`;
-      console.log('🗑️ カート全削除リクエスト:', { url, method: 'DELETE' });
-      
-      const response = await fetch(url, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        credentials: 'include',
-      });
+          console.log('🗑️ カート全削除レスポンス:', { status: response.status, url });
 
-      console.log('🗑️ カート全削除レスポンス:', { status: response.status, url });
+          const data = await response.json();
 
-      const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.message || 'カートのクリアに失敗しました');
+          }
 
-      if (!response.ok) {
-        throw new Error(data.message || 'カートのクリアに失敗しました');
+          setCartItems([]);
+          
+          // グローバルなカート数を更新
+          await fetchCartCount();
+        } catch (err) {
+          console.error('Clear cart error:', err);
+          openModal({
+            type: 'error',
+            title: 'エラー',
+            message: err.message || 'カートのクリアに失敗しました'
+          });
+        }
       }
-
-      setCartItems([]);
-      
-      // グローバルなカート数を更新
-      await fetchCartCount();
-    } catch (err) {
-      console.error('Clear cart error:', err);
-      alert(err.message || 'カートのクリアに失敗しました');
-    }
+    });
   };
 
   const getTotalPrice = () => {

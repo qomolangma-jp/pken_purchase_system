@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useModal } from '../contexts/ModalContext';
 import { getLineProfile } from '../services/lineAuth';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
@@ -14,6 +15,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login, liff, liffInitialized, user } = useAuth();
+  const { openModal } = useModal();
 
   // すでにログイン済みの場合はトップページへリダイレクト
   useEffect(() => {
@@ -133,8 +135,12 @@ const Login = () => {
         throw new Error('認証トークンが取得できませんでした');
       }
 
-      alert('ログインしました！');
-      navigate('/');
+      openModal({
+        type: 'success',
+        title: 'ログイン成功',
+        message: 'ログインしました！',
+        onConfirm: () => navigate('/')
+      });
     } catch (err) {
       console.error('❌ Login error:', err);
       console.error('エラー詳細:', {

@@ -2,6 +2,8 @@ import React from 'react';
 import Header from './components/Header';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ModalProvider } from './contexts/ModalContext';
+import Modal from './components/Modal';
 import ProtectedRoute from './components/ProtectedRoute';
 import DebugLogger from './components/DebugLogger';
 import Register from './pages/Register';
@@ -21,10 +23,12 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Header />
-        {/* 開発環境でのみデバッグログを表示 */}
-        <DebugLogger />
-        <main style={{ paddingTop: '56px' }}>
+        <ModalProvider>
+          <Header />
+          {/* 開発環境でのみデバッグログを表示 */}
+          <DebugLogger />
+          <Modal />
+          <main style={{ paddingTop: '56px' }}>
           <Routes>
           {/* 認証が必要なルート */}
           <Route
@@ -106,6 +110,7 @@ function App() {
           />
           </Routes>
         </main>
+        </ModalProvider>
       </AuthProvider>
     </Router>
   );

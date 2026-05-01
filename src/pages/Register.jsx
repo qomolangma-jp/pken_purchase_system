@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Link as LinkIcon, User, CreditCard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useModal } from '../contexts/ModalContext';
 import { getLineProfile } from '../services/lineAuth';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
@@ -15,6 +16,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login, liff, liffInitialized, user } = useAuth();
+  const { openModal } = useModal();
 
   // すでにログイン済みの場合はトップページへリダイレクト
   useEffect(() => {
@@ -120,9 +122,13 @@ const Register = () => {
         console.log('トークン保存完了');
       }
 
-      alert('登録が完了しました！自動的にログインします。');
+      openModal({
+        type: 'success',
+        title: '登録完了',
+        message: '登録が完了しました！自動的にログインします。',
+        onConfirm: () => navigate('/')
+      });
       console.log('トップページへリダイレクト');
-      navigate('/');
     } catch (err) {
       console.error('Registration error:', err);
       console.error('エラー詳細:', {

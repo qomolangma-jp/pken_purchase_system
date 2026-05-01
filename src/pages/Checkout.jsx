@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useModal } from '../contexts/ModalContext';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
@@ -12,6 +13,7 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
+  const { openModal } = useModal();
 
   useEffect(() => {
     if (authLoading) {
@@ -96,7 +98,11 @@ const Checkout = () => {
 
   const handleConfirmOrder = async () => {
     if (cartItems.length === 0) {
-      alert('カートに商品がありません');
+      openModal({
+        type: 'warning',
+        title: '商品がありません',
+        message: 'カートに商品がありません。'
+      });
       return;
     }
 
@@ -105,8 +111,13 @@ const Checkout = () => {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
-        alert('ログインが必要です');
-        navigate('/login');
+        openModal({
+          type: 'warning',
+          title: 'ログインが必要です',
+          message: '注文するにはログインが必要です。',
+          confirmText: 'ログインへ',
+          onConfirm: () => navigate('/login')
+        });
         return;
       }
 
@@ -177,7 +188,11 @@ const Checkout = () => {
     } catch (err) {
       console.error('Order processing error:', err);
       setError(err.message || '注文処理に失敗しました');
-      alert(err.message || '注文処理に失敗しました。もう一度お試しください。');
+      openModal({
+        type: 'error',
+        title: '注文エラー',
+        message: err.message || '注文処理に失敗しました。もう一度お試しください。'
+      });
     } finally {
       setIsProcessing(false);
     }
