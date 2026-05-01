@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Link as LinkIcon, User, CreditCard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getLineProfile } from '../services/lineAuth';
 
@@ -136,51 +137,53 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-24">
-      {/* Main Content */}
-      <main className="main-content min-h-screen">
-        <div className="container container-narrow py-10">
-          <h1 className="page-title">新規登録-01.23_04</h1>
+    <div className="min-h-screen bg-stone-100 pt-12 pb-8 flex flex-col items-center justify-center">
+      <main className="w-full max-w-md px-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+          <h1 className="text-xl font-bold text-center mb-6 text-stone-800">アカウント新規登録</h1>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-xl mb-4 text-xs">
               {error}
             </div>
           )}
 
-          <form id="registerForm" className="form-card" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="name_2nd">姓</label>
-              <input
-                id="name_2nd"
-                type="text"
-                className="form-input"
-                placeholder="山田"
-                required
-                value={name2nd}
-                onChange={(e) => setName2nd(e.target.value)}
-              />
+          <form id="registerForm" className="space-y-4" onSubmit={handleSubmit}>
+            {/* 姓・名 2カラム */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-stone-600 ml-1" htmlFor="name_2nd">姓</label>
+                <input
+                  id="name_2nd"
+                  type="text"
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all placeholder:text-stone-400 text-sm"
+                  placeholder="山田"
+                  required
+                  value={name2nd}
+                  onChange={(e) => setName2nd(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-stone-600 ml-1" htmlFor="name_1st">名</label>
+                <input
+                  id="name_1st"
+                  type="text"
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all placeholder:text-stone-400 text-sm"
+                  placeholder="太郎"
+                  required
+                  value={name1st}
+                  onChange={(e) => setName1st(e.target.value)}
+                />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="name_1st">名</label>
-              <input
-                id="name_1st"
-                type="text"
-                className="form-input"
-                placeholder="太郎"
-                required
-                value={name1st}
-                onChange={(e) => setName1st(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="student_id">学籍番号</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-stone-600 ml-1" htmlFor="student_id">学籍番号</label>
               <input
                 id="student_id"
                 type="text"
-                className="form-input"
+                inputMode="text"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all placeholder:text-stone-400 text-sm"
                 placeholder="例：S12345678"
                 required
                 value={studentId}
@@ -188,28 +191,43 @@ const Register = () => {
               />
             </div>
 
-            {/* LINE ID (Hidden or Readonly) */}
-            <div className="form-group">
-              <label className="form-label" htmlFor="line_id">LINE ID</label>
-              <input
-                id="line_id"
-                type="text"
-                className="form-input bg-stone-100"
-                placeholder="LIFFから自動取得"
-                readOnly
-                required
-                value={lineId}
-              />
-              <p className="text-xs text-stone-500 mt-1">※LINE IDは自動的に取得されます</p>
+            {/* LINE ID (Readonly) */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-stone-600 ml-1 flex items-center gap-1" htmlFor="line_id">
+                LINE ID
+                <span className="text-[10px] font-normal text-stone-400">(自動取得済み)</span>
+              </label>
+              <div className="relative">
+                <input
+                  id="line_id"
+                  type="text"
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-500 outline-none text-sm cursor-not-allowed"
+                  placeholder="LIFFから自動取得中..."
+                  readOnly
+                  required
+                  value={lineId}
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400">
+                  <LinkIcon size={16} />
+                </div>
+              </div>
             </div>
 
-            <button type="submit" className="btn-primary" disabled={loading}>
+            <button 
+              type="submit" 
+              className="w-full mt-2 bg-stone-900 hover:bg-stone-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm active:scale-[0.98]"
+              disabled={loading}
+            >
               {loading ? '登録中...' : '登録する'}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <Link to="/login" className="link-text">すでにアカウントをお持ちの方はこちら</Link>
+          <div className="mt-8 pt-5 border-t border-stone-100 text-center flex flex-col gap-3">
+            <div className="px-2">
+              <Link to="/login" className="inline-block w-full py-3 rounded-xl border border-stone-200 text-stone-600 font-medium hover:bg-stone-50 transition-all text-sm">
+                すでにアカウントをお持ちの方はこちら
+              </Link>
+            </div>
           </div>
         </div>
       </main>
