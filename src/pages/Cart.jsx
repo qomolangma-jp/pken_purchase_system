@@ -390,7 +390,7 @@ const Cart = () => {
         )}
 
         {cartItems.length === 0 ? (
-          <div className="w-full max-w-4xl px-2 md:px-4 lg:px-6">
+          <div className="w-full max-w-2xl px-2 md:px-4 lg:px-6">
             <div className="text-center py-8 px-3">
               <p className="text-stone-600 mb-3 text-sm font-semibold">カートに商品がありません</p>
               <Link to="/" className="inline-block bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2 px-4 rounded text-sm transition-all">
@@ -399,11 +399,11 @@ const Cart = () => {
             </div>
           </div>
         ) : (
-          <div className="w-full max-w-4xl mx-auto px-2 md:px-4 lg:px-6">
+          <div className="w-full max-w-2xl mx-auto px-2 md:px-4 lg:px-6">
             {/* Cart Summary Line */}
             <div className="bg-white rounded px-2 py-1.5 mb-2 text-xs md:text-sm">
               <p className="text-stone-700 font-semibold">
-                小計（アイテム）: <span className="text-mos-green font-bold text-sm md:text-base">¥{getTotalPrice().toLocaleString()}</span>
+                小計（アイテム）: <span className="text-mos-green font-bold text-sm md:text-lg">¥{getTotalPrice().toLocaleString()}</span>
               </p>
             </div>
 
@@ -422,7 +422,7 @@ const Cart = () => {
                       {/* Top Row: Image + Product Info + Price */}
                       <div className="flex gap-2 md:gap-4 items-start">
                         {/* Product Image - Thumbnail (70px → md:128px) */}
-                        <Link to={`/products/${product.id}`} className="w-[70px] h-[70px] md:w-32 md:h-32 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
+                        <Link to={`/products/${product.id}`} className="w-[70px] h-[70px] md:w-24 md:h-24 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
                           {productImage ? (
                             <img src={productImage} alt={productName} className="w-full h-full object-contain" style={{ width: '70px', height: 'auto' }} />
                           ) : (
@@ -432,7 +432,7 @@ const Cart = () => {
 
                         {/* Product Info and Controls - Center Section */}
                         <div className="flex-1 min-w-0">
-                          <Link to={`/products/${product.id}`} className="font-bold text-lg md:text-3xl text-stone-800 hover:text-mos-green line-clamp-2 block mb-2 md:mb-4">
+                          <Link to={`/products/${product.id}`} className="font-bold text-lg md:text-xl text-stone-800 hover:text-mos-green line-clamp-2 block mb-2 md:mb-3">
                             {productName}
                           </Link>
                           
@@ -443,7 +443,7 @@ const Cart = () => {
                               <button
                                 onClick={() => updateQuantity(item.id, Math.max(1, quantity - 1), product.stock || 0)}
                                 disabled={quantity <= 1 || (product.stock ?? 0) <= 0}
-                                className="w-8 h-8 md:w-10 md:h-10 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
+                                className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
                                 −
                               </button>
@@ -451,7 +451,7 @@ const Cart = () => {
                               <button
                                 onClick={() => updateQuantity(item.id, quantity + 1, product.stock || 0)}
                                 disabled={(product.stock ?? 0) <= 0 || quantity >= (product.stock ?? 0)}
-                                className="w-8 h-8 md:w-10 md:h-10 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
+                                className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
                                 +
                               </button>
@@ -475,15 +475,15 @@ const Cart = () => {
 
                         {/* Price - Right Side */}
                         <div className="flex flex-col items-end gap-1 md:gap-1.5 flex-shrink-0 pr-2 md:pr-3">
-                          <p className="text-xl md:text-4xl font-black text-mos-green whitespace-nowrap">
+                          <p className="text-xl md:text-2xl font-black text-mos-green whitespace-nowrap">
                             ¥{productPrice.toLocaleString()}
                           </p>
                         </div>
                       </div>
 
                       {/* Subtotal Line */}
-                      <div className="mt-2 md:mt-4 text-right pr-2 md:pr-3">
-                        <p className="text-xl md:text-4xl text-mos-green font-black">
+                      <div className="mt-2 md:mt-3 text-right pr-2 md:pr-3 border-t border-stone-50 pt-2">
+                        <p className="text-xl md:text-2xl text-mos-green font-black">
                           計: ¥{(productPrice * quantity).toLocaleString()}
                         </p>
                       </div>
