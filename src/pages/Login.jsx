@@ -250,7 +250,7 @@ const Login = () => {
 
           <div className="mt-8 pt-5 border-t border-stone-100 text-center flex flex-col gap-3">
             <div>
-              <Link to="#" className="text-xs text-stone-500 hover:text-stone-800 transition-colors">パスワードをお忘れですか？</Link>
+              <Link to="/forgot-password" title="パスワードの再発行はこちら" className="text-xs text-stone-500 hover:text-stone-800 transition-colors">パスワードをお忘れですか？</Link>
             </div>
             <div className="px-2">
               <Link to="/register" className="inline-block w-full py-3 rounded-xl bg-orange-50 text-orange-600 font-bold hover:bg-orange-100 transition-all text-sm border border-orange-200">

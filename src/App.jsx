@@ -17,6 +17,7 @@ import OrderComplete from './pages/OrderComplete';
 import PurchaseHistory from './pages/PurchaseHistory';
 import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
+import ForgotPassword from './pages/ForgotPassword';
 import './App.css';
 
 function App() {
@@ -103,6 +104,10 @@ function App() {
           <Route
             path="/login"
             element={<Login />}
+          />
+          <Route
+            path="/forgot-password"
+            element={<ForgotPassword />}
           />
           <Route
             path="/auth/callback"
