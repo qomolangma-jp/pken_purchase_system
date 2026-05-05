@@ -231,10 +231,10 @@ const ProductList = () => {
                 <Link
                   to={`/products/${product.id}`}
                   key={product.id}
-                  className="block bg-white rounded-sm shadow-sm border border-gray-100 overflow-hidden active:scale-[0.98] transition-transform relative"
+                  className="block bg-white rounded-sm shadow-sm border border-gray-100 overflow-hidden active:scale-[0.98] transition-transform relative aspect-[7/8]"
                 >
-                {/* 商品画像（縦長の比率に変更） */}
-                <div className="w-full aspect-[4/5] relative overflow-hidden bg-gray-50">
+                {/* 商品画像（全体の2/3 = 66.6%） */}
+                <div className="w-full h-[66.6%] relative overflow-hidden bg-gray-50">
                   <img
                     src={imageSrc}
                     alt={product.name}
@@ -282,8 +282,8 @@ const ProductList = () => {
                   )}
                 </div>
 
-                {/* 商品情報（画像の下に十分なスペースを確保） */}
-                <div className="p-2.5 flex flex-col justify-between min-h-[70px]">
+                {/* 商品情報（全体の1/3 = 33.3%） */}
+                <div className="p-2 flex flex-col justify-between h-[33.4%]">
                   <div>
                     {/* カテゴリ */}
                     <div className="flex items-center gap-1">
@@ -292,15 +292,15 @@ const ProductList = () => {
                       </span>
                     </div>
 
-                    {/* 商品名（2行まで表示可能にし、隠れないように調整） */}
-                    <h3 className="text-[12px] font-bold text-gray-800 line-clamp-2 leading-tight mt-0.5">
+                    {/* 商品名 */}
+                    <h3 className="text-[11px] font-bold text-gray-800 line-clamp-2 leading-tight mt-0.5">
                       {product.name}
                     </h3>
                   </div>
 
-                  {/* 価格と在庫ステータス（下部に固定） */}
-                  <div className="flex items-baseline gap-1.5 mt-1">
-                    <p className="text-green-600 font-extrabold text-[15px] leading-none">
+                  {/* 価格と在庫ステータス */}
+                  <div className="flex items-baseline gap-1.5 mt-0.5">
+                    <p className="text-green-600 font-extrabold text-[14px] leading-none">
                       ¥{Number(product.price).toLocaleString()}
                     </p>
                     
