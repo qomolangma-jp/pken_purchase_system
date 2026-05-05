@@ -178,8 +178,8 @@ const PurchaseHistory = () => {
                         if (!normalizedUrl) return '';
                         if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
                         
-                        // API_BASE_URL (https://komapay.p-kmt.com) を付与
-                        const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+                        // 明示的にバックエンドドメインを指定（環境変数が空の場合のフォールバック）
+                        const base = (import.meta.env.VITE_API_BASE_URL || 'https://komapay.p-kmt.com').replace(/\/$/, '');
                         return `${base}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
                       };
 
