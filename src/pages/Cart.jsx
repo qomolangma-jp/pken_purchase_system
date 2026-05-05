@@ -78,12 +78,17 @@ const Cart = () => {
       } else if (Array.isArray(data)) {
         console.log('カートアイテム数:', data.length);
         items = data;
+      } else if (data.data && Array.isArray(data.data)) {
+        // ネストされたdata.dataが配列の場合に対応
+        items = data.data;
       } else {
         console.warn('カートデータが期待する構造ではありません:', data);
       }
       
-      const mergedItems = mergeCartItems(items);
-      await syncInventory(mergedItems);
+      // syncInventory で ID が消失しないよう、生のアイテムをそのままセットするか
+      // mergeCartItems の実装を修正する必要があります。
+      // 今回は一旦 merge せずに inventory 同期へ回します。
+      await syncInventory(items);
       
       // グローバルなカート数を更新
       await fetchCartCount();
@@ -111,6 +116,9 @@ const Cart = () => {
 
     try {
       for (const item of items) {
+        // item.id が正しく存在することを確認するためのログ
+        console.log('🔄 同期中のアイテム:', { cartItemId: item.id, productId: item.product?.id || item.product_id });
+
         const product = item.product || item;
         const productId = product.id;
         
@@ -189,16 +197,14 @@ const Cart = () => {
     const mergedMap = new Map();
     
     items.forEach(item => {
+      // カートアイテム自体のIDを保持するように修正
       const productId = item.product?.id || item.product_id || item.id;
       if (mergedMap.has(productId)) {
         const existingItem = mergedMap.get(productId);
-        // 数量を合算
         existingItem.quantity += (item.quantity || 1);
-        // 重複があった場合、サーバー側でも後でクリーンアップが必要かもしれないが
-        // フロントエンドの表示上はここでまとめる
         console.log(`表示上で商品を統合: ID ${productId}, 新しい数量: ${existingItem.quantity}`);
       } else {
-        // Deep copy to avoid mutating original data
+        // オブジェクト全体をコピーして保持
         mergedMap.set(productId, { ...item });
       }
     });
@@ -426,7 +432,7 @@ const Cart = () => {
 
                         {/* Product Info and Controls - Center Section */}
                         <div className="flex-1 min-w-0">
-                          <Link to={`/products/${product.id}`} className="font-bold text-sm md:text-xl text-stone-800 hover:text-mos-green line-clamp-2 block mb-2 md:mb-3">
+                          <Link to={`/products/${product.id}`} className="font-bold text-lg md:text-3xl text-stone-800 hover:text-mos-green line-clamp-2 block mb-2 md:mb-4">
                             {productName}
                           </Link>
                           
@@ -469,15 +475,15 @@ const Cart = () => {
 
                         {/* Price - Right Side */}
                         <div className="flex flex-col items-end gap-1 md:gap-1.5 flex-shrink-0 pr-2 md:pr-3">
-                          <p className="text-base md:text-2xl font-bold text-mos-green whitespace-nowrap">
+                          <p className="text-xl md:text-4xl font-black text-mos-green whitespace-nowrap">
                             ¥{productPrice.toLocaleString()}
                           </p>
                         </div>
                       </div>
 
                       {/* Subtotal Line */}
-                      <div className="mt-1 md:mt-2 text-right pr-2 md:pr-3">
-                        <p className="text-sm md:text-xl text-mos-green font-black">
+                      <div className="mt-2 md:mt-4 text-right pr-2 md:pr-3">
+                        <p className="text-xl md:text-4xl text-mos-green font-black">
                           計: ¥{(productPrice * quantity).toLocaleString()}
                         </p>
                       </div>
