@@ -170,8 +170,20 @@ const PurchaseHistory = () => {
                       const productName = product.name || '商品名不明';
                       const productPrice = product.price || detail.price || 0;
                       const quantity = detail.quantity || 1;
-                      // カート画面と全く同じ方法：product.image_url をそのまま使用
-                      const productImage = product.image_url || '';
+                      
+                      // カート画面 ([src/pages/Cart.jsx](src/pages/Cart.jsx)) と同じURL解決ロジック
+                      const toAbsoluteUrl = (url) => {
+                        if (!url || typeof url !== 'string') return '';
+                        const normalizedUrl = url.trim();
+                        if (!normalizedUrl) return '';
+                        if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
+                        
+                        // API_BASE_URL (https://komapay.p-kmt.com) を付与
+                        const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+                        return `${base}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
+                      };
+
+                      const productImage = toAbsoluteUrl(product.image_url || '');
 
                       return (
                         <div key={detail.id || index} className="flex gap-4 py-3 items-center">
