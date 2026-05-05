@@ -287,17 +287,6 @@ const ProductList = () => {
           )}
         </div>
       </div>
-                        在庫あり
-                      </p>
-                    )}
-                  </div>
-                </div>
-                </Link>
-              );
-            })
-          )}
-        </div>
-      </div>
     </div>
   );
 };
