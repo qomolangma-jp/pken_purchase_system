@@ -448,11 +448,11 @@ const ProductDetail = () => {
       {/* Main Content */}
       <main className="main-content pb-24 md:pb-20 product-detail-container md:px-6 lg:px-8 pt-0">
         <div className="w-full max-w-6xl mx-auto">
-          <div className="bg-white sm:rounded-3xl sm:shadow-sm overflow-hidden sm:border sm:border-stone-100">
+          <div className="bg-white sm:rounded-3xl sm:shadow-sm overflow-hidden sm:border sm:border-stone-100 mt-[-10px] md:mt-0">
             <div className="flex flex-col lg:flex-row gap-5 md:gap-8 lg:gap-12 xl:gap-16 sm:p-6 md:p-10 lg:p-12 xl:p-16">
               {/* Image Section - 左側（PC時） */}
               <div className="w-full md:w-1/2 flex-shrink-0 px-6 sm:px-0">
-                <div className="relative bg-stone-50 md:bg-stone-100 sm:rounded-lg overflow-hidden aspect-square sm:aspect-auto sm:h-[350px] md:h-[400px] flex items-center justify-center mx-auto">
+                <div className="relative bg-stone-50 md:bg-stone-100 sm:rounded-lg overflow-hidden h-[250px] sm:h-[300px] md:h-[400px] flex items-center justify-center mx-auto">
                   <div className="w-full h-full flex items-center justify-center p-2 transition-opacity duration-300">
                     {allImages.length > 0 ? (
                       <img 
