@@ -469,18 +469,15 @@ const Cart = () => {
 
                         {/* Price - Right Side */}
                         <div className="flex flex-col items-end gap-1 md:gap-1.5 flex-shrink-0 pr-2 md:pr-3">
-                          <p className="text-sm md:text-lg font-bold text-mos-green whitespace-nowrap">
+                          <p className="text-base md:text-2xl font-bold text-mos-green whitespace-nowrap">
                             ¥{productPrice.toLocaleString()}
-                          </p>
-                          <p className="text-xs md:text-sm text-stone-600 whitespace-nowrap">
-                            × {quantity}
                           </p>
                         </div>
                       </div>
 
                       {/* Subtotal Line */}
                       <div className="mt-1 md:mt-2 text-right pr-2 md:pr-3">
-                        <p className="text-xs md:text-sm text-mos-green font-bold">
+                        <p className="text-sm md:text-xl text-mos-green font-black">
                           計: ¥{(productPrice * quantity).toLocaleString()}
                         </p>
                       </div>
