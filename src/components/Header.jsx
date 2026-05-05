@@ -35,7 +35,7 @@ const Header = () => {
         className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-3"
         style={{ backgroundColor: '#00873c', height: '56px', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
       >
-        {/* 左から右へ：ロゴ → カート → 通知 → メニュー */}
+        {/* 左から右へ：ロゴ → カート → ニュース → メニュー */}
         <div className="flex items-center gap-2 flex-1">
           {/* 1. コマペイのロゴ */}
           <Link
@@ -56,7 +56,7 @@ const Header = () => {
               <Link
                 to="/cart"
                 aria-label="カート画面へ"
-                className="relative flex items-center justify-center text-white active:bg-green-700 rounded-full"
+                className="relative flex items-center justify-center text-black active:bg-green-700/20 rounded-full"
                 style={{ width: '40px', height: '40px' }}
               >
                 <span className="material-icons" style={{ fontSize: '22px' }}>shopping_cart</span>
@@ -74,7 +74,7 @@ const Header = () => {
               <Link
                 to="/news"
                 aria-label="ニュース画面へ"
-                className="relative flex items-center justify-center text-white active:bg-green-700 rounded-full"
+                className="relative flex items-center justify-center text-black active:bg-green-700/20 rounded-full"
                 style={{ width: '40px', height: '40px' }}
               >
                 <span className="material-icons" style={{ fontSize: '22px' }}>newspaper</span>
@@ -82,7 +82,7 @@ const Header = () => {
 
               {/* 4. メニューボタン */}
               <button
-                className="flex items-center justify-center rounded-full text-white active:bg-green-700"
+                className="flex items-center justify-center rounded-full text-black active:bg-green-700/20"
                 style={{ width: '40px', height: '44px' }}
                 aria-label="メニューを開く"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
