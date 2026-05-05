@@ -171,14 +171,25 @@ const PurchaseHistory = () => {
                       const productPrice = product.price || detail.price || 0;
                       const quantity = detail.quantity || 1;
                       return (
-                        <div key={detail.id || index} className="flex justify-between items-center py-2">
-                          <div className="flex-1">
-                            <p className="font-semibold text-stone-800">{productName}</p>
-                            <p className="text-sm text-stone-600">数量: {quantity}</p>
+                        <div key={detail.id || index} className="flex gap-4 py-3 items-center">
+                          {/* 商品写真 */}
+                          <div className="w-16 h-16 md:w-20 md:h-20 bg-stone-100 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                            {product.image_url ? (
+                              <img src={product.image_url} alt={productName} className="w-full h-full object-contain" />
+                            ) : (
+                              <div className="text-[10px] text-stone-400">No Image</div>
+                            )}
                           </div>
-                          <p className="font-semibold text-stone-800">
-                            ¥{(productPrice * quantity).toLocaleString()}
-                          </p>
+
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-stone-800 text-sm md:text-base line-clamp-1">{productName}</p>
+                            <p className="text-xs md:text-sm text-stone-600 mt-0.5">数量: {quantity}</p>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="font-bold text-stone-800 text-sm md:text-base">
+                              ¥{(productPrice * quantity).toLocaleString()}
+                            </p>
+                          </div>
                         </div>
                       );
                     })}
