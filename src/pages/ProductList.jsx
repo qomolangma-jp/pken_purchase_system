@@ -301,27 +301,27 @@ const ProductList = () => {
                 {/* 商品情報（全体の1/3 = 33.3%） */}
                 <div className="p-2 flex flex-col justify-between h-[33.4%]">
                   <div>
-                    {/* カテゴリ */}
-                    <div className="flex items-center gap-1">
-                      <span className="text-[8px] lg:text-[14px] text-gray-400 font-medium truncate uppercase tracking-tighter">
+                    {/* カテゴリ (スマホ版では非表示) */}
+                    <div className="hidden lg:flex items-center gap-1">
+                      <span className="text-[14px] text-gray-400 font-medium truncate uppercase tracking-tighter">
                         {product.category_name}
                       </span>
                     </div>
 
-                    {/* 商品名 */}
-                    <h3 className="text-[11px] lg:text-[22px] font-bold text-gray-800 line-clamp-2 leading-tight mt-0.5 lg:mt-1.5">
+                    {/* 商品名 (スマホ版でサイズアップ) */}
+                    <h3 className="text-[13px] lg:text-[22px] font-bold text-gray-800 line-clamp-2 leading-tight mt-0.5 lg:mt-1.5">
                       {product.name}
                     </h3>
                   </div>
 
-                  {/* 価格と在庫ステータス */}
-                  <div className="flex items-baseline gap-1.5 lg:gap-4 mt-0.5 lg:mt-3">
-                    <p className="text-green-600 font-extrabold text-[14px] lg:text-[32px] leading-none">
+                  {/* 価格と在庫ステータス (スマホ版でサイズアップ) */}
+                  <div className="flex items-baseline gap-1.5 lg:gap-4 mt-1 lg:mt-3">
+                    <p className="text-green-600 font-extrabold text-[17px] lg:text-[32px] leading-none">
                       ¥{Number(product.price).toLocaleString()}
                     </p>
                     
                     {product.stock > 0 && product.stock <= 5 && (
-                      <span className="text-[8px] lg:text-[18px] font-bold text-orange-500 bg-orange-50 px-1 py-0.5 lg:px-2.5 lg:py-1 rounded-sm">
+                      <span className="text-[9px] lg:text-[18px] font-bold text-orange-500 bg-orange-50 px-1 py-0.5 lg:px-2.5 lg:py-1 rounded-sm">
                         残り{product.stock}
                       </span>
                     )}
