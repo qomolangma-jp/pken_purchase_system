@@ -166,14 +166,14 @@ const Cart = () => {
               },
               body: JSON.stringify({ quantity: stock })
             });
-            adjustedItems.push({ ...item, quantity: stock, product: latestProduct });
+            adjustedItems.push({ ...item, id: item.id, quantity: stock, product: latestProduct });
           } catch (e) {
             console.error('数量調整エラー:', e);
             adjustedItems.push(item);
           }
         } else {
           // 在庫あり: 商品情報を最新に更新
-          adjustedItems.push({ ...item, product: latestProduct });
+          adjustedItems.push({ ...item, id: item.id, product: latestProduct });
         }
       }
 
@@ -226,7 +226,7 @@ const Cart = () => {
     
     // itemIdの存在確認
     if (!itemId) {
-      console.error('Update quantity error: itemId is undefined or null');
+      console.error("更新失敗: itemIdが渡されていません。データ構造を確認してください。", { itemId, newQuantity });
       return;
     }
 
