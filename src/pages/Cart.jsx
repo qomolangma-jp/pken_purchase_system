@@ -74,13 +74,22 @@ const Cart = () => {
       if (data.success && data.data && Array.isArray(data.data.items)) {
         console.log('カートアイテム数:', data.data.items.length);
         console.log('合計金額:', data.data.total);
-        items = data.data.items;
+        items = data.data.items.map(item => ({
+          ...item,
+          id: item.cart_id || item.id // cart_idを優先してidとして扱う
+        }));
       } else if (Array.isArray(data)) {
         console.log('カートアイテム数:', data.length);
-        items = data;
+        items = data.map(item => ({
+          ...item,
+          id: item.cart_id || item.id
+        }));
       } else if (data.data && Array.isArray(data.data)) {
         // ネストされたdata.dataが配列の場合に対応
-        items = data.data;
+        items = data.data.map(item => ({
+          ...item,
+          id: item.cart_id || item.id
+        }));
       } else {
         console.warn('カートデータが期待する構造ではありません:', data);
       }
@@ -215,6 +224,12 @@ const Cart = () => {
   const updateQuantity = async (itemId, newQuantity, maxStock = 999) => {
     if (newQuantity < 1) return;
     
+    // itemIdの存在確認
+    if (!itemId) {
+      console.error('Update quantity error: itemId is undefined or null');
+      return;
+    }
+
     // 在庫チェック
     if (newQuantity > maxStock) {
       openModal({
@@ -230,6 +245,7 @@ const Cart = () => {
       if (!token) return;
       
       const url = `${API_BASE_URL}/api/cart/${itemId}`;
+      console.log("Request URL:", url);
       console.log('📦 カート更新リクエスト:', { url, method: 'PUT', itemId, newQuantity });
       
       const response = await fetch(url, {
@@ -237,7 +253,9 @@ const Cart = () => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        },        credentials: 'include',        body: JSON.stringify({ quantity: newQuantity }),
+        },
+        credentials: 'include',
+        body: JSON.stringify({ quantity: newQuantity }),
       });
 
       console.log('📦 カート更新レスポンス:', { status: response.status, url });
@@ -274,11 +292,18 @@ const Cart = () => {
   };
 
   const executeRemoveItem = async (itemId) => {
+    // itemIdの存在確認
+    if (!itemId) {
+      console.error('Remove item error: itemId is undefined or null');
+      return;
+    }
+
     try {
       const token = localStorage.getItem('authToken');
       if (!token) return;
       
       const url = `${API_BASE_URL}/api/cart/${itemId}`;
+      console.log("Request URL:", url);
       console.log('🗑️ カート削除リクエスト:', { url, method: 'DELETE', itemId });
       
       const response = await fetch(url, {
