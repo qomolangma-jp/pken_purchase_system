@@ -53,6 +53,26 @@ const SearchDrawer = ({ isOpen, onClose, onSearch, initialValue = '' }) => {
       saveSearchToHistory(searchValue);
     }
     onSearch(searchValue);
+    handleClose();
+  };
+
+  // ビューポートのズームをリセット
+  const resetZoom = () => {
+    // 遅延実行で確実にビューポートをリセット
+    setTimeout(() => {
+      document.documentElement.style.zoom = '1';
+      document.body.style.zoom = '1';
+      // iOSの場合、viewportメタタグを更新
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1');
+      }
+    }, 0);
+  };
+
+  // ドロワークローズ時にズームをリセット
+  const handleClose = () => {
+    resetZoom();
     onClose();
   };
 
@@ -63,7 +83,7 @@ const SearchDrawer = ({ isOpen, onClose, onSearch, initialValue = '' }) => {
         className={`fixed inset-0 bg-black/50 z-[100] transition-opacity duration-300 ${
           isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       {/* ドロワーコンテナ */}
@@ -77,7 +97,7 @@ const SearchDrawer = ({ isOpen, onClose, onSearch, initialValue = '' }) => {
           <div className="flex items-center justify-between p-4 border-b">
             <h2 className="text-lg font-bold text-gray-800">商品を検索</h2>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <X size={24} className="text-gray-500" />
@@ -90,7 +110,8 @@ const SearchDrawer = ({ isOpen, onClose, onSearch, initialValue = '' }) => {
               <input
                 type="text"
                 placeholder="キーワードを入力..."
-                className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-xl focus:ring-2 focus:ring-black outline-none transition-all text-sm"
+                className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-xl focus:ring-2 focus:ring-black outline-none transition-all text-base"
+                style={{ fontSize: '16px' }}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 autoFocus={isOpen}
@@ -121,7 +142,7 @@ const SearchDrawer = ({ isOpen, onClose, onSearch, initialValue = '' }) => {
                     setSearchValue(tag);
                     saveSearchToHistory(tag);
                     onSearch(tag);
-                    onClose();
+                    handleClose();
                   }}
                   className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-sm text-gray-600 rounded-full transition-colors"
                 >
