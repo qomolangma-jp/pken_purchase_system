@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
 import CategoryChips from '../components/CategoryChips';
@@ -366,6 +366,13 @@ const ProductList = () => {
                       </span>
                     )}
                   </div>
+                </div>
+
+                <div className="absolute right-3 bottom-3 flex items-center gap-2 bg-white/95 border border-gray-200 rounded-full px-3 py-2 shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center">
+                    <ShoppingCart size={16} />
+                  </div>
+                  <span className="text-sm font-bold text-gray-800">追加</span>
                 </div>
                 </Link>
               );
