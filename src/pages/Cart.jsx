@@ -516,7 +516,7 @@ const Cart = () => {
                             const id = item.id || item.cart_id || item.cart_item_id;
                             removeItem(id);
                           }}
-                          className="text-red-500 hover:text-red-700 text-base font-medium transition-colors hover:underline"
+                          className="text-red-500 hover:text-red-700 text-sm md:text-base font-medium transition-colors hover:underline"
                         >
                           この商品を削除する
                         </button>
