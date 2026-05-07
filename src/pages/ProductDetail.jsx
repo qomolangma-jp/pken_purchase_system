@@ -591,7 +591,7 @@ const ProductDetail = () => {
                 {/* 価格表示 (商品説明より先に表示、スマホ版は右寄せ・背景なし) */}
                 <div className="mb-6 flex justify-end md:justify-start">
                   <div className="flex items-baseline gap-1 md:gap-3 bg-transparent md:bg-gradient-to-br md:from-green-50 md:via-emerald-50 md:to-teal-50 md:p-6 md:rounded-2xl md:border-2 md:border-mos-green md:shadow-md">
-                    <span className="text-4xl sm:text-5xl md:text-6xl font-black text-mos-green">
+                    <span className="text-5xl sm:text-6xl md:text-7xl font-black text-mos-green">
                       ¥{product.price ? product.price.toLocaleString() : '-'}
                     </span>
                     <span className="text-base sm:text-lg md:text-xl text-stone-600 font-semibold text-[12px] md:text-xl">税込</span>
