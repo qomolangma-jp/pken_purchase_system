@@ -147,32 +147,47 @@ const Cart = () => {
         if (stock <= 0) {
           // 在庫切れ: カートから削除
           notifications.push(`「${latestProduct.name}」は在庫切れのためカートから削除されました。`);
-          serverOperations.push(
-            fetch(`${API_BASE_URL}/api/cart/${item.id}`, {
-              method: 'DELETE',
-              headers: { 'Authorization': `Bearer ${token}` }
-            }).then(res => {
-              if (!res.ok) throw new Error(`${latestProduct.name}の削除に失敗しました`);
-              return res;
-            })
-          );
+          
+          const cartItemId = item.id || item.cart_id || item.cart_item_id;
+          
+          if (!cartItemId || cartItemId === 'undefined') {
+            console.error("自動削除失敗: IDが不正です。アイテム全体:", item);
+          } else {
+            serverOperations.push(
+              fetch(`${API_BASE_URL}/api/cart/${cartItemId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+              }).then(res => {
+                if (!res.ok) throw new Error(`${latestProduct.name}の削除に失敗しました`);
+                return res;
+              })
+            );
+          }
         } else if (currentQuantity > stock) {
           // 在庫不足: 数量を引き下げ
           notifications.push(`「${latestProduct.name}」の在庫が不足しているため、数量を最大数（${stock}個）に変更しました。`);
-          serverOperations.push(
-            fetch(`${API_BASE_URL}/api/cart/${item.id}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-              body: JSON.stringify({ quantity: stock })
-            }).then(res => {
-              if (!res.ok) throw new Error(`${latestProduct.name}の更新に失敗しました`);
-              return res;
-            })
-          );
-          adjustedItems.push({ ...item, id: item.id, quantity: stock, product: latestProduct });
+          
+          const cartItemId = item.id || item.cart_id || item.cart_item_id;
+
+          if (!cartItemId || cartItemId === 'undefined') {
+            console.error("自動更新失敗: IDが不正です。アイテム全体:", item);
+            adjustedItems.push({ ...item, quantity: stock, product: latestProduct });
+          } else {
+            serverOperations.push(
+              fetch(`${API_BASE_URL}/api/cart/${cartItemId}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ quantity: stock })
+              }).then(res => {
+                if (!res.ok) throw new Error(`${latestProduct.name}の更新に失敗しました`);
+                return res;
+              })
+            );
+            adjustedItems.push({ ...item, id: cartItemId, quantity: stock, product: latestProduct });
+          }
         } else {
           // 在庫あり: 商品情報を最新に更新
           adjustedItems.push({ ...item, id: item.id, product: latestProduct });
