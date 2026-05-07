@@ -490,15 +490,6 @@ const Cart = () => {
                                 +
                               </button>
                             </div>
-                            <button
-                              onClick={() => {
-                                const id = item.id || item.cart_id || item.cart_item_id;
-                                removeItem(id);
-                              }}
-                              className="text-red-500 hover:text-red-700 text-xl md:text-2xl leading-none ml-1 md:ml-2 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center"
-                            >
-                              ✕
-                            </button>
                           </div>
                           <div className="mt-1 md:mt-2">
                             { (product.stock ?? 0) > 0 ? (
@@ -507,6 +498,17 @@ const Cart = () => {
                                 <p className="text-xs md:text-sm text-red-600 font-bold bg-red-50 inline-block px-1.5 py-0.5 rounded">本日分終了（入荷待ち）</p>
                               )
                             }
+                          </div>
+                          <div className="mt-2 md:mt-3">
+                            <button
+                              onClick={() => {
+                                const id = item.id || item.cart_id || item.cart_item_id;
+                                removeItem(id);
+                              }}
+                              className="text-red-500 hover:text-red-700 text-base font-medium transition-colors hover:underline"
+                            >
+                              この商品を削除する
+                            </button>
                           </div>
                         </div>
 
