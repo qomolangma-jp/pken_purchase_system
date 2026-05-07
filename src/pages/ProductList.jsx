@@ -214,7 +214,7 @@ const ProductList = () => {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="text-xs text-blue-500 font-bold"
+              className="text-sm text-blue-500 font-bold"
             >
               リセット
             </button>
