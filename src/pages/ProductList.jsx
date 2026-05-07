@@ -27,6 +27,7 @@ const ProductList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [favorites, setFavorites] = useState([]);
+  const [initialFavorites, setInitialFavorites] = useState([]); // 初回読み込み時のお気に入りを保持
   const hasFetchedRef = useRef(false); // 一度だけ実行するためのフラグ
   
   // 認証状態を取得
@@ -34,7 +35,9 @@ const ProductList = () => {
   
   // マウント時にお気に入り情報を読み込む
   useEffect(() => {
-    setFavorites(getFavorites());
+    const savedFavorites = getFavorites();
+    setFavorites(savedFavorites);
+    setInitialFavorites(savedFavorites); // 初期並び替え用のお気に入りを保存
   }, []);
 
   useEffect(() => {
@@ -138,14 +141,15 @@ const ProductList = () => {
     }
     
     // お気に入りを上に出すようにソート（『お気に入り』タブ以外、または検索中以外）
+    // 動的な並び替えを防ぐため、初回読み込み時の favorites (initialFavorites) を使用する
     if (activeCategory !== 'お気に入り') {
-      const favorited = filtered.filter(p => favorites.includes(p.id));
-      const notFavorited = filtered.filter(p => !favorites.includes(p.id));
+      const favorited = filtered.filter(p => initialFavorites.includes(p.id));
+      const notFavorited = filtered.filter(p => !initialFavorites.includes(p.id));
       return [...favorited, ...notFavorited];
     }
 
     return filtered;
-  }, [products, activeCategory, favorites, searchQuery]);
+  }, [products, activeCategory, favorites, initialFavorites, searchQuery]);
 
   // カテゴリ変更ハンドラー
   const handleCategoryChange = (category) => {
