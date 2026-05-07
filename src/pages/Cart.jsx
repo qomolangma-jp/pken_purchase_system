@@ -122,6 +122,7 @@ const Cart = () => {
     const token = localStorage.getItem('authToken');
     const adjustedItems = [];
     const notifications = [];
+    const serverOperations = []; // サーバー同期用のプロミスを格納
 
     try {
       for (const item of items) {
@@ -146,35 +147,43 @@ const Cart = () => {
         if (stock <= 0) {
           // 在庫切れ: カートから削除
           notifications.push(`「${latestProduct.name}」は在庫切れのためカートから削除されました。`);
-          try {
-            await fetch(`${API_BASE_URL}/api/cart/${item.id}`, {
+          serverOperations.push(
+            fetch(`${API_BASE_URL}/api/cart/${item.id}`, {
               method: 'DELETE',
               headers: { 'Authorization': `Bearer ${token}` }
-            });
-          } catch (e) {
-            console.error('在庫切れ削除エラー:', e);
-          }
+            }).then(res => {
+              if (!res.ok) throw new Error(`${latestProduct.name}の削除に失敗しました`);
+              return res;
+            })
+          );
         } else if (currentQuantity > stock) {
           // 在庫不足: 数量を引き下げ
           notifications.push(`「${latestProduct.name}」の在庫が不足しているため、数量を最大数（${stock}個）に変更しました。`);
-          try {
-            await fetch(`${API_BASE_URL}/api/cart/${item.id}`, {
+          serverOperations.push(
+            fetch(`${API_BASE_URL}/api/cart/${item.id}`, {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
               },
               body: JSON.stringify({ quantity: stock })
-            });
-            adjustedItems.push({ ...item, id: item.id, quantity: stock, product: latestProduct });
-          } catch (e) {
-            console.error('数量調整エラー:', e);
-            adjustedItems.push(item);
-          }
+            }).then(res => {
+              if (!res.ok) throw new Error(`${latestProduct.name}の更新に失敗しました`);
+              return res;
+            })
+          );
+          adjustedItems.push({ ...item, id: item.id, quantity: stock, product: latestProduct });
         } else {
           // 在庫あり: 商品情報を最新に更新
           adjustedItems.push({ ...item, id: item.id, product: latestProduct });
         }
+      }
+
+      // 全てのサーバー更新処理が完了するまで待機
+      if (serverOperations.length > 0) {
+        console.log(`サーバー側の在庫同期を開始: ${serverOperations.length}件`);
+        await Promise.all(serverOperations);
+        console.log('サーバー側の在庫同期が完了しました');
       }
 
       setCartItems(adjustedItems);
@@ -192,8 +201,8 @@ const Cart = () => {
       }
     } catch (err) {
       console.error('Inventory sync error:', err);
-      // 通信エラーなどの場合はそのまま表示
-      setCartItems(items);
+      // 同期失敗時はユーザーに通知してリロードを促すなどの対応（ここではエラーログのみ）
+      throw new Error('在庫状況に合わせてカートを更新できませんでした。画面を再読み込みしてください。');
     }
   };
 
@@ -383,12 +392,23 @@ const Cart = () => {
     });
   };
 
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => {
-      const price = item.price || item.product?.price || 0;
-      const quantity = item.quantity || 1;
-      return total + (price * quantity);
-    }, 0);
+  const handleCheckout = async () => {
+    try {
+      setLoading(true);
+      // チェックアウト直前に再度最新の在庫を確認
+      await fetchCart();
+      // fetchCart -> syncInventory 内でエラー（同期失敗）があれば catch に飛ぶ
+      navigate('/checkout');
+    } catch (err) {
+      console.error('Checkout preparation error:', err);
+      openModal({
+        type: 'error',
+        title: '注文処理の中断',
+        message: err.message || '在庫状況の確認中にエラーが発生しました。'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -544,7 +564,7 @@ const Cart = () => {
 
               <button
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 md:py-3 px-3 md:px-4 rounded text-xs md:text-base transition-all mb-1.5 md:mb-2"
-                onClick={() => navigate('/checkout')}
+                onClick={handleCheckout}
               >
                 注文を行う
               </button>
