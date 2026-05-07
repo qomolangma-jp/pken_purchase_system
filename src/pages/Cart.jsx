@@ -402,6 +402,16 @@ const Cart = () => {
     });
   };
 
+  const getTotalPrice = () => {
+    if (!cartItems || !Array.isArray(cartItems)) return 0;
+    return cartItems.reduce((total, item) => {
+      const product = item?.product || item;
+      const price = product?.price || 0;
+      const quantity = item?.quantity || 0;
+      return total + (price * quantity);
+    }, 0);
+  };
+
   const handleCheckout = async () => {
     try {
       setLoading(true);
