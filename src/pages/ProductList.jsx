@@ -368,11 +368,11 @@ const ProductList = () => {
                   </div>
                 </div>
 
-                <div className="absolute right-2 bottom-2 flex items-center gap-1 bg-white/95 border border-gray-200 rounded-full px-1.5 py-1 shadow-sm">
-                  <div className="w-5 h-5 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center">
-                    <ShoppingCart size={12} />
+                <div className="absolute right-2 bottom-2 flex items-center gap-2 bg-white/95 border border-gray-200 rounded-full px-2 py-1 shadow-sm text-[22px] lg:text-[40px] font-extrabold">
+                  <div className="w-6 h-6 lg:w-10 lg:h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center">
+                    <ShoppingCart className="w-4 h-4 lg:w-7 lg:h-7" />
                   </div>
-                  <span className="text-[10px] font-bold text-gray-500">追加</span>
+                  <span className="text-gray-500">追加</span>
                 </div>
                 </Link>
               );
