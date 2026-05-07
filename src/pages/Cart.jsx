@@ -222,6 +222,8 @@ const Cart = () => {
   };
 
   const updateQuantity = async (itemId, newQuantity, maxStock = 999) => {
+    console.log("受信データ詳細:", { itemId, newQuantity, maxStock });
+    
     if (newQuantity < 1) return;
     
     // itemIdの存在確認
@@ -467,7 +469,10 @@ const Cart = () => {
                             <span className="text-xs md:text-sm text-stone-600">数量:</span>
                             <div className="flex items-center gap-1 md:gap-1.5 bg-stone-100 rounded">
                               <button
-                                onClick={() => updateQuantity(item.id, Math.max(1, quantity - 1), product.stock || 0)}
+                                onClick={() => {
+                                  const id = item.id || item.cart_id || item.cart_item_id;
+                                  updateQuantity(id, Math.max(1, quantity - 1), product.stock || 0);
+                                }}
                                 disabled={quantity <= 1 || (product.stock ?? 0) <= 0}
                                 className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
@@ -475,7 +480,10 @@ const Cart = () => {
                               </button>
                               <span className="w-6 md:w-8 text-center text-sm md:text-base font-semibold">{quantity}</span>
                               <button
-                                onClick={() => updateQuantity(item.id, quantity + 1, product.stock || 0)}
+                                onClick={() => {
+                                  const id = item.id || item.cart_id || item.cart_item_id;
+                                  updateQuantity(id, quantity + 1, product.stock || 0);
+                                }}
                                 disabled={(product.stock ?? 0) <= 0 || quantity >= (product.stock ?? 0)}
                                 className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
@@ -483,7 +491,10 @@ const Cart = () => {
                               </button>
                             </div>
                             <button
-                              onClick={() => removeItem(item.id)}
+                              onClick={() => {
+                                const id = item.id || item.cart_id || item.cart_item_id;
+                                removeItem(id);
+                              }}
                               className="text-red-500 hover:text-red-700 text-xl md:text-2xl leading-none ml-1 md:ml-2 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center"
                             >
                               ✕
