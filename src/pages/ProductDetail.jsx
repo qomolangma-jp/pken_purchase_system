@@ -249,6 +249,7 @@ const ProductDetail = () => {
           const cartResult = await cartResponse.json();
           const items = cartResult.data?.items || cartResult;
           if (Array.isArray(items)) {
+            console.log('カート全アイテムデータ (デバッグ用):', items);
             existingCartItem = items.find(item => 
               (item.product?.id || item.product_id) === parseInt(id)
             );
@@ -261,22 +262,49 @@ const ProductDetail = () => {
       let response;
       if (existingCartItem) {
         // すでにカートに存在する場合、数量を更新
-        const newTotalQuantity = existingCartItem.quantity + quantity;
+        const newTotalQuantity = (existingCartItem.quantity || 0) + quantity;
         
-        // 在庫チェック
-        if (product.stock !== undefined && product.stock !== null && newTotalQuantity > product.stock) {
-          throw new Error(`在庫数（${product.stock}個）を超えるため追加できません。すでにカートに${existingCartItem.quantity}個入っています。`);
-        }
+        // 既存アイテムの全データを詳細ログ出力して構造を暴く
+        console.log("既存アイテムの全データ:", existingCartItem);
 
-        console.log(`既存の商品を発見: ID ${existingCartItem.id}, 数量更新 ${existingCartItem.quantity} -> ${newTotalQuantity}`);
-        response = await fetch(`${API_BASE_URL}/api/cart/${existingCartItem.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ quantity: newTotalQuantity }),
-        });
+        // IDの特定: cart_id, cart_item_id, item_id, id の順で試行
+        const cartItemId = existingCartItem.cart_id || 
+                           existingCartItem.cart_item_id || 
+                           existingCartItem.item_id || 
+                           existingCartItem.id;
+
+        console.log(`既存の商品を発見: ID ${cartItemId}, 数量更新 ${existingCartItem.quantity} -> ${newTotalQuantity}`);
+
+        if (!cartItemId || cartItemId === 'undefined') {
+          console.warn("警告: 既存アイテムのIDを特定できませんでした。新規追加として処理を試みます。", { currentCartItem: existingCartItem });
+          
+          // IDが特定できない場合のフォールバック: 新規追加(POST)として処理
+          response = await fetch(`${API_BASE_URL}/api/cart/add`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(requestData),
+          });
+        } else {
+          // 在庫チェック
+          if (product.stock !== undefined && product.stock !== null && newTotalQuantity > product.stock) {
+            throw new Error(`在庫数（${product.stock}個）を超えるため追加できません。すでにカートに${existingCartItem.quantity}個入っています。`);
+          }
+
+          const url = `${API_BASE_URL}/api/cart/${cartItemId}`;
+          console.log('📦 数量更新リクエスト送信:', { url, method: 'PUT' });
+          
+          response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ quantity: newTotalQuantity }),
+          });
+        }
       } else {
         // 在庫チェック（新規追加時）
         if (product.stock !== undefined && product.stock !== null && quantity > product.stock) {
