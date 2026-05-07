@@ -12,6 +12,18 @@ const CategoryChips = ({
   bgColor = '#ffffff',
 }) => {
   const scrollContainerRef = useRef(null);
+  const buttonRefs = useRef({});
+
+  React.useEffect(() => {
+    const activeButton = buttonRefs.current[activeCategory];
+    if (activeButton && scrollContainerRef.current) {
+      activeButton.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      });
+    }
+  }, [activeCategory]);
 
   return (
     <nav
@@ -47,6 +59,9 @@ const CategoryChips = ({
           return (
             <button
               key={category}
+              ref={(el) => {
+                if (el) buttonRefs.current[category] = el;
+              }}
               onClick={() => onCategoryChange(category)}
               className={`
                 flex-shrink-0 px-5 py-3.5
