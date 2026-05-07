@@ -499,17 +499,6 @@ const Cart = () => {
                               )
                             }
                           </div>
-                          <div className="mt-2 md:mt-3">
-                            <button
-                              onClick={() => {
-                                const id = item.id || item.cart_id || item.cart_item_id;
-                                removeItem(id);
-                              }}
-                              className="text-red-500 hover:text-red-700 text-base font-medium transition-colors hover:underline"
-                            >
-                              この商品を削除する
-                            </button>
-                          </div>
                         </div>
 
                         {/* Price - Right Side */}
@@ -520,8 +509,17 @@ const Cart = () => {
                         </div>
                       </div>
 
-                      {/* Subtotal Line */}
-                      <div className="mt-2 md:mt-3 text-right pr-2 md:pr-3 border-t border-stone-50 pt-2">
+                      {/* Bottom Section: Remove Button + Subtotal */}
+                      <div className="mt-3 md:mt-4 pt-2 md:pt-3 border-t border-stone-50 flex justify-between items-center">
+                        <button
+                          onClick={() => {
+                            const id = item.id || item.cart_id || item.cart_item_id;
+                            removeItem(id);
+                          }}
+                          className="text-red-500 hover:text-red-700 text-base font-medium transition-colors hover:underline"
+                        >
+                          この商品を削除する
+                        </button>
                         <p className="text-xl md:text-2xl text-mos-green font-black">
                           計: ¥{(productPrice * quantity).toLocaleString()}
                         </p>
