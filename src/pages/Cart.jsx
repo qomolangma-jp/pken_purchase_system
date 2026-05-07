@@ -126,17 +126,26 @@ const Cart = () => {
 
     try {
       for (const item of items) {
-        // item.id が正しく存在することを確認するためのログ
-        console.log('🔄 同期中のアイテム:', { cartItemId: item.id, productId: item.product?.id || item.product_id });
+        if (!item) continue;
+
+        // IDの特定ロジック: 1.item.id -> 2.item.cart_item_id -> 3.item.product_id
+        const cartItemId = item.id || item.cart_item_id || item.product_id || item.product?.id;
+        
+        console.log('🔄 同期中のアイテム:', { cartItemId, item });
 
         const product = item.product || item;
-        const productId = product.id;
+        const productId = product?.id || item.product_id;
         
+        if (!productId) {
+          console.warn('商品IDが特定できないためスキップします:', item);
+          continue;
+        }
+
         // 最新の在庫情報を取得
         const prodResponse = await fetch(`${API_BASE_URL}/api/products/${productId}`);
         if (!prodResponse.ok) {
           adjustedItems.push(item);
-          continue; // 個別商品取得エラー時はそのまま（またはスキップ）
+          continue;
         }
         
         const prodData = await prodResponse.json();
@@ -146,33 +155,24 @@ const Cart = () => {
 
         if (stock <= 0) {
           // 在庫切れ: カートから削除
-          notifications.push(`「${latestProduct.name}」は在庫切れのためカートから削除されました。`);
-          
-          const cartItemId = item.id || item.cart_id || item.cart_item_id;
+          notifications.push(`「${latestProduct.name || '不明な商品'}」は在庫切れのためカートから削除されました。`);
           
           if (!cartItemId || cartItemId === 'undefined') {
-            console.error("自動削除失敗: IDが不正です。アイテム全体:", item);
+            console.warn("自動削除スキップ: IDが不明なため、フロントエンドからのみ除外します。", item);
           } else {
             serverOperations.push(
               fetch(`${API_BASE_URL}/api/cart/${cartItemId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
-              }).then(res => {
-                if (!res.ok) throw new Error(`${latestProduct.name}の削除に失敗しました`);
-                return res;
-              })
+              }).catch(e => console.error('削除リクエスト失敗:', e))
             );
           }
+          // adjustedItems に追加しないことでフロントエンドから除外
         } else if (currentQuantity > stock) {
           // 在庫不足: 数量を引き下げ
-          notifications.push(`「${latestProduct.name}」の在庫が不足しているため、数量を最大数（${stock}個）に変更しました。`);
+          notifications.push(`「${latestProduct.name || '不明な商品'}」の在庫が不足しているため、数量を最大数（${stock}個）に変更しました。`);
           
-          const cartItemId = item.id || item.cart_id || item.cart_item_id;
-
-          if (!cartItemId || cartItemId === 'undefined') {
-            console.error("自動更新失敗: IDが不正です。アイテム全体:", item);
-            adjustedItems.push({ ...item, quantity: stock, product: latestProduct });
-          } else {
+          if (cartItemId && cartItemId !== 'undefined') {
             serverOperations.push(
               fetch(`${API_BASE_URL}/api/cart/${cartItemId}`, {
                 method: 'PUT',
@@ -181,24 +181,19 @@ const Cart = () => {
                   'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ quantity: stock })
-              }).then(res => {
-                if (!res.ok) throw new Error(`${latestProduct.name}の更新に失敗しました`);
-                return res;
-              })
+              }).catch(e => console.error('更新リクエスト失敗:', e))
             );
-            adjustedItems.push({ ...item, id: cartItemId, quantity: stock, product: latestProduct });
           }
+          adjustedItems.push({ ...item, id: cartItemId, quantity: stock, product: latestProduct });
         } else {
           // 在庫あり: 商品情報を最新に更新
-          adjustedItems.push({ ...item, id: item.id, product: latestProduct });
+          adjustedItems.push({ ...item, id: cartItemId, product: latestProduct });
         }
       }
 
-      // 全てのサーバー更新処理が完了するまで待機
+      // サーバー更新処理があれば実行 (失敗しても次に進めるよう個別catch済み)
       if (serverOperations.length > 0) {
-        console.log(`サーバー側の在庫同期を開始: ${serverOperations.length}件`);
         await Promise.all(serverOperations);
-        console.log('サーバー側の在庫同期が完了しました');
       }
 
       setCartItems(adjustedItems);
@@ -472,20 +467,20 @@ const Cart = () => {
             {/* Cart Items */}
             <div className="space-y-2">
               {cartItems.map((item, index) => {
-                console.log("カートアイテムの中身 (map中):", item);
-                const product = item.product || item;
-                const productName = product.name || 'Unknown Product';
-                const productPrice = product.price || 0;
-                const productImage = product.image_url || '';
-                const quantity = item.quantity || 1;
+                if (!item) return null;
+                const product = item?.product || item;
+                const productName = product?.name || '不明な商品';
+                const productPrice = product?.price || 0;
+                const productImage = product?.image_url || '';
+                const quantity = item?.quantity || 1;
 
                 return (
-                  <React.Fragment key={item.id}>
+                  <React.Fragment key={item?.id || index}>
                     <div className="bg-white rounded-lg shadow-sm p-2 md:p-4">
                       {/* Top Row: Image + Product Info + Price */}
                       <div className="flex gap-2 md:gap-4 items-start">
                         {/* Product Image - Thumbnail (70px → md:128px) */}
-                        <Link to={`/products/${product.id}`} className="w-[70px] h-[70px] md:w-24 md:h-24 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
+                        <Link to={`/products/${product?.id}`} className="w-[70px] h-[70px] md:w-24 md:h-24 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
                           {productImage ? (
                             <img src={productImage} alt={productName} className="w-full h-full object-contain" style={{ width: '70px', height: 'auto' }} />
                           ) : (
@@ -495,7 +490,7 @@ const Cart = () => {
 
                         {/* Product Info and Controls - Center Section */}
                         <div className="flex-1 min-w-0">
-                          <Link to={`/products/${product.id}`} className="font-bold text-lg md:text-xl text-stone-800 hover:text-mos-green line-clamp-2 block mb-2 md:mb-3">
+                          <Link to={`/products/${product?.id}`} className="font-bold text-lg md:text-xl text-stone-800 hover:text-mos-green line-clamp-2 block mb-2 md:mb-3">
                             {productName}
                           </Link>
                           
@@ -505,10 +500,10 @@ const Cart = () => {
                             <div className="flex items-center gap-1 md:gap-1.5 bg-stone-100 rounded">
                               <button
                                 onClick={() => {
-                                  const id = item.id || item.cart_id || item.cart_item_id;
-                                  updateQuantity(id, Math.max(1, quantity - 1), product.stock || 0);
+                                  const id = item?.id || item?.cart_id || item?.cart_item_id;
+                                  updateQuantity(id, Math.max(1, quantity - 1), product?.stock || 0);
                                 }}
-                                disabled={quantity <= 1 || (product.stock ?? 0) <= 0}
+                                disabled={quantity <= 1 || (product?.stock ?? 0) <= 0}
                                 className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
                                 −
@@ -516,10 +511,10 @@ const Cart = () => {
                               <span className="w-6 md:w-8 text-center text-sm md:text-base font-semibold">{quantity}</span>
                               <button
                                 onClick={() => {
-                                  const id = item.id || item.cart_id || item.cart_item_id;
-                                  updateQuantity(id, quantity + 1, product.stock || 0);
+                                  const id = item?.id || item?.cart_id || item?.cart_item_id;
+                                  updateQuantity(id, quantity + 1, product?.stock || 0);
                                 }}
-                                disabled={(product.stock ?? 0) <= 0 || quantity >= (product.stock ?? 0)}
+                                disabled={(product?.stock ?? 0) <= 0 || quantity >= (product?.stock ?? 0)}
                                 className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                               >
                                 +
@@ -527,8 +522,8 @@ const Cart = () => {
                             </div>
                           </div>
                           <div className="mt-1 md:mt-2">
-                            { (product.stock ?? 0) > 0 ? (
-                                <p className="text-xs md:text-sm text-stone-500">在庫: {product.stock}個</p>
+                            { (product?.stock ?? 0) > 0 ? (
+                                <p className="text-xs md:text-sm text-stone-500">在庫: {product?.stock}個</p>
                               ) : (
                                 <p className="text-xs md:text-sm text-red-600 font-bold bg-red-50 inline-block px-1.5 py-0.5 rounded">本日分終了（入荷待ち）</p>
                               )
@@ -548,7 +543,7 @@ const Cart = () => {
                       <div className="mt-3 md:mt-4 pt-2 md:pt-3 border-t border-stone-50 flex justify-between items-center">
                         <button
                           onClick={() => {
-                            const id = item.id || item.cart_id || item.cart_item_id;
+                            const id = item?.id || item?.cart_id || item?.cart_item_id;
                             removeItem(id);
                           }}
                           className="text-red-500 hover:text-red-700 text-sm md:text-base font-medium transition-colors hover:underline"
