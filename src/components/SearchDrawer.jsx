@@ -3,15 +3,55 @@ import { X, Search } from 'lucide-react';
 
 const SearchDrawer = ({ isOpen, onClose, onSearch, initialValue = '' }) => {
   const [searchValue, setSearchValue] = useState(initialValue);
+  const [recentKeywords, setRecentKeywords] = useState([]);
+
+  // 最近検索したキーワードの履歴を取得
+  const loadSearchHistory = () => {
+    try {
+      const history = localStorage.getItem('searchHistory');
+      if (history) {
+        setRecentKeywords(JSON.parse(history));
+      }
+    } catch (err) {
+      console.error('検索履歴の読み込みエラー:', err);
+      setRecentKeywords([]);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
       setSearchValue(initialValue);
+      loadSearchHistory();
     }
   }, [isOpen, initialValue]);
 
+  // 検索キーワードをLocalStorageに保存
+  const saveSearchToHistory = (keyword) => {
+    if (!keyword || !keyword.trim()) return;
+
+    try {
+      let history = [];
+      const stored = localStorage.getItem('searchHistory');
+      if (stored) {
+        history = JSON.parse(stored);
+      }
+
+      // 新しいキーワードを配列の先頭に追加（重複は削除）
+      const filtered = history.filter(item => item !== keyword);
+      const newHistory = [keyword, ...filtered].slice(0, 5); // 直近5個のみ保持
+
+      localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+      setRecentKeywords(newHistory);
+    } catch (err) {
+      console.error('検索履歴の保存エラー:', err);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (searchValue.trim()) {
+      saveSearchToHistory(searchValue);
+    }
     onSearch(searchValue);
     onClose();
   };
@@ -68,14 +108,18 @@ const SearchDrawer = ({ isOpen, onClose, onSearch, initialValue = '' }) => {
           {/* おすすめキーワードなど（オプション） */}
           <div className="flex-1 p-4 overflow-y-auto">
             <p className="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">
-              人気のキーワード
+              {recentKeywords.length > 0 ? '最近検索したキーワード' : '人気のキーワード'}
             </p>
             <div className="flex flex-wrap gap-2">
-              {['チキン', 'コーヒー', 'セット', '期間限定'].map((tag) => (
+              {(recentKeywords.length > 0
+                ? recentKeywords
+                : ['チキン', 'コーヒー', 'セット', '期間限定']
+              ).map((tag) => (
                 <button
                   key={tag}
                   onClick={() => {
                     setSearchValue(tag);
+                    saveSearchToHistory(tag);
                     onSearch(tag);
                     onClose();
                   }}
