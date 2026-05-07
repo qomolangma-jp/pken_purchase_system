@@ -320,7 +320,7 @@ const ProductList = () => {
 
                   {/* 価格と在庫ステータス (スマホ版でサイズアップ) */}
                   <div className="flex items-baseline gap-1.5 lg:gap-4 mt-1 lg:mt-3">
-                    <p className="text-green-600 font-extrabold text-[17px] lg:text-[32px] leading-none">
+                    <p className="text-green-600 font-extrabold text-[22px] lg:text-[40px] leading-none">
                       ¥{Number(product.price).toLocaleString()}
                     </p>
                     
