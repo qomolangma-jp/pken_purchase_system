@@ -81,3 +81,70 @@ export const loginUser = async (credentials) => {
     throw error;
   }
 };
+
+/**
+ * 検索履歴の取得
+ * @returns {Promise<string[]>} キーワードの配列
+ */
+export const getSearchHistory = async () => {
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) return [];
+
+    // クエリパラメータ search_type=product を追加
+    const response = await fetch(`${API_BASE_URL}/api/search-history?search_type=product`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        return [];
+      }
+      throw new Error('検索履歴の取得に失敗しました');
+    }
+
+    const data = await response.json();
+    return data.success && Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error('検索履歴取得エラー:', error);
+    return [];
+  }
+};
+
+/**
+ * 検索履歴の保存
+ * @param {string} keyword - 検索キーワード
+ * @returns {Promise<boolean>} 成功・失敗
+ */
+export const saveSearchHistory = async (keyword) => {
+  if (!keyword || !keyword.trim()) return false;
+
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) return false;
+
+    const response = await fetch(`${API_BASE_URL}/api/search-history`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      credentials: 'include',
+      body: JSON.stringify({ 
+        keyword: keyword.trim(),
+        search_type: 'product' 
+      }),
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('検索履歴保存エラー:', error);
+    return false;
+  }
+};
+

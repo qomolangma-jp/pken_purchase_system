@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search } from 'lucide-react';
+import { getSearchHistory, saveSearchHistory } from '../utils/api';
 
 const SearchDrawer = ({ isOpen, onClose, onSearch, initialValue = '' }) => {
   const [searchValue, setSearchValue] = useState(initialValue);
   const [recentKeywords, setRecentKeywords] = useState([]);
 
   // 最近検索したキーワードの履歴を取得
-  const loadSearchHistory = () => {
+  const loadSearchHistory = async () => {
     try {
-      const history = localStorage.getItem('searchHistory');
-      if (history) {
-        setRecentKeywords(JSON.parse(history));
-      }
+      const history = await getSearchHistory();
+      setRecentKeywords(history);
     } catch (err) {
       console.error('検索履歴の読み込みエラー:', err);
       setRecentKeywords([]);
@@ -25,23 +24,18 @@ const SearchDrawer = ({ isOpen, onClose, onSearch, initialValue = '' }) => {
     }
   }, [isOpen, initialValue]);
 
-  // 検索キーワードをLocalStorageに保存
-  const saveSearchToHistory = (keyword) => {
+  // 検索キーワードをサーバーに保存
+  const saveSearchToHistory = async (keyword) => {
     if (!keyword || !keyword.trim()) return;
 
     try {
-      let history = [];
-      const stored = localStorage.getItem('searchHistory');
-      if (stored) {
-        history = JSON.parse(stored);
-      }
-
-      // 新しいキーワードを配列の先頭に追加（重複は削除）
-      const filtered = history.filter(item => item !== keyword);
-      const newHistory = [keyword, ...filtered].slice(0, 5); // 直近5個のみ保持
-
-      localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+      // 楽観的更新
+      const filtered = recentKeywords.filter(item => item !== keyword);
+      const newHistory = [keyword.trim(), ...filtered].slice(0, 5);
       setRecentKeywords(newHistory);
+
+      // サーバーへ送信
+      await saveSearchHistory(keyword);
     } catch (err) {
       console.error('検索履歴の保存エラー:', err);
     }
