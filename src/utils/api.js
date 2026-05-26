@@ -105,8 +105,9 @@ export const getSearchHistory = async () => {
       if (response.status === 401 || response.status === 403) {
         return [];
       }
-      // 500サーバーエラーなどの場合はエラーを投げず、コンソールに警告を出すのみとする（履歴が表示されないだけで続行可能にする）
-      console.warn(`検索履歴の取得に失敗しました (Status: ${response.status})`);
+      // 500サーバーエラーなどの詳細をログに出す
+      const errorText = await response.text().catch(() => 'No response body');
+      console.warn(`[API] 検索履歴の取得に失敗しました (Status: ${response.status})`, errorText);
       return [];
     }
 
