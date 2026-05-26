@@ -2,17 +2,17 @@
 
 商品検索履歴をユーザー別に管理するためのAPI仕様です。
 
-## ⚠️ 重要：現在の状況 (2026/05/26)
-提示された修正内容に従いフロントエンドを更新しましたが、**本番環境 (Vercel) で依然として 500 Internal Server Error が発生しています。**
+## ⚠️ 最終確認事項 (2026/05/26)
+バックエンド側の強化（503/422エラーの明示化）により、原因が特定されました。
 
-### 発生しているエラー
-- `GET /api/search-history?search_type=product` -> 500 (Internal Server Error)
-- `POST /api/search-history` -> 500 (Internal Server Error)
+### 現在のステータス
+- **エラーコード**: `503 (Service Unavailable)`
+- **レスポンス内容**: `{"success":false,"message":"Search history table is not available"}`
+- **結論**: バックエンドのプログラム自体はルートに到達していますが、**本番環境のデータベースに `user_search_keywords` テーブルが存在しません。**
 
-### バックエンド側で確認をお願いしたい項目
-1. **本番環境へのデプロイ・マイグレーション**: 修正コードは本番環境にデプロイされていますか？また、`search_history` テーブル作成や `search_type` カラム追加のマイグレーションは実行済みでしょうか？
-2. **ログの確認**: サーバー側のログ（Laravelであれば `storage/logs/laravel.log` 等）にエラー内容が出力されているはずですので、そちらを確認してください。
-3. **search_type の扱い**: `search_type=product` という文字列が、コード内で正しくバリデーション・保存されていますか？
+### 次のアクション
+- **本番DBでマイグレーションを実行してください。**
+  （例: `php artisan migrate` など）
 
 ## 実装仕様 (合意内容)
 
