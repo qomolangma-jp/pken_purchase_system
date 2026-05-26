@@ -169,6 +169,11 @@ export const saveSearchHistory = async (keyword) => {
       }),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'No response body');
+      console.warn(`[API] 検索履歴の保存に失敗しました (Status: ${response.status})`, errorText);
+    }
+
     return response.ok;
   } catch (error) {
     console.error('検索履歴保存エラー:', error);
