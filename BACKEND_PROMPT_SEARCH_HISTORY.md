@@ -1,21 +1,12 @@
-# バックエンドエンジニアへの依頼: 検索履歴APIの実装
+# 検索履歴API 実装仕様書 (合意済み)
 
-フロントエンド側で検索履歴を「デバイス（LocalStorage）単位」から「ユーザー単位」に変更するために、以下のAPIエンドポイントの実装をお願いします。
+商品検索履歴をユーザー別に管理するためのAPI仕様です。
 
-## 現在発生している問題
-フロントエンドから `/api/search-history` を呼び出した際に、**500 Internal Server Error** が発生しています。
+## ステータス
+- フロントエンド実装済み
+- バックエンド修正完了
 
-### エラー状況
-- `GET /api/search-history?search_type=product` -> 500 Error
-- `POST /api/search-history` -> 500 Error
-
-### 確認をお願いしたい点
-1. **データベースのマイグレーション**: `search_history` テーブル（または相当するもの）は作成されていますか？また `search_type` カラムは存在しますか？
-2. **ルーティング**: 新しいエンドポイントが正しく登録されていますか？
-3. **バリデーション**: POST時のリクエストボディ `{"keyword": "...", "search_type": "product"}` を正しく処理できていますか？
-4. **型エラー**: PHP/Laravel 等であれば、文字列を配列として扱おうとした際などに 500 が出ることがあります。
-
-## 実装が必要なエンドポイント
+## 実装仕様
 
 ### 1. 検索履歴の取得
 - **URL**: `/api/search-history`
@@ -26,12 +17,11 @@
   ```json
   {
     "success": true,
-    "data": ["キーワード1", "キーワード2", "キーワード3", "キーワード4", "キーワード5"]
+    "data": ["キーワード1", "キーワード2", "キーワード3"]
   }
   ```
-  ※ 最新の5〜10件程度を返却してください。
 
-### 2. 検索履歴の追加
+### 2. 検索履歴の追加・更新
 - **URL**: `/api/search-history`
 - **Method**: `POST`
 - **認証**: 必要 (Bearer Token)
@@ -42,11 +32,29 @@
     "search_type": "product"
   }
   ```
-- **処理内容**:
-  - 指定されたキーワードをユーザーの検索履歴に保存または更新（最新にする）。
-  - 重複がある場合は、最新のタイムスタンプに更新してください。
-  - 古い履歴は適宜削除し、ユーザーごとに一定数（例：10件）のみ保持するようにしてください。
+- **処理ロジック**:
+  - 同じキーワード（search_type含む）が存在する場合、一旦削除して新規作成し、最新のタイムスタンプにする。
+  - ユーザーごとに最大10件（MAX_KEYWORDS_PER_USER）まで保持し、超過分は古い順に削除する。
+- **レスポンス形式**:
+  ```json
+  {
+    "success": true,
+    "message": "Keyword saved successfully"
+  }
+  ```
+
+### 3. 検索履歴の全削除
+- **URL**: `/api/search-history`
+- **Method**: `DELETE`
+- **認証**: 必要 (Bearer Token)
+- **レスポンス形式**:
+  ```json
+  {
+    "success": true,
+    "message": "Search history cleared"
+  }
+  ```
 
 ## 補足事項
-フロントエンド側では、すでに `src/utils/api.js` に `getSearchHistory` と `saveSearchHistory` 関数を定義し、`${API_BASE_URL}/api/search-history` を呼び出すように変更済みです。
-また、`src/components/SearchDrawer.jsx` もこれらのAPIを使用するように修正しています。
+フロントエンド側 ([src/utils/api.js](src/utils/api.js)) はこの仕様に基づいて実装されています。
+500エラー等の不具合が発生した場合は、DBのマイグレーションやバリデーションロジックを再度ご確認ください。

@@ -111,10 +111,35 @@ export const getSearchHistory = async () => {
     }
 
     const data = await response.json();
-    return data.success && Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+    return data.success && Array.isArray(data.data) ? data.data : [];
   } catch (error) {
     console.error('検索履歴取得エラー:', error);
     return [];
+  }
+};
+
+/**
+ * 検索履歴のクリア
+ * @returns {Promise<boolean>} 成功・失敗
+ */
+export const clearSearchHistory = async () => {
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) return false;
+
+    const response = await fetch(`${API_BASE_URL}/api/search-history`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('検索履歴クリアエラー:', error);
+    return false;
   }
 };
 
