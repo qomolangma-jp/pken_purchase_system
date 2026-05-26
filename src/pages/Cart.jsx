@@ -440,8 +440,13 @@ const Cart = () => {
       {/* Fixed Header */}
       <div className="fixed left-0 right-0 bg-white shadow-sm z-[90]" style={{ top: '56px', height: '48px', backgroundColor: '#ffffff' }}>
         <div className="container px-3 h-full flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="text-stone-700 text-xl font-light">←</button>
-          <h1 className="text-base font-bold text-stone-800">カート</h1>
+          <div className="flex items-center gap-6">
+            <button onClick={() => navigate(-1)} className="text-stone-700 text-xl font-light">←</button>
+            <h1 className="text-base font-bold text-stone-800">カート</h1>
+          </div>
+          <div className="text-sm font-bold text-stone-800">
+            合計 <span className="text-mos-green text-base">¥{getTotalPrice().toLocaleString()}</span>
+          </div>
         </div>
       </div>
 
