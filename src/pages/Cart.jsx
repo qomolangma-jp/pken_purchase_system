@@ -120,46 +120,51 @@ const Cart = () => {
     }
 
     const token = localStorage.getItem('authToken');
-    const adjustedItems = [];
     const notifications = [];
     const serverOperations = []; // サーバー同期用のプロミスを格納
 
     try {
-      for (const item of items) {
-        if (!item) continue;
+      // 1. 全アイテムの最新製品情報を並列で取得
+      const inventoryChecks = await Promise.all(items.map(async (item) => {
+        if (!item) return null;
 
-        // IDの特定ロジック: 1.item.id -> 2.item.cart_item_id -> 3.item.product_id
         const cartItemId = item.id || item.cart_item_id || item.product_id || item.product?.id;
-        
-        console.log('🔄 同期中のアイテム:', { cartItemId, item });
-
-        const product = item.product || item;
-        const productId = product?.id || item.product_id;
+        const productId = item.product?.id || item.product_id;
         
         if (!productId) {
-          console.warn('商品IDが特定できないためスキップします:', item);
-          continue;
+          return { item, cartItemId, productData: null, error: 'Product ID missing' };
         }
 
-        // 最新の在庫情報を取得
-        const prodResponse = await fetch(`${API_BASE_URL}/api/products/${productId}`);
-        if (!prodResponse.ok) {
+        try {
+          const prodResponse = await fetch(`${API_BASE_URL}/api/products/${productId}`);
+          if (!prodResponse.ok) return { item, cartItemId, productData: null, error: 'Fetch failed' };
+          const prodData = await prodResponse.json();
+          return { item, cartItemId, productData: prodData.data || prodData };
+        } catch (e) {
+          return { item, cartItemId, productData: null, error: e.message };
+        }
+      }));
+
+      const adjustedItems = [];
+
+      // 2. 取得した結果に基づいて調整
+      for (const result of inventoryChecks) {
+        if (!result) continue;
+        const { item, cartItemId, productData, error } = result;
+
+        if (error || !productData) {
           adjustedItems.push(item);
           continue;
         }
-        
-        const prodData = await prodResponse.json();
-        const latestProduct = prodData.data || prodData;
-        const stock = latestProduct.stock ?? 0;
+
+        const stock = productData.stock ?? 0;
         const currentQuantity = item.quantity || 1;
 
         if (stock <= 0) {
           // 在庫切れ: カートから削除
-          notifications.push(`「${latestProduct.name || '不明な商品'}」は在庫切れのためカートから削除されました。`);
+          notifications.push(`「${productData.name || '不明な商品'}」は在庫切れのためカートから削除されました。`);
           
-          if (!cartItemId || cartItemId === 'undefined') {
-            console.warn("自動削除スキップ: IDが不明なため、フロントエンドからのみ除外します。", item);
-          } else {
+          if (cartItemId && cartItemId !== 'undefined') {
             serverOperations.push(
               fetch(`${API_BASE_URL}/api/cart/${cartItemId}`, {
                 method: 'DELETE',
@@ -167,10 +172,9 @@ const Cart = () => {
               }).catch(e => console.error('削除リクエスト失敗:', e))
             );
           }
-          // adjustedItems に追加しないことでフロントエンドから除外
         } else if (currentQuantity > stock) {
           // 在庫不足: 数量を引き下げ
-          notifications.push(`「${latestProduct.name || '不明な商品'}」の在庫が不足しているため、数量を最大数（${stock}個）に変更しました。`);
+          notifications.push(`「${productData.name || '不明な商品'}」の在庫が不足しているため、数量を最大数（${stock}個）に変更しました。`);
           
           if (cartItemId && cartItemId !== 'undefined') {
             serverOperations.push(
@@ -184,14 +188,14 @@ const Cart = () => {
               }).catch(e => console.error('更新リクエスト失敗:', e))
             );
           }
-          adjustedItems.push({ ...item, id: cartItemId, quantity: stock, product: latestProduct });
+          adjustedItems.push({ ...item, id: cartItemId, quantity: stock, product: productData });
         } else {
           // 在庫あり: 商品情報を最新に更新
-          adjustedItems.push({ ...item, id: cartItemId, product: latestProduct });
+          adjustedItems.push({ ...item, id: cartItemId, product: productData });
         }
       }
 
-      // サーバー更新処理があれば実行 (失敗しても次に進めるよう個別catch済み)
+      // サーバー更新処理があれば並列で実行
       if (serverOperations.length > 0) {
         await Promise.all(serverOperations);
       }
@@ -264,10 +268,15 @@ const Cart = () => {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) return;
+
+      // 1. 楽観的UI更新: サーバーの応答を待たずにUIを更新
+      const previousItems = [...cartItems];
+      setCartItems(prev => prev.map(item => 
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      ));
       
       const url = `${API_BASE_URL}/api/cart/${itemId}`;
-      console.log("Request URL:", url);
-      console.log('📦 カート更新リクエスト:', { url, method: 'PUT', itemId, newQuantity });
+      console.log('📦 カート更新リクエスト (楽観的):', { itemId, newQuantity });
       
       const response = await fetch(url, {
         method: 'PUT',
@@ -279,18 +288,22 @@ const Cart = () => {
         body: JSON.stringify({ quantity: newQuantity }),
       });
 
-      console.log('📦 カート更新レスポンス:', { status: response.status, url });
-
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
+        // 失敗した場合は元の状態に戻す
+        setCartItems(previousItems);
         throw new Error(data.message || '数量の更新に失敗しました');
       }
 
-      // カートを再取得
-      await fetchCart();
+      // 2. ヘッダーの点数バッジなどを更新 (これは軽いリクエスト)
+      await fetchCartCount();
+      
+      console.log('📦 カート更新成功');
     } catch (err) {
       console.error('Update quantity error:', err);
+      // エラー時は改めてサーバーから正確なデータを取得
+      await fetchCart();
+      
       openModal({
         type: 'error',
         title: '更新エラー',
@@ -322,10 +335,13 @@ const Cart = () => {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) return;
+
+      // 1. 楽観的UI更新
+      const previousItems = [...cartItems];
+      setCartItems(prev => prev.filter(item => item.id !== itemId));
       
       const url = `${API_BASE_URL}/api/cart/${itemId}`;
-      console.log("Request URL:", url);
-      console.log('🗑️ カート削除リクエスト:', { url, method: 'DELETE', itemId });
+      console.log('🗑️ カート削除リクエスト (楽観的):', { itemId });
       
       const response = await fetch(url, {
         method: 'DELETE',
@@ -336,18 +352,21 @@ const Cart = () => {
         credentials: 'include',
       });
 
-      console.log('🗑️ カート削除レスポンス:', { status: response.status, url });
-
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
+        // 失敗したら戻す
+        setCartItems(previousItems);
         throw new Error(data.message || '削除に失敗しました');
       }
 
-      // カートを再取得
-      await fetchCart();
+      // 2. カウントだけ更新
+      await fetchCartCount();
+      console.log('🗑️ カート削除成功');
     } catch (err) {
       console.error('Remove item error:', err);
+      // 再取得して同期
+      await fetchCart();
+      
       openModal({
         type: 'error',
         title: '削除エラー',
