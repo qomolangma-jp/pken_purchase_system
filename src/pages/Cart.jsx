@@ -467,13 +467,6 @@ const Cart = () => {
           </div>
         ) : (
           <div className="w-full max-w-2xl mx-auto px-2 md:px-4 lg:px-6">
-            {/* Cart Summary Line */}
-            <div className="bg-white rounded px-2 py-1.5 mb-2 text-xs md:text-sm">
-              <p className="text-stone-700 font-semibold">
-                小計（アイテム）: <span className="text-mos-green font-bold text-sm md:text-lg">¥{getTotalPrice().toLocaleString()}</span>
-              </p>
-            </div>
-
             {/* Cart Items */}
             <div className="space-y-2">
               {cartItems.map((item, index) => {
