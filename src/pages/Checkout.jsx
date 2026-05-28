@@ -363,7 +363,6 @@ const Checkout = () => {
                               src={productImage} 
                               alt={productName} 
                               className="w-full h-full object-contain" 
-                              crossOrigin="use-credentials"
                               onError={(e) => handleImageError(e, productImage)}
                             />
                           ) : (

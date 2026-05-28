@@ -391,7 +391,6 @@ const ProductList = () => {
                       alt={product.name}
                       className={"object-cover w-full h-full hover:scale-105 transition-transform duration-300 " + (product.stock === 0 ? 'brightness-50' : '')}
                       loading="lazy"
-                      crossOrigin="use-credentials"
                       onError={(e) => handleImageError(e, imageSrc)}
                     />
                     {product.stock === 0 && (

@@ -409,7 +409,6 @@ const ProductDetail = () => {
                 src={finalImageUrl} 
                 alt={product.name} 
                 className="w-full h-full object-cover relative z-10 rounded-2xl"
-                crossOrigin="use-credentials"
                 onLoad={(e) => {
                   e.target.parentElement.classList.remove('animate-pulse', 'bg-gray-200');
                 }}
@@ -512,7 +511,6 @@ const ProductDetail = () => {
                         src={toAbsoluteUrl(allImages[currentImageIndex])} 
                         alt={`${product.name} - ${currentImageIndex + 1}`} 
                         className="max-w-full max-h-full w-full h-full object-contain drop-shadow-2xl animate-fade-in" 
-                        crossOrigin="use-credentials"
                         onLoad={() => console.log(`[ImageDebug] Gallery success: ${allImages[currentImageIndex]}`)}
                         onError={(e) => handleImageError(e, toAbsoluteUrl(allImages[currentImageIndex]))}
                       />
@@ -563,7 +561,6 @@ const ProductDetail = () => {
                           src={toAbsoluteUrl(imgUrl)} 
                           alt={`${product.name} thumbnail ${index + 1}`} 
                           className="w-full h-full object-cover"
-                          crossOrigin="use-credentials"
                           onError={(e) => handleImageError(e, toAbsoluteUrl(imgUrl))}
                         />
                       </button>
@@ -720,7 +717,6 @@ const ProductDetail = () => {
                             src={toAbsoluteUrl(related.image_url)} 
                             alt={related.name} 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            crossOrigin="use-credentials"
                             onError={(e) => handleImageError(e, toAbsoluteUrl(related.image_url))}
                           />
                         ) : (

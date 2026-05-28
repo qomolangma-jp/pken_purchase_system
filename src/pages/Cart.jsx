@@ -558,7 +558,6 @@ const Cart = () => {
                               alt={productName} 
                               className="w-full h-full object-contain" 
                               style={{ width: '70px', height: 'auto' }} 
-                              crossOrigin="use-credentials"
                               onError={(e) => handleImageError(e, imageSrc)}
                             />
                           ) : (

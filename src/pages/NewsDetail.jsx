@@ -179,7 +179,6 @@ const NewsDetail = () => {
                   src={toAbsoluteUrl(newsItem.image_url)} 
                   alt={newsItem.title}
                   className="w-full h-auto max-h-[500px] object-contain mx-auto"
-                  crossOrigin="use-credentials"
                   onLoad={() => console.log(`[ImageDebug] NewsDetail success: ${newsItem.title}`)}
                   onError={(e) => handleImageError(e, toAbsoluteUrl(newsItem.image_url))}
                 />

@@ -312,7 +312,6 @@ const News = () => {
                               src={toAbsoluteUrl(newsItem.image_url)} 
                               alt={newsItem.title}
                               className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                              crossOrigin="use-credentials"
                               onLoad={() => {
                                 if (newsItem.id === filteredNews[0]?.id) {
                                   console.log(`[ImageDebug] News success: ${newsItem.title}`);
