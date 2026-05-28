@@ -11,33 +11,36 @@ import { getMyOrders } from '../utils/api';
 const PLACEHOLDER_IMAGE = '/no-image.png';
 
 /**
- * 画像のURLを正しい絶対パスに変換する
+ * 画像のURLを正しい絶対パスに変換し、Chromeキャッシュ対策を施す
  */
 const toAbsoluteUrl = (url) => {
-  if (!url || typeof url !== 'string') return ''; // 判定用に空文字を返す
+  if (!url || typeof url !== 'string') return '';
 
   let normalizedUrl = url.trim();
   
   // Chromebook/Mixed Content対策: httpをhttpsに強制変換
   normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
 
-  // すでに絶対URLの場合はそのまま
-  if (/^https?:\/\//i.test(normalizedUrl) || normalizedUrl.startsWith('data:')) {
-    return normalizedUrl;
+  let absoluteUrl = normalizedUrl;
+  if (!/^https?:\/\//i.test(normalizedUrl) && !normalizedUrl.startsWith('data:')) {
+    // 環境変数からベースURLを取得
+    const apiBase = (
+      import.meta.env.VITE_API_BASE_URL || 
+      import.meta.env.VITE_API_URL || 
+      ''
+    ).replace(/\/$/, '');
+
+    const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    absoluteUrl = `${apiBase}${path}`;
   }
 
-  // 環境変数からベースURLを取得
-  const apiBase = (
-    import.meta.env.VITE_API_BASE_URL || 
-    import.meta.env.VITE_API_URL || 
-    ''
-  ).replace(/\/$/, '');
-
-  const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
-  const absoluteUrl = `${apiBase}${path}`;
-
-  // デバッグ用: 必要に応じてコメントアウト
-  // console.log("[Debug] Generated Image URL:", absoluteUrl);
+  // Chromeキャッシュ対策（Cache Buster）: URLに日付ベースのクエリを付与
+  if (absoluteUrl && !absoluteUrl.startsWith('data:')) {
+    const separator = absoluteUrl.includes('?') ? '&' : '?';
+    // 日付を使用することで、日ごとにキャッシュを更新
+    const cb = new Date().getUTCDate();
+    absoluteUrl = `${absoluteUrl}${separator}cb=${cb}`;
+  }
   
   return absoluteUrl;
 };
@@ -387,10 +390,12 @@ const ProductList = () => {
                 >
                   <div className="w-full h-[66.6%] relative overflow-hidden bg-gray-50">
                     <img
+                      key={imageSrc}
                       src={imageSrc}
                       alt={product.name}
                       className={"object-cover w-full h-full hover:scale-105 transition-transform duration-300 " + (product.stock === 0 ? 'brightness-50' : '')}
                       loading="lazy"
+                      referrerPolicy="no-referrer"
                       onError={(e) => handleImageError(e, imageSrc)}
                     />
                     {product.stock === 0 && (

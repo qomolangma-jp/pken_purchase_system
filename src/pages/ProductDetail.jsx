@@ -13,7 +13,7 @@ const API_BASE_URL = (
 const PLACEHOLDER_IMAGE = '/no-image.png';
 
 /**
- * 画像のURLを正しい絶対パスに変換する
+ * 画像のURLを正しい絶対パスに変換し、Chromeキャッシュ対策を施す
  */
 const toAbsoluteUrl = (url) => {
   if (!url || typeof url !== 'string') return '';
@@ -23,12 +23,20 @@ const toAbsoluteUrl = (url) => {
   // Chromebook 対策: http を https に変換
   normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
 
-  if (/^https?:\/\//i.test(normalizedUrl) || normalizedUrl.startsWith('data:')) {
-    return normalizedUrl;
+  let absoluteUrl = normalizedUrl;
+  if (!/^https?:\/\//i.test(normalizedUrl) && !normalizedUrl.startsWith('data:')) {
+    const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    absoluteUrl = `${API_BASE_URL}${path}`;
   }
 
-  const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
-  return `${API_BASE_URL}${path}`;
+  // Chromeキャッシュ対策（Cache Buster）
+  if (absoluteUrl && !absoluteUrl.startsWith('data:')) {
+    const separator = absoluteUrl.includes('?') ? '&' : '?';
+    const cb = new Date().getUTCDate();
+    absoluteUrl = `${absoluteUrl}${separator}cb=${cb}`;
+  }
+
+  return absoluteUrl;
 };
 
 /**
@@ -406,9 +414,11 @@ const ProductDetail = () => {
           <div className="flex items-center gap-4 py-2">
             <div className="w-16 h-16 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 relative animate-pulse">
               <img 
+                key={finalImageUrl}
                 src={finalImageUrl} 
                 alt={product.name} 
                 className="w-full h-full object-cover relative z-10 rounded-2xl"
+                referrerPolicy="no-referrer"
                 onLoad={(e) => {
                   e.target.parentElement.classList.remove('animate-pulse', 'bg-gray-200');
                 }}
@@ -510,8 +520,7 @@ const ProductDetail = () => {
                         key={toAbsoluteUrl(allImages[currentImageIndex])}
                         src={toAbsoluteUrl(allImages[currentImageIndex])} 
                         alt={`${product.name} - ${currentImageIndex + 1}`} 
-                        className="max-w-full max-h-full w-full h-full object-contain drop-shadow-2xl animate-fade-in" 
-                        onLoad={() => console.log(`[ImageDebug] Gallery success: ${allImages[currentImageIndex]}`)}
+                        className="max-w-full max-h-full w-full h-full object-contain drop-shadow-2xl animate-fade-in"                         referrerPolicy="no-referrer"                        onLoad={() => console.log(`[ImageDebug] Gallery success: ${allImages[currentImageIndex]}`)}
                         onError={(e) => handleImageError(e, toAbsoluteUrl(allImages[currentImageIndex]))}
                       />
                     ) : (
@@ -558,9 +567,11 @@ const ProductDetail = () => {
                         }`}
                       >
                         <img 
+                          key={toAbsoluteUrl(imgUrl)}
                           src={toAbsoluteUrl(imgUrl)} 
                           alt={`${product.name} thumbnail ${index + 1}`} 
                           className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
                           onError={(e) => handleImageError(e, toAbsoluteUrl(imgUrl))}
                         />
                       </button>
@@ -714,9 +725,11 @@ const ProductDetail = () => {
                       <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200 relative flex items-center justify-center overflow-hidden">
                         {related.image_url ? (
                           <img 
+                            key={toAbsoluteUrl(related.image_url)}
                             src={toAbsoluteUrl(related.image_url)} 
                             alt={related.name} 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            referrerPolicy="no-referrer"
                             onError={(e) => handleImageError(e, toAbsoluteUrl(related.image_url))}
                           />
                         ) : (

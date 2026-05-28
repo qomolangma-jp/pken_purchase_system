@@ -11,7 +11,7 @@ const API_BASE_URL = (
 const PLACEHOLDER_IMAGE = '/no-image.png';
 
 /**
- * 画像のURLを正しい絶対パスに変換する
+ * 画像のURLを正しい絶対パスに変換し、Chromeキャッシュ対策を施す
  */
 const toAbsoluteUrl = (url) => {
   if (!url || typeof url !== 'string') return '';
@@ -21,12 +21,20 @@ const toAbsoluteUrl = (url) => {
   // Chromebook 対策: http を https に変換
   normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
 
-  if (/^https?:\/\//i.test(normalizedUrl) || normalizedUrl.startsWith('data:')) {
-    return normalizedUrl;
+  let absoluteUrl = normalizedUrl;
+  if (!/^https?:\/\//i.test(normalizedUrl) && !normalizedUrl.startsWith('data:')) {
+    const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    absoluteUrl = `${API_BASE_URL}${path}`;
   }
 
-  const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
-  return `${API_BASE_URL}${path}`;
+  // Chromeキャッシュ対策（Cache Buster）
+  if (absoluteUrl && !absoluteUrl.startsWith('data:')) {
+    const separator = absoluteUrl.includes('?') ? '&' : '?';
+    const cb = new Date().getUTCDate();
+    absoluteUrl = `${absoluteUrl}${separator}cb=${cb}`;
+  }
+
+  return absoluteUrl;
 };
 
 /**
@@ -554,10 +562,12 @@ const Cart = () => {
                         <Link to={`/products/${product?.id}`} className="w-[70px] h-[70px] md:w-24 md:h-24 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
                           {imageSrc ? (
                             <img 
+                              key={imageSrc}
                               src={imageSrc} 
                               alt={productName} 
                               className="w-full h-full object-contain" 
                               style={{ width: '70px', height: 'auto' }} 
+                              referrerPolicy="no-referrer"
                               onError={(e) => handleImageError(e, imageSrc)}
                             />
                           ) : (
