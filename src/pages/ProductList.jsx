@@ -31,9 +31,17 @@ const ProductList = () => {
   const [favorites, setFavorites] = useState([]);
   const [initialFavorites, setInitialFavorites] = useState([]); // 初回読み込み時のお気に入りを保持
   const [notification, setNotification] = useState(null);
-  const [isNotificationDismissed, setIsNotificationDismissed] = useState(
-    sessionStorage.getItem('notification_dismissed') === 'true'
-  );
+  const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
+
+  // ユーザー情報が確定したらlocalStorageから非表示設定を読み込む
+  useEffect(() => {
+    if (user) {
+      const userKey = user.id || user.student_id || 'default';
+      const dismissed = localStorage.getItem(`notification_dismissed_${userKey}`) === 'true';
+      setIsNotificationDismissed(dismissed);
+    }
+  }, [user]);
+
   const hasFetchedRef = useRef(false); // 一度だけ実行するためのフラグ
   const touchStartXRef = useRef(null);
   const touchStartYRef = useRef(null);
@@ -92,7 +100,10 @@ const ProductList = () => {
   const handleCloseNotification = () => {
     setNotification(null);
     setIsNotificationDismissed(true);
-    sessionStorage.setItem('notification_dismissed', 'true');
+    if (user) {
+      const userKey = user.id || user.student_id || 'default';
+      localStorage.setItem(`notification_dismissed_${userKey}`, 'true');
+    }
   };
   
   // マウント時にお気に入り情報を読み込む
