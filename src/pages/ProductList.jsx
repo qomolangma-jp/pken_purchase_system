@@ -48,6 +48,8 @@ const ProductList = () => {
   const touchStartYRef = useRef(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     if (authLoading || !user || isNotificationDismissed) {
       return;
     }
@@ -55,6 +57,16 @@ const ProductList = () => {
     const checkOrders = async () => {
       try {
         const orders = await getMyOrders();
+        
+        // すでに閉じられたか、マウント解除されていたら何もしない
+        if (!isMounted) return;
+        
+        // 注文チェック中に dismiss された場合を考慮して再度チェック
+        const userKey = user.id || user.student_id || 'default';
+        if (localStorage.getItem('notification_dismissed_' + userKey) === 'true') {
+          return;
+        }
+
         if (!orders || orders.length === 0) return;
 
         const alertOrders = orders.filter(o => o.status === '停止' || o.status === 'キャンセル');
@@ -84,14 +96,24 @@ const ProductList = () => {
     };
 
     checkOrders();
+
+    return () => {
+      isMounted = false;
+    };
   }, [authLoading, user, isNotificationDismissed]);
 
-  const handleCloseNotification = () => {
+  const handleCloseNotification = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    console.log('Notification closing...');
     setNotification(null);
     setIsNotificationDismissed(true);
     if (user) {
       const userKey = user.id || user.student_id || 'default';
       localStorage.setItem('notification_dismissed_' + userKey, 'true');
+      console.log('Notification dismissed for user:', userKey);
     }
   };
   
