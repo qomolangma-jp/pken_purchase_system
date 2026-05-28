@@ -13,13 +13,16 @@ const PLACEHOLDER_IMAGE = '/no-image.png';
  * 画像のURLを正しい絶対パスに変換する
  */
 const toAbsoluteUrl = (url) => {
-  if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
+  if (!url || typeof url !== 'string') return '';
 
-  const normalizedUrl = url.trim();
-  if (!normalizedUrl) return PLACEHOLDER_IMAGE;
+  let normalizedUrl = url.trim();
   
-  if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
-  if (normalizedUrl.startsWith('data:')) return normalizedUrl;
+  // Chromebook 対策: http を https に変換
+  normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
+
+  if (/^https?:\/\//i.test(normalizedUrl) || normalizedUrl.startsWith('data:')) {
+    return normalizedUrl;
+  }
 
   const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
   return `${API_BASE_URL}${path}`;
@@ -30,12 +33,9 @@ const toAbsoluteUrl = (url) => {
  */
 const handleImageError = (e, src) => {
   const target = e.currentTarget;
-  if (target.src.endsWith(PLACEHOLDER_IMAGE)) return;
+  if (target.src.includes(PLACEHOLDER_IMAGE)) return;
   
-  console.error(`[ImageLoadError] Failed to load: ${src}`, {
-    currentSrc: target.src,
-    naturalWidth: target.naturalWidth
-  });
+  console.warn(`[ImageLoadError] Failed to load: ${src}`);
   
   target.src = PLACEHOLDER_IMAGE;
   target.onerror = null;
@@ -208,7 +208,11 @@ const PurchaseHistory = () => {
                       const productPrice = product.price || detail.price || 0;
                       const quantity = detail.quantity || 1;
                       
-                      const productImage = toAbsoluteUrl(product.image_url || '');
+                      const productImage = toAbsoluteUrl(product.image_url || product.thumbnail_url || '');
+                      
+                      if (index === 0) {
+                        console.log(`[ImageDebug] History: ${productName}, Src: ${productImage}`);
+                      }
 
                       return (
                         <div key={detail.id || index} className="flex gap-4 py-3 items-center">

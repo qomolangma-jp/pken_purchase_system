@@ -16,13 +16,16 @@ const PLACEHOLDER_IMAGE = '/no-image.png';
  * 画像のURLを正しい絶対パスに変換する
  */
 const toAbsoluteUrl = (url) => {
-  if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
+  if (!url || typeof url !== 'string') return '';
 
-  const normalizedUrl = url.trim();
-  if (!normalizedUrl) return PLACEHOLDER_IMAGE;
+  let normalizedUrl = url.trim();
   
-  if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
-  if (normalizedUrl.startsWith('data:')) return normalizedUrl;
+  // Chromebook 対策: http を https に変換
+  normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
+
+  if (/^https?:\/\//i.test(normalizedUrl) || normalizedUrl.startsWith('data:')) {
+    return normalizedUrl;
+  }
 
   const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
   return `${API_BASE_URL}${path}`;
@@ -33,12 +36,9 @@ const toAbsoluteUrl = (url) => {
  */
 const handleImageError = (e, src) => {
   const target = e.currentTarget;
-  if (target.src.endsWith(PLACEHOLDER_IMAGE)) return;
+  if (target.src.includes(PLACEHOLDER_IMAGE)) return;
   
-  console.error(`[ImageLoadError] Failed to load: ${src}`, {
-    currentSrc: target.src,
-    naturalWidth: target.naturalWidth
-  });
+  console.warn(`[ImageLoadError] Failed to load: ${src}`);
   
   target.src = PLACEHOLDER_IMAGE;
   target.onerror = null;
@@ -395,6 +395,8 @@ const ProductDetail = () => {
       });
 
       const displayImageUrl = product.thumbnail_url || product.image_url || product.image_original_url || product.images?.[0]?.image_url;
+      const finalImageUrl = toAbsoluteUrl(displayImageUrl);
+      console.log(`[ImageDebug] ProductDetail: ${product.name}, Abs: ${finalImageUrl}`);
 
       // リッチなカート追加完了モーダルを表示
       openModal({
@@ -404,14 +406,14 @@ const ProductDetail = () => {
           <div className="flex items-center gap-4 py-2">
             <div className="w-16 h-16 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 relative animate-pulse">
               <img 
-                src={toAbsoluteUrl(displayImageUrl)} 
+                src={finalImageUrl} 
                 alt={product.name} 
                 className="w-full h-full object-cover relative z-10 rounded-2xl"
                 crossOrigin="use-credentials"
                 onLoad={(e) => {
                   e.target.parentElement.classList.remove('animate-pulse', 'bg-gray-200');
                 }}
-                onError={(e) => handleImageError(e, toAbsoluteUrl(displayImageUrl))}
+                onError={(e) => handleImageError(e, finalImageUrl)}
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -506,12 +508,13 @@ const ProductDetail = () => {
                   <div className="w-full h-full flex items-center justify-center p-2 transition-opacity duration-300">
                     {allImages.length > 0 ? (
                       <img 
-                        key={allImages[currentImageIndex]}
-                        src={allImages[currentImageIndex]} 
+                        key={toAbsoluteUrl(allImages[currentImageIndex])}
+                        src={toAbsoluteUrl(allImages[currentImageIndex])} 
                         alt={`${product.name} - ${currentImageIndex + 1}`} 
                         className="max-w-full max-h-full w-full h-full object-contain drop-shadow-2xl animate-fade-in" 
                         crossOrigin="use-credentials"
-                        onError={(e) => handleImageError(e, allImages[currentImageIndex])}
+                        onLoad={() => console.log(`[ImageDebug] Gallery success: ${allImages[currentImageIndex]}`)}
+                        onError={(e) => handleImageError(e, toAbsoluteUrl(allImages[currentImageIndex]))}
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-stone-400">
@@ -557,11 +560,11 @@ const ProductDetail = () => {
                         }`}
                       >
                         <img 
-                          src={imgUrl} 
+                          src={toAbsoluteUrl(imgUrl)} 
                           alt={`${product.name} thumbnail ${index + 1}`} 
                           className="w-full h-full object-cover"
                           crossOrigin="use-credentials"
-                          onError={(e) => handleImageError(e, imgUrl)}
+                          onError={(e) => handleImageError(e, toAbsoluteUrl(imgUrl))}
                         />
                       </button>
                     ))}
@@ -714,9 +717,11 @@ const ProductDetail = () => {
                       <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200 relative flex items-center justify-center overflow-hidden">
                         {related.image_url ? (
                           <img 
-                            src={related.image_url} 
+                            src={toAbsoluteUrl(related.image_url)} 
                             alt={related.name} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            crossOrigin="use-credentials"
+                            onError={(e) => handleImageError(e, toAbsoluteUrl(related.image_url))}
                           />
                         ) : (
                           <span className="text-stone-400 text-sm">No Image</span>

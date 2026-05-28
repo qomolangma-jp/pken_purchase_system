@@ -14,13 +14,16 @@ const PLACEHOLDER_IMAGE = '/no-image.png';
  * 画像のURLを正しい絶対パスに変換する
  */
 const toAbsoluteUrl = (url) => {
-  if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
+  if (!url || typeof url !== 'string') return '';
 
-  const normalizedUrl = url.trim();
-  if (!normalizedUrl) return PLACEHOLDER_IMAGE;
+  let normalizedUrl = url.trim();
   
-  if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
-  if (normalizedUrl.startsWith('data:')) return normalizedUrl;
+  // Chromebook 対策: http を https に変換
+  normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
+
+  if (/^https?:\/\//i.test(normalizedUrl) || normalizedUrl.startsWith('data:')) {
+    return normalizedUrl;
+  }
 
   const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
   return `${API_BASE_URL}${path}`;
@@ -31,12 +34,9 @@ const toAbsoluteUrl = (url) => {
  */
 const handleImageError = (e, src) => {
   const target = e.currentTarget;
-  if (target.src.endsWith(PLACEHOLDER_IMAGE)) return;
+  if (target.src.includes(PLACEHOLDER_IMAGE)) return;
   
-  console.error(`[ImageLoadError] Failed to load: ${src}`, {
-    currentSrc: target.src,
-    naturalWidth: target.naturalWidth
-  });
+  console.warn(`[ImageLoadError] Failed to load: ${src}`);
   
   target.src = PLACEHOLDER_IMAGE;
   target.onerror = null;
@@ -535,8 +535,15 @@ const Cart = () => {
                 const product = item?.product || item;
                 const productName = product?.name || '不明な商品';
                 const productPrice = product?.price || 0;
-                const productImage = product?.image_url || '';
+                const productImage = product?.image_url || product?.thumbnail_url || '';
                 const quantity = item?.quantity || 1;
+
+                const imageSrc = toAbsoluteUrl(productImage) || PLACEHOLDER_IMAGE;
+                
+                // デバッグ用
+                if (index === 0) {
+                  console.log(`[ImageDebug] Cart: ${productName}, Src: ${imageSrc}`);
+                }
 
                 return (
                   <React.Fragment key={item?.id || index}>
@@ -545,14 +552,14 @@ const Cart = () => {
                       <div className="flex gap-2 md:gap-4 items-start">
                         {/* Product Image - Thumbnail (70px → md:128px) */}
                         <Link to={`/products/${product?.id}`} className="w-[70px] h-[70px] md:w-24 md:h-24 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
-                          {productImage ? (
+                          {imageSrc ? (
                             <img 
-                              src={toAbsoluteUrl(productImage)} 
+                              src={imageSrc} 
                               alt={productName} 
                               className="w-full h-full object-contain" 
                               style={{ width: '70px', height: 'auto' }} 
                               crossOrigin="use-credentials"
-                              onError={(e) => handleImageError(e, toAbsoluteUrl(productImage))}
+                              onError={(e) => handleImageError(e, imageSrc)}
                             />
                           ) : (
                             <span className="text-xs text-stone-400">No Image</span>

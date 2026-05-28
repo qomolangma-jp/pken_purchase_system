@@ -14,14 +14,17 @@ const PLACEHOLDER_IMAGE = '/no-image.png';
  * 画像のURLを正しい絶対パスに変換する
  */
 const toAbsoluteUrl = (url) => {
-  if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
+  if (!url || typeof url !== 'string') return ''; // 判定用に空文字を返す
 
-  const normalizedUrl = url.trim();
-  if (!normalizedUrl) return PLACEHOLDER_IMAGE;
+  let normalizedUrl = url.trim();
   
-  // すでに絶対URLの場合はそのまま（ただしプロトコルがない場合は補完）
-  if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
-  if (normalizedUrl.startsWith('data:')) return normalizedUrl;
+  // Chromebook/Mixed Content対策: httpをhttpsに強制変換
+  normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
+
+  // すでに絶対URLの場合はそのまま
+  if (/^https?:\/\//i.test(normalizedUrl) || normalizedUrl.startsWith('data:')) {
+    return normalizedUrl;
+  }
 
   // 環境変数からベースURLを取得
   const apiBase = (
@@ -31,21 +34,24 @@ const toAbsoluteUrl = (url) => {
   ).replace(/\/$/, '');
 
   const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
-  return `${apiBase}${path}`;
+  const absoluteUrl = `${apiBase}${path}`;
+
+  // デバッグ用: 必要に応じてコメントアウト
+  // console.log("[Debug] Generated Image URL:", absoluteUrl);
+  
+  return absoluteUrl;
 };
 
 /**
  * 画像読み込み失敗時のハンドラー
  */
-const handleImageError = (e, src) => {
+const handleImageError = (e, originalSrc) => {
   const target = e.currentTarget;
-  if (target.src.endsWith(PLACEHOLDER_IMAGE)) return;
   
-  console.error(`[ImageLoadError] Failed to load: ${src}`, {
-    currentSrc: target.src,
-    naturalWidth: target.naturalWidth,
-    status: 'failed'
-  });
+  // すでにプレースホルダーなら何もしない
+  if (target.src.includes(PLACEHOLDER_IMAGE)) return;
+  
+  console.warn(`[ImageLoadError] Failed to load: ${originalSrc}. Falling back to ${PLACEHOLDER_IMAGE}`);
   
   target.src = PLACEHOLDER_IMAGE;
   target.onerror = null; // ループ防止
@@ -365,7 +371,13 @@ const ProductList = () => {
             </p>
           ) : (
             displayedProducts.map(product => {
-              const imageSrc = toAbsoluteUrl(product.thumbnail_url || product.image_url || product.image_original_url);
+              const rawPath = product.thumbnail_url || product.image_url || product.image_original_url;
+              const imageSrc = toAbsoluteUrl(rawPath) || PLACEHOLDER_IMAGE;
+
+              // 開発時のデバッグ用
+              if (product.id === displayedProducts[0]?.id) {
+                console.log(`[ImageDebug] Product: ${product.name}, URL: ${imageSrc}`);
+              }
 
               return (
                 <Link
