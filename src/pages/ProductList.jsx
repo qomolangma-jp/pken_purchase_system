@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
 import CategoryChips from '../components/CategoryChips';
 import SearchDrawer from '../components/SearchDrawer';
+import NotificationBar from '../components/NotificationBar';
+import { getMyOrders } from '../utils/api';
 
 const PLACEHOLDER_IMAGE = '/no-image.png';
 
@@ -28,12 +30,60 @@ const ProductList = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [initialFavorites, setInitialFavorites] = useState([]); // 初回読み込み時のお気に入りを保持
+  const [notification, setNotification] = useState(null);
+  const [isNotificationDismissed, setIsNotificationDismissed] = useState(
+    sessionStorage.getItem('notification_dismissed') === 'true'
+  );
   const hasFetchedRef = useRef(false); // 一度だけ実行するためのフラグ
   const touchStartXRef = useRef(null);
   const touchStartYRef = useRef(null);
   
   // 認証状態を取得
   const { loading: authLoading, user } = useAuth();
+
+  // 通知用の注文情報を取得
+  useEffect(() => {
+    // ログイン済み かつ 通知が閉じられていない場合に取得
+    if (authLoading || !user || isNotificationDismissed) {
+      return;
+    }
+
+    const checkOrders = async () => {
+      try {
+        const orders = await getMyOrders();
+        if (!orders || orders.length === 0) return;
+
+        // ステータスを確認
+        const stoppedOrders = orders.filter(o => o.status === '停止');
+        const cookedOrders = orders.filter(o => o.status === '調理済');
+
+        if (stoppedOrders.length > 0) {
+          setNotification({
+            message: '【重要】注文が停止されている商品があります。ご確認ください。',
+            type: 'warning'
+          });
+        } else if (cookedOrders.length > 0) {
+          const message = cookedOrders.length > 1 
+            ? `【お知らせ】調理済みの商品が${cookedOrders.length}件あります。お受け取りください。`
+            : '【お知らせ】調理済みの商品があります。お受け取りください。';
+          setNotification({
+            message,
+            type: 'info'
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch orders for notification:', error);
+      }
+    };
+
+    checkOrders();
+  }, [authLoading, user, isNotificationDismissed]);
+
+  const handleCloseNotification = () => {
+    setNotification(null);
+    setIsNotificationDismissed(true);
+    sessionStorage.setItem('notification_dismissed', 'true');
+  };
   
   // マウント時にお気に入り情報を読み込む
   useEffect(() => {
@@ -217,6 +267,15 @@ const ProductList = () => {
 
   return (
     <div style={{ backgroundColor: '#faf3e8', minHeight: '100vh', paddingTop: '0px' }}>
+
+      {/* 通知バー */}
+      {notification && (
+        <NotificationBar
+          message={notification.message}
+          type={notification.type}
+          onClose={handleCloseNotification}
+        />
+      )}
 
       {/* ─── カテゴリチップスバー ─── */}
       <CategoryChips
