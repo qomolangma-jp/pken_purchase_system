@@ -360,10 +360,10 @@ const Checkout = () => {
               <div className="bg-white rounded-lg shadow-md p-4 md:p-5 sticky top-24">
                 
                 {/* 注文サマリー */}
-                <div className="mb-6 pb-4 border-b border-stone-200">
-                  <h3 className="text-base font-bold text-stone-800 mb-3">注文サマリー</h3>
+                <div className="mb-4 pb-3 border-b border-stone-200">
+                  <h3 className="text-base font-bold text-stone-800 mb-2">注文サマリー</h3>
                   
-                  <div className="space-y-2 text-sm mb-4">
+                  <div className="space-y-1 text-sm mb-3">
                     <div className="flex justify-between">
                       <span className="text-stone-600">小計</span>
                       <span className="font-semibold">¥{getTotalPrice().toLocaleString()}</span>
@@ -383,8 +383,8 @@ const Checkout = () => {
                 </div>
 
                 {/* 支払い方法 */}
-                <div className="mb-6 pb-4 border-b border-stone-200">
-                  <h3 className="text-base font-bold text-stone-800 mb-3">支払い方法</h3>
+                <div className="mb-4 pb-3 border-b border-stone-200">
+                  <h3 className="text-base font-bold text-stone-800 mb-2">支払い方法</h3>
                   
                   <div className="space-y-2">
                     <label className="flex items-center p-2 border border-stone-300 rounded bg-stone-50">
@@ -405,14 +405,14 @@ const Checkout = () => {
                 <button
                   onClick={handleConfirmOrder}
                   disabled={isProcessing || cartItems.length === 0}
-                  className="w-full bg-mos-green hover:bg-mos-green-dark text-white font-bold py-3 px-4 rounded transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2.5 px-4 rounded transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing ? '処理中...' : '注文を確定する'}
                 </button>
 
                 <Link
                   to="/cart"
-                  className="block text-center text-stone-700 hover:text-stone-900 font-semibold py-2.5 px-3 border border-stone-300 rounded transition-all text-sm mt-2"
+                  className="block text-center text-stone-700 hover:text-stone-900 font-semibold py-2 px-3 border border-stone-300 rounded transition-all text-sm mt-1"
                 >
                   カートに戻る
                 </Link>
