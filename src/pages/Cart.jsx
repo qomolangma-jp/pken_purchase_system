@@ -3,7 +3,44 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_URL || 
+  ''
+).replace(/\/$/, '');
+const PLACEHOLDER_IMAGE = '/no-image.png';
+
+/**
+ * 画像のURLを正しい絶対パスに変換する
+ */
+const toAbsoluteUrl = (url) => {
+  if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
+
+  const normalizedUrl = url.trim();
+  if (!normalizedUrl) return PLACEHOLDER_IMAGE;
+  
+  if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
+  if (normalizedUrl.startsWith('data:')) return normalizedUrl;
+
+  const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+  return `${API_BASE_URL}${path}`;
+};
+
+/**
+ * 画像読み込み失敗時のハンドラー
+ */
+const handleImageError = (e, src) => {
+  const target = e.currentTarget;
+  if (target.src.endsWith(PLACEHOLDER_IMAGE)) return;
+  
+  console.error(`[ImageLoadError] Failed to load: ${src}`, {
+    currentSrc: target.src,
+    naturalWidth: target.naturalWidth
+  });
+  
+  target.src = PLACEHOLDER_IMAGE;
+  target.onerror = null;
+};
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -509,7 +546,14 @@ const Cart = () => {
                         {/* Product Image - Thumbnail (70px → md:128px) */}
                         <Link to={`/products/${product?.id}`} className="w-[70px] h-[70px] md:w-24 md:h-24 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
                           {productImage ? (
-                            <img src={productImage} alt={productName} className="w-full h-full object-contain" style={{ width: '70px', height: 'auto' }} />
+                            <img 
+                              src={toAbsoluteUrl(productImage)} 
+                              alt={productName} 
+                              className="w-full h-full object-contain" 
+                              style={{ width: '70px', height: 'auto' }} 
+                              crossOrigin="use-credentials"
+                              onError={(e) => handleImageError(e, toAbsoluteUrl(productImage))}
+                            />
                           ) : (
                             <span className="text-xs text-stone-400">No Image</span>
                           )}

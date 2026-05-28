@@ -10,15 +10,45 @@ import { getMyOrders } from '../utils/api';
 
 const PLACEHOLDER_IMAGE = '/no-image.png';
 
+/**
+ * 画像のURLを正しい絶対パスに変換する
+ */
 const toAbsoluteUrl = (url) => {
   if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
 
   const normalizedUrl = url.trim();
   if (!normalizedUrl) return PLACEHOLDER_IMAGE;
+  
+  // すでに絶対URLの場合はそのまま（ただしプロトコルがない場合は補完）
   if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
+  if (normalizedUrl.startsWith('data:')) return normalizedUrl;
 
-  const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-  return `${base}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
+  // 環境変数からベースURLを取得
+  const apiBase = (
+    import.meta.env.VITE_API_BASE_URL || 
+    import.meta.env.VITE_API_URL || 
+    ''
+  ).replace(/\/$/, '');
+
+  const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+  return `${apiBase}${path}`;
+};
+
+/**
+ * 画像読み込み失敗時のハンドラー
+ */
+const handleImageError = (e, src) => {
+  const target = e.currentTarget;
+  if (target.src.endsWith(PLACEHOLDER_IMAGE)) return;
+  
+  console.error(`[ImageLoadError] Failed to load: ${src}`, {
+    currentSrc: target.src,
+    naturalWidth: target.naturalWidth,
+    status: 'failed'
+  });
+  
+  target.src = PLACEHOLDER_IMAGE;
+  target.onerror = null; // ループ防止
 };
 
 const ProductList = () => {
@@ -349,10 +379,8 @@ const ProductList = () => {
                       alt={product.name}
                       className={"object-cover w-full h-full hover:scale-105 transition-transform duration-300 " + (product.stock === 0 ? 'brightness-50' : '')}
                       loading="lazy"
-                      onError={(e) => {
-                        if (e.currentTarget.src.endsWith(PLACEHOLDER_IMAGE)) return;
-                        e.currentTarget.src = PLACEHOLDER_IMAGE;
-                      }}
+                      crossOrigin="use-credentials"
+                      onError={(e) => handleImageError(e, imageSrc)}
                     />
                     {product.stock === 0 && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

@@ -2,6 +2,45 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_URL || 
+  ''
+).replace(/\/$/, '');
+const PLACEHOLDER_IMAGE = '/no-image.png';
+
+/**
+ * 画像のURLを正しい絶対パスに変換する
+ */
+const toAbsoluteUrl = (url) => {
+  if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
+
+  const normalizedUrl = url.trim();
+  if (!normalizedUrl) return PLACEHOLDER_IMAGE;
+  
+  if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
+  if (normalizedUrl.startsWith('data:')) return normalizedUrl;
+
+  const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+  return `${API_BASE_URL}${path}`;
+};
+
+/**
+ * 画像読み込み失敗時のハンドラー
+ */
+const handleImageError = (e, src) => {
+  const target = e.currentTarget;
+  if (target.src.endsWith(PLACEHOLDER_IMAGE)) return;
+  
+  console.error(`[ImageLoadError] Failed to load: ${src}`, {
+    currentSrc: target.src,
+    naturalWidth: target.naturalWidth
+  });
+  
+  target.src = PLACEHOLDER_IMAGE;
+  target.onerror = null;
+};
+
 const News = () => {
   const [newsList, setNewsList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -270,9 +309,11 @@ const News = () => {
                         {newsItem.image_url && (
                           <div className="w-full md:w-48 lg:w-64 h-48 md:h-auto flex-shrink-0 overflow-hidden bg-stone-100 border-b md:border-b-0 md:border-r border-stone-100">
                             <img 
-                              src={newsItem.image_url} 
+                              src={toAbsoluteUrl(newsItem.image_url)} 
                               alt={newsItem.title}
                               className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                              crossOrigin="use-credentials"
+                              onError={(e) => handleImageError(e, toAbsoluteUrl(newsItem.image_url))}
                             />
                           </div>
                         )}

@@ -5,17 +5,43 @@ import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_URL || 
+  ''
+).replace(/\/$/, '');
 const PLACEHOLDER_IMAGE = '/no-image.png';
 
+/**
+ * 画像のURLを正しい絶対パスに変換する
+ */
 const toAbsoluteUrl = (url) => {
   if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
 
   const normalizedUrl = url.trim();
   if (!normalizedUrl) return PLACEHOLDER_IMAGE;
+  
   if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
+  if (normalizedUrl.startsWith('data:')) return normalizedUrl;
 
-  return `${API_BASE_URL}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
+  const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+  return `${API_BASE_URL}${path}`;
+};
+
+/**
+ * 画像読み込み失敗時のハンドラー
+ */
+const handleImageError = (e, src) => {
+  const target = e.currentTarget;
+  if (target.src.endsWith(PLACEHOLDER_IMAGE)) return;
+  
+  console.error(`[ImageLoadError] Failed to load: ${src}`, {
+    currentSrc: target.src,
+    naturalWidth: target.naturalWidth
+  });
+  
+  target.src = PLACEHOLDER_IMAGE;
+  target.onerror = null;
 };
 
 const ProductDetail = () => {
@@ -381,15 +407,11 @@ const ProductDetail = () => {
                 src={toAbsoluteUrl(displayImageUrl)} 
                 alt={product.name} 
                 className="w-full h-full object-cover relative z-10 rounded-2xl"
+                crossOrigin="use-credentials"
                 onLoad={(e) => {
                   e.target.parentElement.classList.remove('animate-pulse', 'bg-gray-200');
                 }}
-                onError={(e) => {
-                  console.error('❌ 画像読み込み失敗:', e.target.src);
-                  e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
-                  e.target.parentElement.classList.remove('animate-pulse');
-                }}
+                onError={(e) => handleImageError(e, toAbsoluteUrl(displayImageUrl))}
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -488,10 +510,8 @@ const ProductDetail = () => {
                         src={allImages[currentImageIndex]} 
                         alt={`${product.name} - ${currentImageIndex + 1}`} 
                         className="max-w-full max-h-full w-full h-full object-contain drop-shadow-2xl animate-fade-in" 
-                        onError={(e) => {
-                          console.error('❌ Image load error:', allImages[currentImageIndex]);
-                          e.target.src = 'https://placehold.jp/24/cccccc/ffffff/400x400.png?text=Image%20Error';
-                        }}
+                        crossOrigin="use-credentials"
+                        onError={(e) => handleImageError(e, allImages[currentImageIndex])}
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-stone-400">
@@ -540,9 +560,8 @@ const ProductDetail = () => {
                           src={imgUrl} 
                           alt={`${product.name} thumbnail ${index + 1}`} 
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.src = 'https://placehold.jp/24/cccccc/ffffff/100x100.png?text=Error';
-                          }}
+                          crossOrigin="use-credentials"
+                          onError={(e) => handleImageError(e, imgUrl)}
                         />
                       </button>
                     ))}
