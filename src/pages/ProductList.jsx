@@ -63,7 +63,7 @@ const ProductList = () => {
 
         // ステータスを確認
         const alertOrders = orders.filter(o => o.status === '停止' || o.status === 'キャンセル');
-        const cookedOrders = orders.filter(o => o.status === '調理済');
+        const cookedOrders = orders.filter(o => o.status === '調理済' || o.status === '完了');
 
         if (alertOrders.length > 0) {
           const hasCancel = alertOrders.some(o => o.status === 'キャンセル');
@@ -82,8 +82,8 @@ const ProductList = () => {
           });
         } else if (cookedOrders.length > 0) {
           const message = cookedOrders.length > 1 
-            ? `【お知らせ】調理済みの商品が${cookedOrders.length}件あります。お受け取りください。`
-            : '【お知らせ】調理済みの商品があります。お受け取りください。';
+            ? `【お知らせ】調理済み、または完了した商品が${cookedOrders.length}件あります。お受け取りください。`
+            : '【お知らせ】調理済み、または完了した商品があります。お受け取りください。';
           setNotification({
             message,
             type: 'info'
