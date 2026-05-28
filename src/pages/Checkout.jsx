@@ -9,7 +9,7 @@ const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('credit_card');
+  const [paymentMethod, setPaymentMethod] = useState('paypay');
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
@@ -387,40 +387,16 @@ const Checkout = () => {
                   <h3 className="text-base font-bold text-stone-800 mb-3">支払い方法</h3>
                   
                   <div className="space-y-2">
-                    <label className="flex items-center p-2 border border-stone-300 rounded cursor-pointer hover:bg-stone-50 transition-colors" style={{ borderColor: paymentMethod === 'credit_card' ? '#16A34A' : 'inherit', backgroundColor: paymentMethod === 'credit_card' ? '#F0FDF4' : 'inherit' }}>
+                    <label className="flex items-center p-2 border border-stone-300 rounded bg-stone-50">
                       <input
                         type="radio"
                         name="payment_method"
-                        value="credit_card"
-                        checked={paymentMethod === 'credit_card'}
+                        value="paypay"
+                        checked={paymentMethod === 'paypay'}
                         onChange={(e) => setPaymentMethod(e.target.value)}
                         className="w-4 h-4"
                       />
-                      <span className="ml-2 text-sm font-medium text-stone-700">クレジットカード</span>
-                    </label>
-
-                    <label className="flex items-center p-2 border border-stone-300 rounded cursor-pointer hover:bg-stone-50 transition-colors" style={{ borderColor: paymentMethod === 'bank_transfer' ? '#16A34A' : 'inherit', backgroundColor: paymentMethod === 'bank_transfer' ? '#F0FDF4' : 'inherit' }}>
-                      <input
-                        type="radio"
-                        name="payment_method"
-                        value="bank_transfer"
-                        checked={paymentMethod === 'bank_transfer'}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-4 h-4"
-                      />
-                      <span className="ml-2 text-sm font-medium text-stone-700">銀行振込</span>
-                    </label>
-
-                    <label className="flex items-center p-2 border border-stone-300 rounded cursor-pointer hover:bg-stone-50 transition-colors" style={{ borderColor: paymentMethod === 'convenience_store' ? '#16A34A' : 'inherit', backgroundColor: paymentMethod === 'convenience_store' ? '#F0FDF4' : 'inherit' }}>
-                      <input
-                        type="radio"
-                        name="payment_method"
-                        value="convenience_store"
-                        checked={paymentMethod === 'convenience_store'}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-4 h-4"
-                      />
-                      <span className="ml-2 text-sm font-medium text-stone-700">コンビニ支払い</span>
+                      <span className="ml-2 text-sm font-medium text-stone-700">PayPay</span>
                     </label>
                   </div>
                 </div>
