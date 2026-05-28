@@ -33,6 +33,9 @@ const ProductList = () => {
   const [notification, setNotification] = useState(null);
   const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
 
+  // 認証状態を取得
+  const { loading: authLoading, user } = useAuth();
+
   // ユーザー情報が確定したらlocalStorageから非表示設定を読み込む
   useEffect(() => {
     if (user) {
@@ -41,13 +44,6 @@ const ProductList = () => {
       setIsNotificationDismissed(dismissed);
     }
   }, [user]);
-
-  const hasFetchedRef = useRef(false); // 一度だけ実行するためのフラグ
-  const touchStartXRef = useRef(null);
-  const touchStartYRef = useRef(null);
-  
-  // 認証状態を取得
-  const { loading: authLoading, user } = useAuth();
 
   // 通知用の注文情報を取得
   useEffect(() => {
