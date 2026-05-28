@@ -54,12 +54,22 @@ const ProductList = () => {
         if (!orders || orders.length === 0) return;
 
         // ステータスを確認
-        const stoppedOrders = orders.filter(o => o.status === '停止');
+        const alertOrders = orders.filter(o => o.status === '停止' || o.status === 'キャンセル');
         const cookedOrders = orders.filter(o => o.status === '調理済');
 
-        if (stoppedOrders.length > 0) {
+        if (alertOrders.length > 0) {
+          const hasCancel = alertOrders.some(o => o.status === 'キャンセル');
+          const hasStop = alertOrders.some(o => o.status === '停止');
+          
+          let message = '【重要】注文が停止されている商品があります。ご確認ください。';
+          if (hasCancel && hasStop) {
+            message = '【重要】キャンセルまたは停止された注文があります。ご確認ください。';
+          } else if (hasCancel) {
+            message = '【重要】キャンセルされた注文があります。ご確認ください。';
+          }
+
           setNotification({
-            message: '【重要】注文が停止されている商品があります。ご確認ください。',
+            message,
             type: 'warning'
           });
         } else if (cookedOrders.length > 0) {
