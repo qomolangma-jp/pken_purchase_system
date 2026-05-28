@@ -69,26 +69,40 @@ const ProductList = () => {
 
         if (!orders || orders.length === 0) return;
 
-        const alertOrders = orders.filter(o => o.status === '停止' || o.status === 'キャンセル');
-        const cookedOrders = orders.filter(o => o.status === '調理済' || o.status === '完了');
+        const alertOrders = orders.filter(o => {
+          const s = (o.status || '').trim();
+          return s === '停止' || s === 'キャンセル';
+        });
+        const cookedOrders = orders.filter(o => {
+          const s = (o.status || '').trim();
+          return s === '調理済' || s === '調理済み' || s === '調理完了' || s === '完了';
+        });
 
         if (alertOrders.length > 0) {
-          const hasCancel = alertOrders.some(o => o.status === 'キャンセル');
-          const hasStop = alertOrders.some(o => o.status === '停止');
+          const hasCancel = alertOrders.some(o => (o.status || '').trim() === 'キャンセル');
+          const hasStop = alertOrders.some(o => (o.status || '').trim() === '停止');
           
-          let message = '【重要】注文が停止されている商品があります。ご確認ください。';
+          let msg = '【重要】注文が停止されている商品があります。ご確認ください。';
           if (hasCancel && hasStop) {
-            message = '【重要】キャンセルまたは停止された注文があります。ご確認ください。';
+            msg = '【重要】キャンセルまたは停止された注文があります。ご確認ください。';
           } else if (hasCancel) {
-            message = '【重要】キャンセルされた注文があります。ご確認ください。';
+            msg = '【重要】キャンセルされた注文があります。ご確認ください。';
           }
 
-          setNotification({ message, type: 'warning' });
+          // 調理済みもある場合は追記
+          if (cookedOrders.length > 0) {
+            msg += '（受取可能な商品もあります）';
+          }
+
+          setNotification({ message: msg, type: 'warning' });
         } else if (cookedOrders.length > 0) {
-          const message = cookedOrders.length > 1 
+          const msg = cookedOrders.length > 1 
             ? '【お知らせ】調理済み、または完了した商品が' + cookedOrders.length + '件あります。お受け取りください。'
             : '【お知らせ】調理済み、または完了した商品があります。お受け取りください。';
-          setNotification({ message, type: 'info' });
+          setNotification({ message: msg, type: 'info' });
+        } else {
+          // 該当する注文がなくなったら通知を消す
+          setNotification(null);
         }
       } catch (error) {
         console.error('Failed to fetch orders for notification:', error);
@@ -96,9 +110,11 @@ const ProductList = () => {
     };
 
     checkOrders();
+    const intervalId = setInterval(checkOrders, 30000); // 30秒ごとに更新
 
     return () => {
       isMounted = false;
+      clearInterval(intervalId);
     };
   }, [authLoading, user, isNotificationDismissed]);
 
