@@ -335,7 +335,7 @@ const Checkout = () => {
                             <div>
                               <p className="text-xs text-stone-500">数量: {quantity}</p>
                             </div>
-                            <p className="text-sm md:text-base font-bold text-mos-green">
+                            <p className="text-base md:text-lg font-bold text-mos-green">
                               ¥{productPrice.toLocaleString()}
                             </p>
                           </div>
@@ -344,7 +344,7 @@ const Checkout = () => {
                         {/* Subtotal */}
                         <div className="flex flex-col items-end flex-shrink-0">
                           <p className="text-xs md:text-sm text-stone-600">小計</p>
-                          <p className="text-sm md:text-lg font-bold text-mos-green">
+                          <p className="text-lg md:text-xl font-bold text-mos-green">
                             ¥{(productPrice * quantity).toLocaleString()}
                           </p>
                         </div>
@@ -366,17 +366,17 @@ const Checkout = () => {
                   <div className="space-y-1 text-sm mb-3">
                     <div className="flex justify-between">
                       <span className="text-stone-600">小計</span>
-                      <span className="font-semibold">¥{getTotalPrice().toLocaleString()}</span>
+                      <span className="font-semibold text-base md:text-lg">¥{getTotalPrice().toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-stone-600">送料</span>
-                      <span className="font-semibold">¥0</span>
+                      <span className="font-semibold text-base md:text-lg">¥0</span>
                     </div>
                   </div>
 
                   <div className="flex justify-between text-base md:text-lg border-t pt-3">
                     <span className="font-bold text-stone-800">合計</span>
-                    <span className="font-bold text-mos-green text-lg md:text-2xl">
+                    <span className="font-bold text-mos-green text-xl md:text-3xl">
                       ¥{getTotalPrice().toLocaleString()}
                     </span>
                   </div>
