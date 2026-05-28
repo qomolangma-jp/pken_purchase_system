@@ -18,7 +18,7 @@ const toAbsoluteUrl = (url) => {
   if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
 
   const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-  return ${base};
+  return `${base}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
 };
 
 const ProductList = () => {
