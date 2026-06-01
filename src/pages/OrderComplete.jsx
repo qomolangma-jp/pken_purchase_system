@@ -171,33 +171,6 @@ const OrderComplete = () => {
             </div>
           </div>
 
-          {/* Store Information - MOS Burger style */}
-          <div className="bg-white rounded-lg shadow-md p-5 md:p-6 mb-6">
-            <h4 className="text-base md:text-lg font-bold text-stone-800 mb-4">
-              📍 受け取り店舗
-            </h4>
-            <div className="space-y-3 text-sm md:text-base">
-              <div>
-                <p className="text-xs text-stone-600 mb-1">店舗</p>
-                <p className="font-semibold text-stone-800">MOS バーガー 渋谷店</p>
-              </div>
-              <div>
-                <p className="text-xs text-stone-600 mb-1">住所</p>
-                <p className="font-semibold text-stone-800">
-                  東京都渋谷区道玄坂1-2-3
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-stone-600 mb-1">電話番号</p>
-                <p className="font-semibold text-stone-800">03-XXXX-XXXX</p>
-              </div>
-              <div>
-                <p className="text-xs text-stone-600 mb-1">営業時間</p>
-                <p className="font-semibold text-stone-800">10:00 - 23:00</p>
-              </div>
-            </div>
-          </div>
-
           {/* Next Steps */}
           <div className="bg-blue-50 border-l-4 border-blue-600 rounded p-4 md:p-5 mb-6">
             <h4 className="font-bold text-stone-800 mb-2 text-sm md:text-base">次のステップ</h4>
