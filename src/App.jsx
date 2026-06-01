@@ -19,6 +19,7 @@ import PurchaseHistory from './pages/PurchaseHistory';
 import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
 import ForgotPassword from './pages/ForgotPassword';
+import PayPayReturn from './pages/PayPayReturn';
 import './App.css';
 
 function App() {
@@ -114,6 +115,10 @@ function App() {
           <Route
             path="/auth/callback"
             element={<LineCallback />}
+          />
+          <Route
+            path="/paypay/return"
+            element={<PayPayReturn />}
           />
           </Routes>
         </main>
