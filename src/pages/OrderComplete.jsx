@@ -195,16 +195,6 @@ const OrderComplete = () => {
             </div>
           </div>
 
-          {/* Next Steps */}
-          <div className="bg-blue-50 border-l-4 border-blue-600 rounded p-4 md:p-5 mb-6">
-            <h4 className="font-bold text-stone-800 mb-2 text-sm md:text-base">次のステップ</h4>
-            <ol className="text-sm md:text-base text-stone-700 space-y-1 list-decimal list-inside">
-              <li>注文確認メールをご確認ください</li>
-              <li>店舗に商品を受け取りに来てください</li>
-              <li>商品をお受け取られたら、評価をお願いします</li>
-            </ol>
-          </div>
-
           {/* Action Buttons */}
           <div className="space-y-3 md:space-y-2">
             <Link
@@ -227,12 +217,6 @@ const OrderComplete = () => {
             >
               買い物を続ける
             </Link>
-          </div>
-
-          {/* Footer Note */}
-          <div className="text-center text-xs md:text-sm text-stone-600 mt-8 md:mt-10 pb-4">
-            <p>ご質問がある場合は、お気軽にお問い合わせください。</p>
-            <p className="mt-1">平日 9:00-18:00 (土日祝休)</p>
           </div>
 
         </div>
