@@ -83,7 +83,6 @@ const Checkout = () => {
       const response = await fetch(`${API_BASE_URL}/api/cart`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
       });
@@ -175,7 +174,9 @@ const Checkout = () => {
         const productId = product.id;
         
         try {
-          const prodResponse = await fetch(`${API_BASE_URL}/api/products/${productId}`);
+          const prodResponse = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
           if (!prodResponse.ok) throw new Error('在庫情報が取得できません');
           
           const prodData = await prodResponse.json();
@@ -304,7 +305,6 @@ const Checkout = () => {
           await fetch(`${API_BASE_URL}/api/cart`, {
             method: 'DELETE',
             headers: {
-              'Content-Type': 'application/json',
               'Authorization': `Bearer ${clearToken}`,
             },
           });
