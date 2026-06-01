@@ -7,6 +7,10 @@
     {
       "source": "/storage/:path*",
       "destination": "https://komapay.p-kmt.com/storage/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "functions": {
