@@ -127,17 +127,11 @@ const OrderComplete = () => {
             </div>
 
             {/* Order Status */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+            <div className="mb-5">
               <div className="p-3 md:p-4 bg-stone-50 rounded">
                 <p className="text-xs md:text-sm text-stone-600 mb-1">注文日時</p>
                 <p className="text-sm md:text-base font-semibold text-stone-800">
                   {new Date().toLocaleString('ja-JP')}
-                </p>
-              </div>
-              <div className="p-3 md:p-4 bg-stone-50 rounded">
-                <p className="text-xs md:text-sm text-stone-600 mb-1">ステータス</p>
-                <p className="text-sm md:text-base font-semibold text-mos-green">
-                  ✓ 確認済み
                 </p>
               </div>
             </div>
