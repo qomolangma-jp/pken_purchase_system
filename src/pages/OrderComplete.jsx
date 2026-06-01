@@ -72,6 +72,30 @@ const OrderComplete = () => {
     }
   };
 
+  const calculateTotalAmount = () => {
+    if (!orderData) {
+      return 0;
+    }
+
+    const rawTotal = orderData.total_amount ?? orderData.total_price;
+    const parsedTotal = Number(rawTotal);
+    if (!Number.isNaN(parsedTotal) && parsedTotal >= 0) {
+      return parsedTotal;
+    }
+
+    if (!orderData.items?.length) {
+      return 0;
+    }
+
+    return orderData.items.reduce((sum, item) => {
+      const unitPrice = Number(item.product?.price ?? item.price ?? 0) || 0;
+      const quantity = Number(item.quantity ?? 1) || 1;
+      return sum + unitPrice * quantity;
+    }, 0);
+  };
+
+  const totalAmount = calculateTotalAmount();
+
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
@@ -165,7 +189,7 @@ const OrderComplete = () => {
               <div className="flex justify-between items-center">
                 <span className="text-base md:text-lg font-bold text-stone-800">合計金額</span>
                 <span className="text-2xl md:text-3xl font-black text-mos-green">
-                  ¥{(orderData?.total_amount || '0').toLocaleString ? (orderData?.total_amount || '0').toLocaleString() : orderData?.total_amount || '0'}
+                  ¥{totalAmount.toLocaleString()}
                 </span>
               </div>
             </div>
