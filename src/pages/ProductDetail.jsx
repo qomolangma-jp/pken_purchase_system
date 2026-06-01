@@ -128,9 +128,7 @@ const ProductDetail = () => {
       try {
         // 認証トークンを取得
         const token = localStorage.getItem('authToken');
-        const headers = {
-          'Content-Type': 'application/json',
-        };
+        const headers = {};
         
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
@@ -193,9 +191,7 @@ const ProductDetail = () => {
     const fetchRelatedProducts = async (category) => {
       try {
         const token = localStorage.getItem('authToken');
-        const headers = {
-          'Content-Type': 'application/json',
-        };
+        const headers = {};
         
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;

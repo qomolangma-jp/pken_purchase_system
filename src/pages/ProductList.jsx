@@ -183,7 +183,7 @@ const ProductList = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem('authToken');
-        const headers = { 'Content-Type': 'application/json' };
+        const headers = {};
         if (token) headers['Authorization'] = 'Bearer ' + token;
 
         const apiUrl = (import.meta.env.VITE_API_BASE_URL || '') + '/api/products';

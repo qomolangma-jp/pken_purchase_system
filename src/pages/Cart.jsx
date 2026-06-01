@@ -84,7 +84,6 @@ const Cart = () => {
       const response = await fetch(`${API_BASE_URL}/api/cart`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',

@@ -37,7 +37,6 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch(`${(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')}/api/cart`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',

@@ -81,7 +81,6 @@ const PurchaseHistory = () => {
       const response = await fetch(`${API_BASE_URL}/api/orders/my/list`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',

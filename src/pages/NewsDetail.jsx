@@ -71,9 +71,6 @@ const NewsDetail = () => {
           `${import.meta.env.VITE_API_BASE_URL || ''}/api/news/${id}`,
           {
             method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
           }
         );
 

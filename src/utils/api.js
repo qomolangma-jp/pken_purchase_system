@@ -95,7 +95,6 @@ export const getSearchHistory = async () => {
     const response = await fetch(`${API_BASE_URL}/api/search-history?search_type=product`, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
       credentials: 'include',
@@ -193,7 +192,6 @@ export const getMyOrders = async () => {
     const response = await fetch(`${API_BASE_URL}/api/orders/my/list`, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
       credentials: 'include',

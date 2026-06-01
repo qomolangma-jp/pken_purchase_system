@@ -48,7 +48,6 @@ const OrderComplete = () => {
       const response = await fetch(`${API_BASE_URL}/api/orders/${id}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
       });
