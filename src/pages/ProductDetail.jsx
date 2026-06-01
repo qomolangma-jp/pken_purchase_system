@@ -5,17 +5,51 @@ import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_URL || 
+  ''
+).replace(/\/$/, '');
 const PLACEHOLDER_IMAGE = '/no-image.png';
 
+/**
+ * 画像のURLを正しい絶対パスに変換し、Chromeキャッシュ対策を施す
+ */
 const toAbsoluteUrl = (url) => {
-  if (!url || typeof url !== 'string') return PLACEHOLDER_IMAGE;
+  if (!url || typeof url !== 'string') return '';
 
-  const normalizedUrl = url.trim();
-  if (!normalizedUrl) return PLACEHOLDER_IMAGE;
-  if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
+  let normalizedUrl = url.trim();
+  
+  // Chromebook 対策: http を https に変換
+  normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
 
-  return `${API_BASE_URL}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
+  let absoluteUrl = normalizedUrl;
+  if (!/^https?:\/\//i.test(normalizedUrl) && !normalizedUrl.startsWith('data:')) {
+    const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    absoluteUrl = `${API_BASE_URL}${path}`;
+  }
+
+  // Chromeキャッシュ対策（Cache Buster）
+  if (absoluteUrl && !absoluteUrl.startsWith('data:')) {
+    const separator = absoluteUrl.includes('?') ? '&' : '?';
+    const cb = new Date().getUTCDate();
+    absoluteUrl = `${absoluteUrl}${separator}cb=${cb}`;
+  }
+
+  return absoluteUrl;
+};
+
+/**
+ * 画像読み込み失敗時のハンドラー
+ */
+const handleImageError = (e, src) => {
+  const target = e.currentTarget;
+  if (target.src.includes(PLACEHOLDER_IMAGE)) return;
+  
+  console.warn(`[ImageLoadError] Failed to load: ${src}`);
+  
+  target.src = PLACEHOLDER_IMAGE;
+  target.onerror = null;
 };
 
 const ProductDetail = () => {
@@ -369,6 +403,8 @@ const ProductDetail = () => {
       });
 
       const displayImageUrl = product.thumbnail_url || product.image_url || product.image_original_url || product.images?.[0]?.image_url;
+      const finalImageUrl = toAbsoluteUrl(displayImageUrl);
+      console.log(`[ImageDebug] ProductDetail: ${product.name}, Abs: ${finalImageUrl}`);
 
       // リッチなカート追加完了モーダルを表示
       openModal({
@@ -378,18 +414,15 @@ const ProductDetail = () => {
           <div className="flex items-center gap-4 py-2">
             <div className="w-16 h-16 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 relative animate-pulse">
               <img 
-                src={toAbsoluteUrl(displayImageUrl)} 
+                key={finalImageUrl}
+                src={finalImageUrl} 
                 alt={product.name} 
                 className="w-full h-full object-cover relative z-10 rounded-2xl"
+                referrerPolicy="no-referrer"
                 onLoad={(e) => {
                   e.target.parentElement.classList.remove('animate-pulse', 'bg-gray-200');
                 }}
-                onError={(e) => {
-                  console.error('❌ 画像読み込み失敗:', e.target.src);
-                  e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
-                  e.target.parentElement.classList.remove('animate-pulse');
-                }}
+                onError={(e) => handleImageError(e, finalImageUrl)}
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -484,14 +517,11 @@ const ProductDetail = () => {
                   <div className="w-full h-full flex items-center justify-center p-2 transition-opacity duration-300">
                     {allImages.length > 0 ? (
                       <img 
-                        key={allImages[currentImageIndex]}
-                        src={allImages[currentImageIndex]} 
+                        key={toAbsoluteUrl(allImages[currentImageIndex])}
+                        src={toAbsoluteUrl(allImages[currentImageIndex])} 
                         alt={`${product.name} - ${currentImageIndex + 1}`} 
-                        className="max-w-full max-h-full w-full h-full object-contain drop-shadow-2xl animate-fade-in" 
-                        onError={(e) => {
-                          console.error('❌ Image load error:', allImages[currentImageIndex]);
-                          e.target.src = 'https://placehold.jp/24/cccccc/ffffff/400x400.png?text=Image%20Error';
-                        }}
+                        className="max-w-full max-h-full w-full h-full object-contain drop-shadow-2xl animate-fade-in"                         referrerPolicy="no-referrer"                        onLoad={() => console.log(`[ImageDebug] Gallery success: ${allImages[currentImageIndex]}`)}
+                        onError={(e) => handleImageError(e, toAbsoluteUrl(allImages[currentImageIndex]))}
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-stone-400">
@@ -537,12 +567,12 @@ const ProductDetail = () => {
                         }`}
                       >
                         <img 
-                          src={imgUrl} 
+                          key={toAbsoluteUrl(imgUrl)}
+                          src={toAbsoluteUrl(imgUrl)} 
                           alt={`${product.name} thumbnail ${index + 1}`} 
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.src = 'https://placehold.jp/24/cccccc/ffffff/100x100.png?text=Error';
-                          }}
+                          referrerPolicy="no-referrer"
+                          onError={(e) => handleImageError(e, toAbsoluteUrl(imgUrl))}
                         />
                       </button>
                     ))}
@@ -695,9 +725,12 @@ const ProductDetail = () => {
                       <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200 relative flex items-center justify-center overflow-hidden">
                         {related.image_url ? (
                           <img 
-                            src={related.image_url} 
+                            key={toAbsoluteUrl(related.image_url)}
+                            src={toAbsoluteUrl(related.image_url)} 
                             alt={related.name} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => handleImageError(e, toAbsoluteUrl(related.image_url))}
                           />
                         ) : (
                           <span className="text-stone-400 text-sm">No Image</span>

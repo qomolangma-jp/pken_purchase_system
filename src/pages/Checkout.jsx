@@ -3,7 +3,52 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_URL || 
+  ''
+).replace(/\/$/, '');
+const PLACEHOLDER_IMAGE = '/no-image.png';
+
+/**
+ * 画像のURLを正しい絶対パスに変換し、Chromeキャッシュ対策を施す
+ */
+const toAbsoluteUrl = (url) => {
+  if (!url || typeof url !== 'string') return '';
+
+  let normalizedUrl = url.trim();
+  
+  // Chromebook 対策: http を https に変換
+  normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
+
+  let absoluteUrl = normalizedUrl;
+  if (!/^https?:\/\//i.test(normalizedUrl) && !normalizedUrl.startsWith('data:')) {
+    const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    absoluteUrl = `${API_BASE_URL}${path}`;
+  }
+
+  // Chromeキャッシュ対策（Cache Buster）
+  if (absoluteUrl && !absoluteUrl.startsWith('data:')) {
+    const separator = absoluteUrl.includes('?') ? '&' : '?';
+    const cb = new Date().getUTCDate();
+    absoluteUrl = `${absoluteUrl}${separator}cb=${cb}`;
+  }
+
+  return absoluteUrl;
+};
+
+/**
+ * 画像読み込み失敗時のハンドラー
+ */
+const handleImageError = (e, src) => {
+  const target = e.currentTarget;
+  if (target.src.includes(PLACEHOLDER_IMAGE)) return;
+  
+  console.warn(`[ImageLoadError] Failed to load: ${src}`);
+  
+  target.src = PLACEHOLDER_IMAGE;
+  target.onerror = null;
+};
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -308,16 +353,28 @@ const Checkout = () => {
                   const product = item.product || item;
                   const productName = product.name || 'Unknown Product';
                   const productPrice = product.price || 0;
-                  const productImage = product.image_url || '';
+                  const rawImageUrl = product.image_url || product.thumbnail_url || '';
+                  const productImage = toAbsoluteUrl(rawImageUrl);
                   const quantity = item.quantity || 1;
 
+                  if (index === 0) {
+                    console.log(`[ImageDebug] Checkout: ${productName}, Src: ${productImage}`);
+                  }
+                  
                   return (
                     <div key={item.id} className="bg-white rounded-lg shadow-sm p-3 md:p-4">
                       <div className="flex gap-3 md:gap-4 items-start">
                         {/* Product Image */}
                         <div className="w-[60px] h-[60px] md:w-24 md:h-24 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
                           {productImage ? (
-                            <img src={productImage} alt={productName} className="w-full h-full object-contain" />
+                            <img 
+                              key={productImage}
+                              src={productImage} 
+                              alt={productName} 
+                              className="w-full h-full object-contain" 
+                              referrerPolicy="no-referrer"
+                              onError={(e) => handleImageError(e, productImage)}
+                            />
                           ) : (
                             <span className="text-xs text-stone-400">No Image</span>
                           )}

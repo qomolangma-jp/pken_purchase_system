@@ -181,3 +181,44 @@ export const saveSearchHistory = async (keyword) => {
   }
 };
 
+/**
+ * 自分の注文リストを取得
+ * @returns {Promise<any[]>}
+ */
+export const getMyOrders = async () => {
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) return [];
+
+    const response = await fetch(`${API_BASE_URL}/api/orders/my/list`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    
+    // APIレスポンスの構造に応じて調整
+    if (data.success && data.data && Array.isArray(data.data.data)) {
+      return data.data.data;
+    } else if (data.data && Array.isArray(data.data.data)) {
+      return data.data.data;
+    } else if (data.data && Array.isArray(data.data)) {
+      return data.data;
+    } else if (Array.isArray(data)) {
+      return data;
+    }
+    return [];
+  } catch (error) {
+    console.error('注文取得エラー:', error);
+    return [];
+  }
+};
+

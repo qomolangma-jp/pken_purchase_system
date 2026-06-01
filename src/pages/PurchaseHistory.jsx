@@ -2,7 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_URL || 
+  ''
+).replace(/\/$/, '');
+const PLACEHOLDER_IMAGE = '/no-image.png';
+
+/**
+ * 画像のURLを正しい絶対パスに変換し、Chromeキャッシュ対策を施す
+ */
+const toAbsoluteUrl = (url) => {
+  if (!url || typeof url !== 'string') return '';
+
+  let normalizedUrl = url.trim();
+  
+  // Chromebook 対策: http を https に変換
+  normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
+
+  let absoluteUrl = normalizedUrl;
+  if (!/^https?:\/\//i.test(normalizedUrl) && !normalizedUrl.startsWith('data:')) {
+    const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    absoluteUrl = `${API_BASE_URL}${path}`;
+  }
+
+  // Chromeキャッシュ対策（Cache Buster）
+  if (absoluteUrl && !absoluteUrl.startsWith('data:')) {
+    const separator = absoluteUrl.includes('?') ? '&' : '?';
+    const cb = new Date().getUTCDate();
+    absoluteUrl = `${absoluteUrl}${separator}cb=${cb}`;
+  }
+
+  return absoluteUrl;
+};
+
+/**
+ * 画像読み込み失敗時のハンドラー
+ */
+const handleImageError = (e, src) => {
+  const target = e.currentTarget;
+  if (target.src.includes(PLACEHOLDER_IMAGE)) return;
+  
+  console.warn(`[ImageLoadError] Failed to load: ${src}`);
+  
+  target.src = PLACEHOLDER_IMAGE;
+  target.onerror = null;
+};
 
 const PurchaseHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -171,19 +216,11 @@ const PurchaseHistory = () => {
                       const productPrice = product.price || detail.price || 0;
                       const quantity = detail.quantity || 1;
                       
-                      // カート画面 ([src/pages/Cart.jsx](src/pages/Cart.jsx)) と同じURL解決ロジック
-                      const toAbsoluteUrl = (url) => {
-                        if (!url || typeof url !== 'string') return '';
-                        const normalizedUrl = url.trim();
-                        if (!normalizedUrl) return '';
-                        if (/^https?:\/\//i.test(normalizedUrl)) return normalizedUrl;
-                        
-                        // 明示的にバックエンドドメインを指定（環境変数が空の場合のフォールバック）
-                        const base = (import.meta.env.VITE_API_BASE_URL || 'https://komapay.p-kmt.com').replace(/\/$/, '');
-                        return `${base}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
-                      };
-
-                      const productImage = toAbsoluteUrl(product.image_url || '');
+                      const productImage = toAbsoluteUrl(product.image_url || product.thumbnail_url || '');
+                      
+                      if (index === 0) {
+                        console.log(`[ImageDebug] History: ${productName}, Src: ${productImage}`);
+                      }
 
                       return (
                         <div key={detail.id || index} className="flex gap-4 py-3 items-center">
@@ -193,7 +230,14 @@ const PurchaseHistory = () => {
                             className="w-16 h-16 md:w-20 md:h-20 bg-stone-100 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center hover:opacity-80 transition-opacity"
                           >
                             {productImage ? (
-                              <img src={productImage} alt={productName} className="w-full h-full object-contain" />
+                              <img 
+                                key={productImage}
+                                src={productImage} 
+                                alt={productName} 
+                                className="w-full h-full object-contain" 
+                                referrerPolicy="no-referrer"
+                                onError={(e) => handleImageError(e, productImage)}
+                              />
                             ) : (
                               <span className="text-xs text-stone-400">No Image</span>
                             )}

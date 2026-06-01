@@ -2,6 +2,53 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_URL || 
+  ''
+).replace(/\/$/, '');
+const PLACEHOLDER_IMAGE = '/no-image.png';
+
+/**
+ * 画像のURLを正しい絶対パスに変換し、Chromeキャッシュ対策を施す
+ */
+const toAbsoluteUrl = (url) => {
+  if (!url || typeof url !== 'string') return '';
+
+  let normalizedUrl = url.trim();
+  
+  // Chromebook 対策: http を https に変換
+  normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
+
+  let absoluteUrl = normalizedUrl;
+  if (!/^https?:\/\//i.test(normalizedUrl) && !normalizedUrl.startsWith('data:')) {
+    const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    absoluteUrl = `${API_BASE_URL}${path}`;
+  }
+
+  // Chromeキャッシュ対策（Cache Buster）
+  if (absoluteUrl && !absoluteUrl.startsWith('data:')) {
+    const separator = absoluteUrl.includes('?') ? '&' : '?';
+    const cb = new Date().getUTCDate();
+    absoluteUrl = `${absoluteUrl}${separator}cb=${cb}`;
+  }
+
+  return absoluteUrl;
+};
+
+/**
+ * 画像読み込み失敗時のハンドラー
+ */
+const handleImageError = (e, src) => {
+  const target = e.currentTarget;
+  if (target.src.includes(PLACEHOLDER_IMAGE)) return;
+  
+  console.warn(`[ImageLoadError] Failed to load news image: ${src}`);
+  
+  target.src = PLACEHOLDER_IMAGE;
+  target.onerror = null;
+};
+
 const News = () => {
   const [newsList, setNewsList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -269,11 +316,24 @@ const News = () => {
                         {/* Thumbnail Image */}
                         {newsItem.image_url && (
                           <div className="w-full md:w-48 lg:w-64 h-48 md:h-auto flex-shrink-0 overflow-hidden bg-stone-100 border-b md:border-b-0 md:border-r border-stone-100">
-                            <img 
-                              src={newsItem.image_url} 
-                              alt={newsItem.title}
-                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                            />
+                            {(() => {
+                              const imageSrc = toAbsoluteUrl(newsItem.image_url);
+                              return (
+                                <img 
+                                  key={imageSrc}
+                                  src={imageSrc} 
+                                  alt={newsItem.title}
+                                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                                  referrerPolicy="no-referrer"
+                                  onLoad={() => {
+                                    if (newsItem.id === filteredNews[0]?.id) {
+                                      console.log(`[ImageDebug] News success: ${newsItem.title}`);
+                                    }
+                                  }}
+                                  onError={(e) => handleImageError(e, imageSrc)}
+                                />
+                              );
+                            })()}
                           </div>
                         )}
 

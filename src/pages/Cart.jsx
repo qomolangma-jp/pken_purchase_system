@@ -3,7 +3,52 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_URL || 
+  ''
+).replace(/\/$/, '');
+const PLACEHOLDER_IMAGE = '/no-image.png';
+
+/**
+ * 画像のURLを正しい絶対パスに変換し、Chromeキャッシュ対策を施す
+ */
+const toAbsoluteUrl = (url) => {
+  if (!url || typeof url !== 'string') return '';
+
+  let normalizedUrl = url.trim();
+  
+  // Chromebook 対策: http を https に変換
+  normalizedUrl = normalizedUrl.replace(/^http:\/\//i, 'https://');
+
+  let absoluteUrl = normalizedUrl;
+  if (!/^https?:\/\//i.test(normalizedUrl) && !normalizedUrl.startsWith('data:')) {
+    const path = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    absoluteUrl = `${API_BASE_URL}${path}`;
+  }
+
+  // Chromeキャッシュ対策（Cache Buster）
+  if (absoluteUrl && !absoluteUrl.startsWith('data:')) {
+    const separator = absoluteUrl.includes('?') ? '&' : '?';
+    const cb = new Date().getUTCDate();
+    absoluteUrl = `${absoluteUrl}${separator}cb=${cb}`;
+  }
+
+  return absoluteUrl;
+};
+
+/**
+ * 画像読み込み失敗時のハンドラー
+ */
+const handleImageError = (e, src) => {
+  const target = e.currentTarget;
+  if (target.src.includes(PLACEHOLDER_IMAGE)) return;
+  
+  console.warn(`[ImageLoadError] Failed to load: ${src}`);
+  
+  target.src = PLACEHOLDER_IMAGE;
+  target.onerror = null;
+};
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -498,8 +543,15 @@ const Cart = () => {
                 const product = item?.product || item;
                 const productName = product?.name || '不明な商品';
                 const productPrice = product?.price || 0;
-                const productImage = product?.image_url || '';
+                const productImage = product?.image_url || product?.thumbnail_url || '';
                 const quantity = item?.quantity || 1;
+
+                const imageSrc = toAbsoluteUrl(productImage) || PLACEHOLDER_IMAGE;
+                
+                // デバッグ用
+                if (index === 0) {
+                  console.log(`[ImageDebug] Cart: ${productName}, Src: ${imageSrc}`);
+                }
 
                 return (
                   <React.Fragment key={item?.id || index}>
@@ -508,8 +560,16 @@ const Cart = () => {
                       <div className="flex gap-2 md:gap-4 items-start">
                         {/* Product Image - Thumbnail (70px → md:128px) */}
                         <Link to={`/products/${product?.id}`} className="w-[70px] h-[70px] md:w-24 md:h-24 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity" style={{ maxWidth: '70px', maxHeight: '70px' }}>
-                          {productImage ? (
-                            <img src={productImage} alt={productName} className="w-full h-full object-contain" style={{ width: '70px', height: 'auto' }} />
+                          {imageSrc ? (
+                            <img 
+                              key={imageSrc}
+                              src={imageSrc} 
+                              alt={productName} 
+                              className="w-full h-full object-contain" 
+                              style={{ width: '70px', height: 'auto' }} 
+                              referrerPolicy="no-referrer"
+                              onError={(e) => handleImageError(e, imageSrc)}
+                            />
                           ) : (
                             <span className="text-xs text-stone-400">No Image</span>
                           )}
