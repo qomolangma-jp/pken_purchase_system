@@ -154,7 +154,7 @@ const OrderComplete = () => {
             <div className="mb-5">
               <div className="p-3 md:p-4 bg-stone-50 rounded">
                 <p className="text-xs md:text-sm text-stone-600 mb-1">注文日時</p>
-                <p className="text-sm md:text-base font-semibold text-stone-800">
+                <p className="text-base md:text-lg font-semibold text-stone-800">
                   {new Date().toLocaleString('ja-JP')}
                 </p>
               </div>
