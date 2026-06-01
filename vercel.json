@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://komapay.p-kmt.com/api/:path*"
+    },
+    {
+      "source": "/storage/:path*",
+      "destination": "https://komapay.p-kmt.com/storage/:path*"
     }
   ],
   "functions": {
