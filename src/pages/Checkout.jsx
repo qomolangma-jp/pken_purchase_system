@@ -213,47 +213,89 @@ const Checkout = () => {
       }
       // -------------------------
 
-      // 注文データを構築（バックエンド仕様に準拠）
-      // items: product_id と quantity のみ
-      // 合計金額はサーバー側で計算
-      const orderData = {
-        items: cartItems.map(item => ({
-          product_id: item.product?.id || item.id,
-          quantity: item.quantity || 1,
-        })),
-      };
+      // 注文アイテムを構築
+      const items = cartItems.map(item => ({
+        product_id: item.product?.id || item.id,
+        quantity: item.quantity || 1,
+      }));
 
-      console.log('注文データを送信:', orderData);
+      let data;
 
-      // APIに注文を送信
-      const response = await fetch(`${API_BASE_URL}/api/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(orderData),
-      });
+      if (paymentMethod === 'paypay') {
+        // --- PayPay 支払いフロー ---
+        const paymentPayload = {
+          items,
+          payment_method: 'paypay',
+        };
 
-      console.log('注文送信 - API URL:', API_BASE_URL + '/api/orders');
-      console.log('注文送信 - ステータス:', response.status);
+        console.log('PayPay 支払いデータを送信:', paymentPayload);
 
-      const contentType = response.headers.get('content-type');
-      console.log('注文送信 - Content-Type:', contentType);
+        const paymentResponse = await fetch(`${API_BASE_URL}/api/payments/paypay`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(paymentPayload),
+        });
 
-      if (!contentType || !contentType.includes('application/json')) {
-        const responseText = await response.text();
-        console.error('JSON でないレスポンス:', responseText.substring(0, 500));
-        throw new Error('サーバーから正しい応答が得られませんでした');
+        console.log('PayPay 送信 - API URL:', API_BASE_URL + '/api/payments/paypay');
+        console.log('PayPay 送信 - ステータス:', paymentResponse.status);
+
+        const paymentContentType = paymentResponse.headers.get('content-type');
+        if (!paymentContentType || !paymentContentType.includes('application/json')) {
+          const responseText = await paymentResponse.text();
+          console.error('JSON でないレスポンス:', responseText.substring(0, 500));
+          throw new Error('サーバーから正しい応答が得られませんでした');
+        }
+
+        data = await paymentResponse.json();
+
+        if (!paymentResponse.ok) {
+          throw new Error(data.message || 'PayPay 支払い処理に失敗しました');
+        }
+
+        console.log('PayPay 支払いレスポンス:', data);
+
+        // PayPay の決済URLにリダイレクト
+        const redirectUrl = data.payment_url || data.data?.payment_url || data.redirect_url;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+          return;
+        }
+      } else {
+        // --- 通常注文フロー ---
+        const orderData = { items };
+
+        console.log('注文データを送信:', orderData);
+
+        const response = await fetch(`${API_BASE_URL}/api/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(orderData),
+        });
+
+        console.log('注文送信 - API URL:', API_BASE_URL + '/api/orders');
+        console.log('注文送信 - ステータス:', response.status);
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const responseText = await response.text();
+          console.error('JSON でないレスポンス:', responseText.substring(0, 500));
+          throw new Error('サーバーから正しい応答が得られませんでした');
+        }
+
+        data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || '注文処理に失敗しました');
+        }
+
+        console.log('注文完了:', data);
       }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || '注文処理に失敗しました');
-      }
-
-      console.log('注文完了:', data);
 
       // 注文成功後、カートをクリア
       try {
@@ -274,7 +316,7 @@ const Checkout = () => {
       }
 
       // 注文完了画面へ遷移（注文番号をパラメータで渡す）
-      const orderId = data.data?.id || data.order_id || Math.random().toString(36).substr(2, 9);
+      const orderId = data?.data?.id || data?.order_id || Math.random().toString(36).substr(2, 9);
       navigate(`/order-complete?order_id=${orderId}`);
 
     } catch (err) {
@@ -464,7 +506,11 @@ const Checkout = () => {
                   disabled={isProcessing || cartItems.length === 0}
                   className="w-full bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2.5 px-4 rounded transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isProcessing ? '処理中...' : '注文を確定する'}
+                  {isProcessing
+                    ? '処理中...'
+                    : paymentMethod === 'paypay'
+                    ? 'PayPayで支払う'
+                    : '注文を確定する'}
                 </button>
 
                 <Link
