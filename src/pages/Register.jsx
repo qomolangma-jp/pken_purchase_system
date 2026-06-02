@@ -11,6 +11,7 @@ const Register = () => {
   const [name2nd, setName2nd] = useState('');
   const [name1st, setName1st] = useState('');
   const [studentId, setStudentId] = useState('');
+  const [password, setPassword] = useState('');
   const [lineId, setLineId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,6 +54,7 @@ const Register = () => {
         name_2nd: name2nd,
         name_1st: name1st,
         student_id: studentId,
+        password: password,
         line_id: lineId,
       };
 
@@ -194,6 +196,19 @@ const Register = () => {
                 required
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-stone-600 ml-1" htmlFor="password">パスワード</label>
+              <input
+                id="password"
+                type="password"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all placeholder:text-stone-400 text-sm"
+                placeholder="8文字以上のパスワードを入力"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
