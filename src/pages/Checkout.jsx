@@ -151,6 +151,7 @@ const Checkout = () => {
     }
 
     setIsProcessing(true);
+    let isRedirecting = false;
 
     try {
       const token = localStorage.getItem('authToken');
@@ -261,6 +262,7 @@ const Checkout = () => {
         // PayPay の決済URLにリダイレクト
         const redirectUrl = data.payment_url || data.data?.payment_url || data.redirect_url;
         if (redirectUrl) {
+          isRedirecting = true;
           window.location.href = redirectUrl;
           return;
         }
@@ -328,7 +330,9 @@ const Checkout = () => {
         message: err.message || '注文処理に失敗しました。もう一度お試しください。'
       });
     } finally {
-      setIsProcessing(false);
+      if (!isRedirecting) {
+        setIsProcessing(false);
+      }
     }
   };
 
@@ -507,7 +511,7 @@ const Checkout = () => {
                   className="w-full bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2.5 px-4 rounded transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing
-                    ? '処理中...'
+                    ? (paymentMethod === 'paypay' ? 'PayPayへ移動中...' : '処理中...')
                     : paymentMethod === 'paypay'
                     ? 'PayPayで支払う'
                     : '注文を確定する'}
