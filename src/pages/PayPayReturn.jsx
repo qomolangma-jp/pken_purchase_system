@@ -37,10 +37,26 @@ const PayPayReturn = () => {
     });
 
     try {
-      const token = localStorage.getItem('authToken');
+      // 1. localStorage からトークンを取得（通常のケース）
+      let token = localStorage.getItem('authToken');
+      
+      // 2. localStorage にない場合は、sessionStorage から復元（PayPayリダイレクト後のケース）
+      if (!token) {
+        token = sessionStorage.getItem('paypay_session_token');
+        console.log('[PayPayReturn] sessionStorage からトークンを復元');
+        
+        // トークンが復元できた場合は、localStorage にも復元
+        if (token) {
+          localStorage.setItem('authToken', token);
+          console.log('[PayPayReturn] トークンを localStorage に復元');
+        }
+      }
+      
+      // 3. それでもトークンがない場合はエラー
       if (!token) {
         setStatus('error');
         setMessage('セッションが切れています。再度ログインしてください。');
+        console.error('[PayPayReturn] トークンが見つかりません');
         return;
       }
 
@@ -83,6 +99,11 @@ const PayPayReturn = () => {
       setOrderId(confirmedOrderId);
       setStatus('success');
 
+      // sessionStorage のPyPay関連データをクリア
+      sessionStorage.removeItem('paypay_session_token');
+      sessionStorage.removeItem('paypay_redirect_timestamp');
+      console.log('[PayPayReturn] セッション情報をクリア');
+
       // 3秒後に注文完了ページへ自動遷移
       setTimeout(() => {
         navigate(`/order-complete?order_id=${confirmedOrderId}`);
@@ -92,6 +113,10 @@ const PayPayReturn = () => {
       console.error('[PayPayReturn] エラー:', err);
       setStatus('error');
       setMessage(err.message || '決済処理中にエラーが発生しました');
+      
+      // エラー時もセッション情報をクリア
+      sessionStorage.removeItem('paypay_session_token');
+      sessionStorage.removeItem('paypay_redirect_timestamp');
     }
   };
 

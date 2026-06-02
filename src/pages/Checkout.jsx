@@ -263,6 +263,10 @@ const Checkout = () => {
         const redirectUrl = data.payment_url || data.data?.payment_url || data.redirect_url;
         if (redirectUrl) {
           isRedirecting = true;
+          // PayPayから戻ってくる際にセッションが保持されるように、sessionStorage にトークンを保存
+          sessionStorage.setItem('paypay_session_token', token);
+          sessionStorage.setItem('paypay_redirect_timestamp', Date.now().toString());
+          console.log('[Checkout] PayPay リダイレクト前: セッションを sessionStorage に保存');
           window.location.href = redirectUrl;
           return;
         }
