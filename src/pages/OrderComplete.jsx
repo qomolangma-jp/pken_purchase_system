@@ -5,11 +5,31 @@ import { Check } from 'lucide-react';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
+const normalizeOrder = (rawOrder) => {
+  if (!rawOrder) return null;
+  const base = rawOrder.data ?? rawOrder.order ?? rawOrder;
+  const items = base.items ?? base.order_items ?? base.order_details ?? base.details ?? [];
+  return {
+    ...base,
+    items,
+  };
+};
+
+const extractOrdersArray = (payload) => {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  if (payload.data && Array.isArray(payload.data)) return payload.data;
+  if (payload.data && payload.data.data && Array.isArray(payload.data.data)) return payload.data.data;
+  if (payload.success && payload.data && Array.isArray(payload.data.data)) return payload.data.data;
+  return [];
+};
+
 const OrderComplete = () => {
   const [searchParams] = useSearchParams();
   const [orderId, setOrderId] = useState('');
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
 
@@ -51,8 +71,23 @@ const OrderComplete = () => {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
+        setError('ログイン情報が見つかりませんでした。再度ログインしてください。');
         setLoading(false);
         return;
+      }
+
+      const persistedOrderJson = sessionStorage.getItem('paypay_order_data');
+      if (persistedOrderJson) {
+        sessionStorage.removeItem('paypay_order_data');
+        try {
+          const persistedOrder = JSON.parse(persistedOrderJson);
+          const normalizedPersisted = normalizeOrder(persistedOrder);
+          if (normalizedPersisted) {
+            setOrderData(normalizedPersisted);
+          }
+        } catch (parseErr) {
+          console.warn('Persisted order JSON parse error', parseErr);
+        }
       }
 
       const response = await fetch(`${API_BASE_URL}/api/orders/${id}`, {
@@ -63,22 +98,56 @@ const OrderComplete = () => {
       });
 
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        console.warn('サーバーから正しい応答が得られませんでした');
-        setLoading(false);
+      const text = await response.text();
+      let data;
+
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = JSON.parse(text);
+        } catch (parseError) {
+          console.warn('Order complete response JSON parse error', parseError, text);
+        }
+      } else {
+        console.warn('サーバーから正しい応答が得られませんでした', text);
+      }
+
+      if (response.ok && data) {
+        const normalized = normalizeOrder(data);
+        if (normalized) {
+          setOrderData(normalized);
+          return;
+        }
+      }
+
+      console.warn('Order detail fetch failed, fallback to list', response.status, text);
+
+      const listResponse = await fetch(`${API_BASE_URL}/api/orders/my/list`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const listContentType = listResponse.headers.get('content-type');
+      if (!listContentType || !listContentType.includes('application/json')) {
+        const listText = await listResponse.text();
+        console.error('Order list response is not JSON:', listText);
+        throw new Error('注文データの取得に失敗しました');
+      }
+
+      const listData = await listResponse.json();
+      const orders = extractOrdersArray(listData);
+      const matchedOrder = orders.find((order) => String(order.id) === String(id) || String(order.order_id) === String(id));
+
+      if (matchedOrder) {
+        setOrderData(normalizeOrder(matchedOrder));
         return;
       }
 
-      const data = await response.json();
-      const normalized = normalizeOrder(data);
-
-      if (response.ok && normalized) {
-        setOrderData(normalized);
-      } else {
-        console.warn('注文データが取得できませんでした', data);
-      }
+      throw new Error('注文データが見つかりませんでした');
     } catch (err) {
       console.error('Order details fetch error:', err);
+      setError(err.message || '注文データの取得に失敗しました');
     } finally {
       setLoading(false);
     }
@@ -161,6 +230,13 @@ const OrderComplete = () => {
                 {orderId}
               </p>
             </div>
+
+            {error && (
+              <div className="mb-5 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                <p className="text-sm font-semibold text-red-700">注文データの取得に問題がありました</p>
+                <p className="text-sm text-red-600 mt-1">{error}</p>
+              </div>
+            )}
 
             {/* Order Status */}
             <div className="mb-5">

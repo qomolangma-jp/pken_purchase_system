@@ -96,6 +96,8 @@ const PayPayReturn = () => {
       await fetchCartCount();
 
       const confirmedOrderId = data.data?.id || data.order_id || merchantPaymentId;
+      const preservedOrderData = data.data ?? data.order ?? data;
+      sessionStorage.setItem('paypay_order_data', JSON.stringify(preservedOrderData));
 
       // sessionStorage のPayPay関連データをクリア
       sessionStorage.removeItem('paypay_session_token');
