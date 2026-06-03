@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
@@ -73,6 +73,16 @@ const ProductList = () => {
   const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
 
   const { loading: authLoading, user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.resetFilters) {
+      setActiveCategory('すべて');
+      setSearchQuery('');
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -266,6 +276,9 @@ const ProductList = () => {
 
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
+    if (category === 'すべて') {
+      setSearchQuery('');
+    }
     if (category === 'お気に入り') {
       setFavorites(getFavorites());
     }
@@ -354,7 +367,10 @@ const ProductList = () => {
           </h1>
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery('')}
+              onClick={() => {
+                setSearchQuery('');
+                setActiveCategory('すべて');
+              }}
               className="px-3 py-1 text-sm bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold rounded-full transition-colors flex items-center gap-1 shadow-sm"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>

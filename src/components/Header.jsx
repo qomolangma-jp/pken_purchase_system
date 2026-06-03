@@ -40,6 +40,7 @@ const Header = () => {
           {/* 1. コマペイのロゴ */}
           <Link
             to="/"
+            state={{ resetFilters: true }}
             aria-label="ホームへ"
             className="flex items-center"
           >
@@ -144,6 +145,7 @@ const Header = () => {
               <div className="space-y-2">
                 <Link 
                   to="/" 
+                  state={{ resetFilters: true }}
                   className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
