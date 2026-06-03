@@ -84,6 +84,8 @@ const OrderComplete = () => {
           const normalizedPersisted = normalizeOrder(persistedOrder);
           if (normalizedPersisted) {
             setOrderData(normalizedPersisted);
+            setLoading(false);
+            return;
           }
         } catch (parseErr) {
           console.warn('Persisted order JSON parse error', parseErr);
