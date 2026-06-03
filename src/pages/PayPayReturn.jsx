@@ -96,18 +96,15 @@ const PayPayReturn = () => {
       await fetchCartCount();
 
       const confirmedOrderId = data.data?.id || data.order_id || merchantPaymentId;
-      setOrderId(confirmedOrderId);
-      setStatus('success');
 
-      // sessionStorage のPyPay関連データをクリア
+      // sessionStorage のPayPay関連データをクリア
       sessionStorage.removeItem('paypay_session_token');
       sessionStorage.removeItem('paypay_redirect_timestamp');
       console.log('[PayPayReturn] セッション情報をクリア');
 
-      // 3秒後に注文完了ページへ自動遷移
-      setTimeout(() => {
-        navigate(`/order-complete?order_id=${confirmedOrderId}`);
-      }, 3000);
+      // 直接注文完了ページへ遷移
+      navigate(`/order-complete?order_id=${confirmedOrderId}`, { replace: true });
+      return;
 
     } catch (err) {
       console.error('[PayPayReturn] エラー:', err);
