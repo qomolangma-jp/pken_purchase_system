@@ -201,7 +201,7 @@ const News = () => {
         <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Section */}
           <div className="mb-10 text-center">
-            <h1 className="page-title text-3xl md:text-4xl lg:text-6xl font-bold text-stone-800 mb-3">ニュース</h1>
+            <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-stone-800 mb-3">ニュース</h1>
             <p className="text-stone-600 text-base md:text-lg mb-8">最新のお知らせやニュースをお伝えします</p>
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
