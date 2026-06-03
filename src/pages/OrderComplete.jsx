@@ -37,6 +37,16 @@ const OrderComplete = () => {
     fetchCartCount();
   }, [authLoading, isAuthenticated, user, searchParams, navigate, fetchCartCount]);
 
+  const normalizeOrder = (rawOrder) => {
+    if (!rawOrder) return null;
+    const base = rawOrder.data || rawOrder.order || rawOrder;
+    const items = base.items || base.order_items || base.order_details || base.details || [];
+    return {
+      ...base,
+      items,
+    };
+  };
+
   const fetchOrderDetails = async (id) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -60,9 +70,12 @@ const OrderComplete = () => {
       }
 
       const data = await response.json();
+      const normalized = normalizeOrder(data);
 
-      if (response.ok && data.data) {
-        setOrderData(data.data);
+      if (response.ok && normalized) {
+        setOrderData(normalized);
+      } else {
+        console.warn('注文データが取得できませんでした', data);
       }
     } catch (err) {
       console.error('Order details fetch error:', err);
@@ -76,7 +89,7 @@ const OrderComplete = () => {
       return 0;
     }
 
-    const rawTotal = orderData.total_amount ?? orderData.total_price;
+    const rawTotal = orderData.total_price ?? orderData.total_amount ?? orderData.amount ?? orderData.total;
     const parsedTotal = Number(rawTotal);
     if (!Number.isNaN(parsedTotal) && parsedTotal >= 0) {
       return parsedTotal;
@@ -87,8 +100,8 @@ const OrderComplete = () => {
     }
 
     return orderData.items.reduce((sum, item) => {
-      const unitPrice = Number(item.product?.price ?? item.price ?? 0) || 0;
-      const quantity = Number(item.quantity ?? 1) || 1;
+      const unitPrice = Number(item.price ?? item.unit_price ?? item.product?.price ?? 0) || 0;
+      const quantity = Number(item.quantity ?? item.qty ?? 1) || 1;
       return sum + unitPrice * quantity;
     }, 0);
   };
