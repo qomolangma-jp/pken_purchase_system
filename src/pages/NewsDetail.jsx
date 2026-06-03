@@ -108,7 +108,7 @@ const NewsDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-stone-50 pt-20 px-8">
+      <div className="min-h-screen flex justify-center items-center bg-stone-50 px-8">
         <p className="text-stone-600">読み込み中...</p>
       </div>
     );
@@ -116,7 +116,7 @@ const NewsDetail = () => {
 
   if (error || !newsItem) {
     return (
-      <div className="min-h-screen bg-stone-50 pt-20">
+      <div className="min-h-screen bg-stone-50">
         <main className="main-content min-h-screen pb-20 w-full flex flex-col items-center">
           <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center py-12">
@@ -137,7 +137,7 @@ const NewsDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-20">
+    <div className="min-h-screen bg-stone-50">
       <main className="main-content pb-20 w-full flex flex-col items-center">
         <article className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Button */}
