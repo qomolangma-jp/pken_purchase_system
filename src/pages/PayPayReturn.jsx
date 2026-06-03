@@ -92,12 +92,25 @@ const PayPayReturn = () => {
 
       console.log('[PayPayReturn] 注文確定:', data);
 
-      // カート件数を更新
-      await fetchCartCount();
-
       const confirmedOrderId = data.data?.id || data.order_id || merchantPaymentId;
       const preservedOrderData = data.data ?? data.order ?? data;
       sessionStorage.setItem('paypay_order_data', JSON.stringify(preservedOrderData));
+
+      // PayPay 注文確定後、バックエンドのカートをクリア
+      try {
+        await fetch(`${API_BASE_URL}/api/cart`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        console.log('[PayPayReturn] カートをクリアしました');
+      } catch (clearErr) {
+        console.warn('[PayPayReturn] カートクリアエラー:', clearErr);
+      }
+
+      // カート件数を更新
+      await fetchCartCount();
 
       // sessionStorage のPayPay関連データをクリア
       sessionStorage.removeItem('paypay_session_token');
