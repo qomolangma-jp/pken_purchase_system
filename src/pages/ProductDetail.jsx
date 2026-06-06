@@ -69,6 +69,7 @@ const ProductDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [addingToCart, setAddingToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   console.log('✅ State initialized');
@@ -174,6 +175,11 @@ const ProductDetail = () => {
         console.log('Product data (full):', JSON.stringify(productData, null, 2).substring(0, 500));
         console.log('Raw description:', JSON.stringify(productData.description));
         setProduct(productData);
+
+        // デフォルトのサイズを設定
+        if (productData.size_options && Array.isArray(productData.size_options) && productData.size_options.length > 0) {
+          setSelectedSize(productData.size_options[0].label);
+        }
         
         // 関連商品の取得
         const relatedCategoryKey = getCategoryDisplayName(productData);
@@ -263,6 +269,7 @@ const ProductDetail = () => {
       const requestData = {
         product_id: parseInt(id),
         quantity: quantity,
+        size: selectedSize,
       };
 
       console.log('トークン:', token ? `あり (長さ: ${token.length}, 最初の10文字: ${token.substring(0, 10)}...)` : 'なし');
@@ -280,9 +287,11 @@ const ProductDetail = () => {
           const items = cartResult.data?.items || cartResult;
           if (Array.isArray(items)) {
             console.log('カート全アイテムデータ (デバッグ用):', items);
-            existingCartItem = items.find(item => 
-              (item.product?.id || item.product_id) === parseInt(id)
-            );
+            existingCartItem = items.find(item => {
+              const matchesId = (item.product?.id || item.product_id) === parseInt(id);
+              const matchesSize = (item.size || null) === (selectedSize || null);
+              return matchesId && matchesSize;
+            });
           }
         }
       } catch (e) {
@@ -500,6 +509,9 @@ const ProductDetail = () => {
     return 'text-stone-700';
   };
 
+  const selectedSizeInfo = product.size_options?.find(opt => opt.label === selectedSize);
+  const adjustedPrice = (product.price || 0) + (selectedSizeInfo?.price_adjustment || 0);
+
  return (
     <div className="min-h-screen bg-white md:bg-stone-50 md:pt-8 lg:pt-12">
       {/* Main Content */}
@@ -617,8 +629,8 @@ const ProductDetail = () => {
                 {/* 価格表示 (商品説明より先に表示、スマホ版は右寄せ・背景なし) */}
                 <div className="mb-6 flex justify-end md:justify-start">
                   <div className="flex items-baseline gap-1 md:gap-3 bg-transparent md:bg-gradient-to-br md:from-green-50 md:via-emerald-50 md:to-teal-50 md:p-6 md:rounded-2xl md:border-2 md:border-mos-green md:shadow-md">
-                    <span className="text-5xl sm:text-6xl md:text-7xl font-black text-mos-green">
-                      ¥{product.price ? product.price.toLocaleString() : '-'}
+                    <span className="text-4xl sm:text-5xl md:text-6xl font-black text-mos-green">
+                      ¥{adjustedPrice.toLocaleString()}
                     </span>
                     <span className="text-base sm:text-lg md:text-xl text-stone-600 font-semibold text-[12px] md:text-xl">税込</span>
                   </div>
@@ -630,6 +642,33 @@ const ProductDetail = () => {
                     <p className="text-sm md:text-base text-stone-600 leading-relaxed bg-stone-50 p-5 rounded-xl border border-stone-200">
                       {descriptionText}
                     </p>
+                  </div>
+                )}
+
+                {/* サイズ選択 */}
+                {product.size_options && product.size_options.length > 0 && (
+                  <div className="mb-6 md:mb-8">
+                    <label className="block text-base md:text-lg font-bold text-stone-900 mb-3 md:mb-4">サイズを選択</label>
+                    <div className="flex flex-wrap gap-2">
+                      {product.size_options.map((opt) => (
+                        <button
+                          key={opt.label}
+                          onClick={() => setSelectedSize(opt.label)}
+                          className={`px-6 py-2 rounded-xl border-2 font-bold transition-all duration-200 min-w-[100px] flex flex-col items-center ${
+                            selectedSize === opt.label
+                              ? 'border-mos-green bg-green-50 text-mos-green'
+                              : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300'
+                          }`}
+                        >
+                          <span className="text-base">{opt.label}</span>
+                          {opt.price_adjustment !== 0 && (
+                            <span className="text-[10px] md:text-xs">
+                              ({opt.price_adjustment > 0 ? '+' : ''}{opt.price_adjustment}円)
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 

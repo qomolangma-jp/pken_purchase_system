@@ -134,9 +134,15 @@ const Checkout = () => {
 
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => {
-      const price = item.price || item.product?.price || 0;
+      const product = item.product || item;
+      const basePrice = product.price || 0;
       const quantity = item.quantity || 1;
-      return total + (price * quantity);
+      
+      // サイズ調整額の計算
+      const sizeOption = (product.size_options || []).find(opt => opt.label === item.size);
+      const priceAdjustment = sizeOption?.price_adjustment || 0;
+      
+      return total + ((basePrice + priceAdjustment) * quantity);
     }, 0);
   };
 
@@ -219,6 +225,7 @@ const Checkout = () => {
       const items = cartItems.map(item => ({
         product_id: item.product?.id || item.id,
         quantity: item.quantity || 1,
+        size: item.size,
       }));
 
       let data;
@@ -402,7 +409,13 @@ const Checkout = () => {
                 {cartItems.map((item, index) => {
                   const product = item.product || item;
                   const productName = product.name || 'Unknown Product';
-                  const productPrice = product.price || 0;
+                  const basePrice = product.price || 0;
+                  
+                  // サイズ調整
+                  const sizeOption = (product.size_options || []).find(opt => opt.label === item.size);
+                  const priceAdjustment = sizeOption?.price_adjustment || 0;
+                  const finalPrice = basePrice + priceAdjustment;
+
                   const rawImageUrl = product.image_url || product.thumbnail_url || '';
                   const productImage = toAbsoluteUrl(rawImageUrl);
                   const quantity = item.quantity || 1;
@@ -432,10 +445,15 @@ const Checkout = () => {
 
                         {/* Product Info */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-xs md:text-base text-stone-800 line-clamp-2 mb-1">
+                          <h3 className="font-bold text-xs md:text-base text-stone-800 line-clamp-2 mb-0.5">
                             {productName}
                           </h3>
-                          <p className="text-xs md:text-sm text-stone-600 mb-2 line-clamp-1">
+                          {item.size && (
+                            <p className="text-[10px] md:text-sm text-mos-green font-bold mb-1">
+                              サイズ: {item.size}
+                            </p>
+                          )}
+                          <p className="text-[10px] md:text-xs text-stone-600 mb-2 line-clamp-1">
                             {product.description || ''}
                           </p>
                           <div className="flex justify-between items-end">
@@ -443,7 +461,7 @@ const Checkout = () => {
                               <p className="text-xs text-stone-500">数量: {quantity}</p>
                             </div>
                             <p className="text-base md:text-lg font-bold text-mos-green">
-                              ¥{productPrice.toLocaleString()}
+                              ¥{finalPrice.toLocaleString()}
                             </p>
                           </div>
                         </div>
@@ -452,7 +470,7 @@ const Checkout = () => {
                         <div className="flex flex-col items-end flex-shrink-0">
                           <p className="text-xs md:text-sm text-stone-600">小計</p>
                           <p className="text-lg md:text-xl font-bold text-mos-green">
-                            ¥{(productPrice * quantity).toLocaleString()}
+                            ¥{(finalPrice * quantity).toLocaleString()}
                           </p>
                         </div>
                       </div>

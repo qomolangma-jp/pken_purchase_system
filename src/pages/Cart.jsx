@@ -274,14 +274,18 @@ const Cart = () => {
     
     items.forEach(item => {
       // カートアイテム自体のIDを保持するように修正
+      // 同じ商品でもサイズが異なる場合は、別のアイテムとして扱う
       const productId = item.product?.id || item.product_id || item.id;
-      if (mergedMap.has(productId)) {
-        const existingItem = mergedMap.get(productId);
+      const sizeKey = item.size || 'default';
+      const mapKey = `${productId}-${sizeKey}`;
+      
+      if (mergedMap.has(mapKey)) {
+        const existingItem = mergedMap.get(mapKey);
         existingItem.quantity += (item.quantity || 1);
-        console.log(`表示上で商品を統合: ID ${productId}, 新しい数量: ${existingItem.quantity}`);
+        console.log(`表示上で商品を統合: ID ${productId}, サイズ ${sizeKey}, 新しい数量: ${existingItem.quantity}`);
       } else {
         // オブジェクト全体をコピーして保持
-        mergedMap.set(productId, { ...item });
+        mergedMap.set(mapKey, { ...item });
       }
     });
     
@@ -469,9 +473,14 @@ const Cart = () => {
     if (!cartItems || !Array.isArray(cartItems)) return 0;
     return cartItems.reduce((total, item) => {
       const product = item?.product || item;
-      const price = product?.price || 0;
+      const basePrice = product?.price || 0;
       const quantity = item?.quantity || 0;
-      return total + (price * quantity);
+      
+      // サイズ調整額の計算
+      const sizeOption = (product.size_options || []).find(opt => opt.label === item.size);
+      const priceAdjustment = sizeOption?.price_adjustment || 0;
+      
+      return total + ((basePrice + priceAdjustment) * quantity);
     }, 0);
   };
 
@@ -541,7 +550,13 @@ const Cart = () => {
                 if (!item) return null;
                 const product = item?.product || item;
                 const productName = product?.name || '不明な商品';
-                const productPrice = product?.price || 0;
+                const basePrice = product?.price || 0;
+                
+                // サイズ調整
+                const sizeOption = (product.size_options || []).find(opt => opt.label === item.size);
+                const priceAdjustment = sizeOption?.price_adjustment || 0;
+                const finalPrice = basePrice + priceAdjustment;
+
                 const productImage = product?.image_url || product?.thumbnail_url || '';
                 const quantity = item?.quantity || 1;
 
@@ -576,9 +591,16 @@ const Cart = () => {
 
                         {/* Product Info and Controls - Center Section */}
                         <div className="flex-1 min-w-0">
-                          <Link to={`/products/${product?.id}`} className="font-bold text-lg md:text-xl text-stone-800 hover:text-mos-green line-clamp-2 block mb-2 md:mb-3">
+                          <Link to={`/products/${product?.id}`} className="font-bold text-lg md:text-xl text-stone-800 hover:text-mos-green line-clamp-2 block mb-1">
                             {productName}
                           </Link>
+                          
+                          {/* サイズ表示 */}
+                          {item.size && (
+                            <div className="text-xs md:text-sm text-stone-500 mb-2">
+                              サイズ: {item.size}
+                            </div>
+                          )}
                           
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-2 md:gap-3 mt-1 md:mt-2">
@@ -620,7 +642,7 @@ const Cart = () => {
                         {/* Price - Right Side */}
                         <div className="flex flex-col items-end gap-1 md:gap-1.5 flex-shrink-0 pr-2 md:pr-3">
                           <p className="text-xl md:text-2xl font-black text-mos-green whitespace-nowrap">
-                            ¥{productPrice.toLocaleString()}
+                            ¥{finalPrice.toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -637,7 +659,7 @@ const Cart = () => {
                           この商品を削除する
                         </button>
                         <p className="text-xl md:text-2xl text-mos-green font-black">
-                          計: ¥{(productPrice * quantity).toLocaleString()}
+                          計: ¥{(finalPrice * quantity).toLocaleString()}
                         </p>
                       </div>
                     </div>
