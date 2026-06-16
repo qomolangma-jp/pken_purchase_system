@@ -476,8 +476,9 @@ const Cart = () => {
       const basePrice = product?.price || 0;
       const quantity = item?.quantity || 0;
       
-      // サイズ調整額の計算
-      const sizeOption = (product.size_options || []).find(opt => opt.label === item.size);
+      // サイズ調整額の計算 (size, selected_size, size_label どれかを見る)
+      const currentSize = item.size || item.selected_size || item.size_label;
+      const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
       const priceAdjustment = sizeOption?.price_adjustment || 0;
       
       return total + ((basePrice + priceAdjustment) * quantity);
@@ -553,7 +554,8 @@ const Cart = () => {
                 const basePrice = product?.price || 0;
                 
                 // サイズ調整
-                const sizeOption = (product.size_options || []).find(opt => opt.label === item.size);
+                const currentSize = item.size || item.selected_size || item.size_label;
+                const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
                 const priceAdjustment = sizeOption?.price_adjustment || 0;
                 const finalPrice = basePrice + priceAdjustment;
 
@@ -564,7 +566,7 @@ const Cart = () => {
                 
                 // デバッグ用
                 if (index === 0) {
-                  console.log(`[ImageDebug] Cart: ${productName}, Src: ${imageSrc}`);
+                  console.log(`[ImageDebug] Cart: ${productName}, Size: ${currentSize}, Adjustment: ${priceAdjustment}`);
                 }
 
                 return (
@@ -596,9 +598,9 @@ const Cart = () => {
                           </Link>
                           
                           {/* サイズ表示 */}
-                          {item.size && (
-                            <div className="text-xs md:text-sm text-stone-500 mb-2">
-                              サイズ: {item.size}
+                          {currentSize && (
+                            <div className="text-xs md:text-sm text-mos-green font-bold mb-2 bg-green-50 inline-block px-2 py-0.5 rounded">
+                              サイズ: {currentSize}
                             </div>
                           )}
                           

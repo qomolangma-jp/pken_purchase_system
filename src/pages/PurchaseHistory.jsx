@@ -246,11 +246,17 @@ const PurchaseHistory = () => {
                             <Link to={`/products/${product.id}`} className="hover:text-mos-green transition-colors">
                               <p className="font-bold text-stone-800 text-sm md:text-base line-clamp-1">{productName}</p>
                             </Link>
+                            {/* サイズ表示の追加 */}
+                            {(detail.size || detail.size_label || detail.selected_size) && (
+                              <p className="text-[10px] md:text-xs text-mos-green font-bold">
+                                サイズ: {detail.size || detail.size_label || detail.selected_size}
+                              </p>
+                            )}
                             <p className="text-xs md:text-sm text-stone-600 mt-0.5">数量: {quantity}</p>
                           </div>
                           <div className="text-right flex-shrink-0">
                             <p className="font-bold text-stone-800 text-sm md:text-base">
-                              ¥{(productPrice * quantity).toLocaleString()}
+                              ¥{((detail.price || product.price || 0) * quantity).toLocaleString()}
                             </p>
                           </div>
                         </div>

@@ -289,7 +289,9 @@ const ProductDetail = () => {
             console.log('カート全アイテムデータ (デバッグ用):', items);
             existingCartItem = items.find(item => {
               const matchesId = (item.product?.id || item.product_id) === parseInt(id);
-              const matchesSize = (item.size || null) === (selectedSize || null);
+              // size, selected_size, size_label のいずれかで一致を確認
+              const itemSize = item.size || item.selected_size || item.size_label;
+              const matchesSize = (itemSize || null) === (selectedSize || null);
               return matchesId && matchesSize;
             });
           }

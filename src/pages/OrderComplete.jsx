@@ -255,21 +255,35 @@ const OrderComplete = () => {
               <div className="mb-5">
                 <h4 className="text-base font-bold text-stone-800 mb-3">注文内容</h4>
                 <div className="space-y-2">
-                  {orderData.items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-stone-50 rounded text-sm md:text-base">
-                      <div>
-                        <p className="font-medium text-stone-800">
-                          {item.product?.name || item.name || '商品'}
-                        </p>
-                        <p className="text-xs md:text-sm text-stone-600">
-                          数量: {item.quantity || 1}
+                  {orderData.items.map((item, index) => {
+                    const product = item.product || {};
+                    const basePrice = Number(item.price || item.unit_price || product.price || 0) || 0;
+                    const quantity = Number(item.quantity || 1) || 1;
+                    
+                    // サイズ情報の取得 (size, selected_size, size_label)
+                    const currentSize = item.size || item.selected_size || item.size_label;
+                    
+                    return (
+                      <div key={index} className="flex justify-between items-center p-2 bg-stone-50 rounded text-sm md:text-base">
+                        <div>
+                          <p className="font-medium text-stone-800">
+                            {product.name || item.name || '商品'}
+                          </p>
+                          {currentSize && (
+                            <p className="text-[10px] md:text-xs text-mos-green font-bold">
+                              サイズ: {currentSize}
+                            </p>
+                          )}
+                          <p className="text-xs md:text-sm text-stone-600">
+                            数量: {quantity}
+                          </p>
+                        </div>
+                        <p className="font-bold text-mos-green">
+                          ¥{(basePrice * quantity).toLocaleString()}
                         </p>
                       </div>
-                      <p className="font-bold text-mos-green">
-                        ¥{((item.product?.price || item.price || 0) * (item.quantity || 1)).toLocaleString()}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

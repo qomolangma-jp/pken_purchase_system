@@ -138,8 +138,9 @@ const Checkout = () => {
       const basePrice = product.price || 0;
       const quantity = item.quantity || 1;
       
-      // サイズ調整額の計算
-      const sizeOption = (product.size_options || []).find(opt => opt.label === item.size);
+      // サイズ調整額の計算 (size, selected_size, size_label どれかを見る)
+      const currentSize = item.size || item.selected_size || item.size_label;
+      const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
       const priceAdjustment = sizeOption?.price_adjustment || 0;
       
       return total + ((basePrice + priceAdjustment) * quantity);
@@ -412,7 +413,8 @@ const Checkout = () => {
                   const basePrice = product.price || 0;
                   
                   // サイズ調整
-                  const sizeOption = (product.size_options || []).find(opt => opt.label === item.size);
+                  const currentSize = item.size || item.selected_size || item.size_label;
+                  const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
                   const priceAdjustment = sizeOption?.price_adjustment || 0;
                   const finalPrice = basePrice + priceAdjustment;
 
@@ -421,7 +423,7 @@ const Checkout = () => {
                   const quantity = item.quantity || 1;
 
                   if (index === 0) {
-                    console.log(`[ImageDebug] Checkout: ${productName}, Src: ${productImage}`);
+                    console.log(`[ImageDebug] Checkout: ${productName}, Size: ${currentSize}, Adjustment: ${priceAdjustment}`);
                   }
                   
                   return (
@@ -448,9 +450,9 @@ const Checkout = () => {
                           <h3 className="font-bold text-xs md:text-base text-stone-800 line-clamp-2 mb-0.5">
                             {productName}
                           </h3>
-                          {item.size && (
+                          {currentSize && (
                             <p className="text-[10px] md:text-sm text-mos-green font-bold mb-1">
-                              サイズ: {item.size}
+                              サイズ: {currentSize}
                             </p>
                           )}
                           <p className="text-[10px] md:text-xs text-stone-600 mb-2 line-clamp-1">
