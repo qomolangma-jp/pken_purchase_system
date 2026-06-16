@@ -269,7 +269,7 @@ const ProductDetail = () => {
       const requestData = {
         product_id: parseInt(id),
         quantity: quantity,
-        size: selectedSize,
+        size_label: selectedSize, // バックエンドが期待するキー (size ではなく size_label)
       };
 
       console.log('トークン:', token ? `あり (長さ: ${token.length}, 最初の10文字: ${token.substring(0, 10)}...)` : 'なし');

@@ -483,10 +483,9 @@ const Cart = () => {
       const basePrice = Number(product?.price || 0);
       const quantity = Number(item?.quantity || 0);
       
-      // サイズ調整額の計算 (size, selected_size, size_label どれかを見る)
-      // item.product.size などネストされている可能性も考慮
-      const currentSize = item.size || item.selected_size || item.size_label || 
-                          item.product?.size || item.product?.selected_size || item.product?.size_label;
+      // バックエンドが返す可能性のある全てのサイズキーを網羅
+      const currentSize = item.size_label || item.size || item.selected_size || 
+                          item.product?.size_label || item.product?.size || item.product?.selected_size;
       
       const sizeOption = (product.size_options || []).find(opt => {
         const itemSize = String(currentSize || "").trim();
@@ -496,7 +495,7 @@ const Cart = () => {
       const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
       
       const itemSubtotal = (basePrice + priceAdjustment) * quantity;
-      console.log(`[Summary] Item: ${product?.name}, Size: ${currentSize}, Base: ${basePrice}, Adj: ${priceAdjustment}, Qty: ${quantity}, Total: ${itemSubtotal}`);
+      console.log(`[Summary] Item: ${product?.name}, Size: ${currentSize || 'なし'}, Base: ${basePrice}, Adj: ${priceAdjustment}, Qty: ${quantity}, Total: ${itemSubtotal}`);
       
       return total + itemSubtotal;
     }, 0);
@@ -606,8 +605,8 @@ const Cart = () => {
                 const basePrice = Number(product?.price || 0);
                 
                 // サイズ調整
-                const currentSize = item.size || item.selected_size || item.size_label ||
-                                    item.product?.size || item.product?.selected_size || item.product?.size_label;
+                const currentSize = item.size_label || item.size || item.selected_size ||
+                                    item.product?.size_label || item.product?.size || item.product?.selected_size;
                 
                 const sizeOption = (product.size_options || []).find(opt => {
                   const itemSize = String(currentSize || "").trim();
