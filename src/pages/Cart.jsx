@@ -492,17 +492,30 @@ const Cart = () => {
    * 商品ごとのサイズ内訳を取得する
    */
   const getSizeSummary = (productId) => {
-    const sameProductItems = cartItems.filter(item => (item.product?.id || item.product_id) === productId);
+    if (!productId) return "";
+    
+    // IDの型不一致（文字列 vs 数値）を避けるため両方数値に変換して比較
+    const targetId = Number(productId);
+    const sameProductItems = cartItems.filter(item => {
+      const itemProductId = Number(item.product?.id || item.product_id);
+      return itemProductId === targetId;
+    });
+    
     if (sameProductItems.length === 0) return "";
 
-    const product = sameProductItems[0].product || {};
+    // 商品マスタのサイズオプションを取得
+    const product = sameProductItems[0]?.product || {};
     const sizeOptions = product.size_options || [];
     
     // 全てのサイズオプションについて、カート内の数量を集計
     const summary = sizeOptions.map(opt => {
       const count = sameProductItems
-        .filter(item => (item.size || item.selected_size || item.size_label) === opt.label)
-        .reduce((sum, item) => sum + (item.quantity || 0), 0);
+        .filter(item => {
+          const itemSize = String(item.size || item.selected_size || item.size_label || "").trim();
+          const optionLabel = String(opt.label || "").trim();
+          return itemSize === optionLabel;
+        })
+        .reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
       return `${opt.label}:${count}`;
     });
 
