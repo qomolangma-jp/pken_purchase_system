@@ -168,6 +168,9 @@ const Cart = () => {
     const serverOperations = []; // サーバー同期用のプロミスを格納
 
     try {
+      // API_BASE_URL が空、かつ /api から始まらないリクエストが 404 になるのを防ぐ
+      const fetchBase = API_BASE_URL || '';
+      
       // 1. 全アイテムの最新製品情報を並列で取得
       const inventoryChecks = await Promise.all(items.map(async (item) => {
         if (!item) return null;
@@ -180,7 +183,11 @@ const Cart = () => {
         }
 
         try {
-          const prodResponse = await fetch(`${API_BASE_URL}/api/products/${productId}`);
+          const url = `${fetchBase}/api/products/${productId}`;
+          console.log(`[InventorySync] Fetching: ${url}`);
+          const prodResponse = await fetch(url, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
           if (!prodResponse.ok) return { item, cartItemId, productData: null, error: 'Fetch failed' };
           const prodData = await prodResponse.json();
           return { item, cartItemId, productData: prodData.data || prodData };
