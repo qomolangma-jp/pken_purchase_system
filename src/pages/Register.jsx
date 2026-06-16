@@ -48,11 +48,18 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // LINE ID の検証
+    if (!lineId) {
+      setError('LINE IDがまだ取得されていません。少し待ってからやり直してください。');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const requestData = {
-        user_id: email,
+        username: email,
         name_2nd: name2nd,
         name_1st: name1st,
         student_id: studentId,
@@ -252,9 +259,9 @@ const Register = () => {
             <button 
               type="submit" 
               className="w-full mt-2 bg-stone-900 hover:bg-stone-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm active:scale-[0.98]"
-              disabled={loading}
+              disabled={loading || !lineId}
             >
-              {loading ? '登録中...' : '登録する'}
+              {loading ? '登録中...' : (lineId ? '登録する' : 'LINE ID を取得中...')}
             </button>
           </form>
 
