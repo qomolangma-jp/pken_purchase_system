@@ -269,12 +269,10 @@ const ProductDetail = () => {
       const requestData = {
         product_id: parseInt(id),
         quantity: quantity,
-        size_label: selectedSize, // バックエンドが期待するキー (size ではなく size_label)
+        size: selectedSize, // バックエンドが 'size' を期待している可能性が高いため戻す
       };
 
-      console.log('トークン:', token ? `あり (長さ: ${token.length}, 最初の10文字: ${token.substring(0, 10)}...)` : 'なし');
-      console.log('カート追加リクエスト:', requestData);
-      console.log('リクエストURL:', `${API_BASE_URL}/api/cart/add`);
+      console.log('📦 カート追加リクエスト実行:', JSON.stringify(requestData));
 
       // 既存のカートアイテムを確認（重複チェック）
       let existingCartItem = null;
@@ -343,7 +341,10 @@ const ProductDetail = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ quantity: newTotalQuantity }),
+            body: JSON.stringify({ 
+              quantity: newTotalQuantity,
+              size: selectedSize // 数量更新時もサイズを念のため送る
+            }),
           });
         }
       } else {
