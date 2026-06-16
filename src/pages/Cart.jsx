@@ -232,10 +232,10 @@ const Cart = () => {
               }).catch(e => console.error('更新リクエスト失敗:', e))
             );
           }
-          adjustedItems.push({ ...item, id: cartItemId, quantity: stock, product: productData });
+          adjustedItems.push({ ...item, id: cartItemId, quantity: stock, product: productData, size: item.size || item.selected_size || item.size_label });
         } else {
           // 在庫あり: 商品情報を最新に更新
-          adjustedItems.push({ ...item, id: cartItemId, product: productData });
+          adjustedItems.push({ ...item, id: cartItemId, product: productData, size: item.size || item.selected_size || item.size_label });
         }
       }
 
@@ -477,12 +477,19 @@ const Cart = () => {
       const quantity = Number(item?.quantity || 0);
       
       // サイズ調整額の計算 (size, selected_size, size_label どれかを見る)
-      const currentSize = item.size || item.selected_size || item.size_label;
-      const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
+      // item.product.size などネストされている可能性も考慮
+      const currentSize = item.size || item.selected_size || item.size_label || 
+                          item.product?.size || item.product?.selected_size || item.product?.size_label;
+      
+      const sizeOption = (product.size_options || []).find(opt => {
+        const itemSize = String(currentSize || "").trim();
+        const optionLabel = String(opt.label || "").trim();
+        return itemSize === optionLabel;
+      });
       const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
       
       const itemSubtotal = (basePrice + priceAdjustment) * quantity;
-      console.log(`[Summary] Item: ${product?.name}, Size: ${currentSize}, Total: ${itemSubtotal}`);
+      console.log(`[Summary] Item: ${product?.name}, Size: ${currentSize}, Base: ${basePrice}, Adj: ${priceAdjustment}, Qty: ${quantity}, Total: ${itemSubtotal}`);
       
       return total + itemSubtotal;
     }, 0);
@@ -592,8 +599,14 @@ const Cart = () => {
                 const basePrice = Number(product?.price || 0);
                 
                 // サイズ調整
-                const currentSize = item.size || item.selected_size || item.size_label;
-                const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
+                const currentSize = item.size || item.selected_size || item.size_label ||
+                                    item.product?.size || item.product?.selected_size || item.product?.size_label;
+                
+                const sizeOption = (product.size_options || []).find(opt => {
+                  const itemSize = String(currentSize || "").trim();
+                  const optionLabel = String(opt.label || "").trim();
+                  return itemSize === optionLabel;
+                });
                 const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
                 const finalPrice = basePrice + priceAdjustment;
 
