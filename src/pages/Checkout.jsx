@@ -135,15 +135,18 @@ const Checkout = () => {
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => {
       const product = item.product || item;
-      const basePrice = product.price || 0;
-      const quantity = item.quantity || 1;
+      const basePrice = Number(product.price || 0);
+      const quantity = Number(item.quantity || 1);
       
       // サイズ調整額の計算 (size, selected_size, size_label どれかを見る)
       const currentSize = item.size || item.selected_size || item.size_label;
       const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
-      const priceAdjustment = sizeOption?.price_adjustment || 0;
+      const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
       
-      return total + ((basePrice + priceAdjustment) * quantity);
+      const itemSubtotal = (basePrice + priceAdjustment) * quantity;
+      console.log(`[CheckoutSummary] Item: ${product?.name}, Size: ${currentSize}, Total: ${itemSubtotal}`);
+      
+      return total + itemSubtotal;
     }, 0);
   };
 
@@ -410,17 +413,17 @@ const Checkout = () => {
                 {cartItems.map((item, index) => {
                   const product = item.product || item;
                   const productName = product.name || 'Unknown Product';
-                  const basePrice = product.price || 0;
+                  const basePrice = Number(product.price || 0);
                   
                   // サイズ調整
                   const currentSize = item.size || item.selected_size || item.size_label;
                   const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
-                  const priceAdjustment = sizeOption?.price_adjustment || 0;
+                  const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
                   const finalPrice = basePrice + priceAdjustment;
 
                   const rawImageUrl = product.image_url || product.thumbnail_url || '';
                   const productImage = toAbsoluteUrl(rawImageUrl);
-                  const quantity = item.quantity || 1;
+                  const quantity = Number(item.quantity || 1);
 
                   if (index === 0) {
                     console.log(`[ImageDebug] Checkout: ${productName}, Size: ${currentSize}, Adjustment: ${priceAdjustment}`);

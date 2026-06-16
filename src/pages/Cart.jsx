@@ -473,16 +473,40 @@ const Cart = () => {
     if (!cartItems || !Array.isArray(cartItems)) return 0;
     return cartItems.reduce((total, item) => {
       const product = item?.product || item;
-      const basePrice = product?.price || 0;
-      const quantity = item?.quantity || 0;
+      const basePrice = Number(product?.price || 0);
+      const quantity = Number(item?.quantity || 0);
       
       // サイズ調整額の計算 (size, selected_size, size_label どれかを見る)
       const currentSize = item.size || item.selected_size || item.size_label;
       const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
-      const priceAdjustment = sizeOption?.price_adjustment || 0;
+      const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
       
-      return total + ((basePrice + priceAdjustment) * quantity);
+      const itemSubtotal = (basePrice + priceAdjustment) * quantity;
+      console.log(`[Summary] Item: ${product?.name}, Size: ${currentSize}, Total: ${itemSubtotal}`);
+      
+      return total + itemSubtotal;
     }, 0);
+  };
+
+  /**
+   * 商品ごとのサイズ内訳を取得する
+   */
+  const getSizeSummary = (productId) => {
+    const sameProductItems = cartItems.filter(item => (item.product?.id || item.product_id) === productId);
+    if (sameProductItems.length === 0) return "";
+
+    const product = sameProductItems[0].product || {};
+    const sizeOptions = product.size_options || [];
+    
+    // 全てのサイズオプションについて、カート内の数量を集計
+    const summary = sizeOptions.map(opt => {
+      const count = sameProductItems
+        .filter(item => (item.size || item.selected_size || item.size_label) === opt.label)
+        .reduce((sum, item) => sum + (item.quantity || 0), 0);
+      return `${opt.label}:${count}`;
+    });
+
+    return summary.length > 0 ? `[${summary.join(' ')}]` : "";
   };
 
   const handleCheckout = async () => {
@@ -551,16 +575,17 @@ const Cart = () => {
                 if (!item) return null;
                 const product = item?.product || item;
                 const productName = product?.name || '不明な商品';
-                const basePrice = product?.price || 0;
+                const productId = product?.id || item.product_id;
+                const basePrice = Number(product?.price || 0);
                 
                 // サイズ調整
                 const currentSize = item.size || item.selected_size || item.size_label;
                 const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
-                const priceAdjustment = sizeOption?.price_adjustment || 0;
+                const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
                 const finalPrice = basePrice + priceAdjustment;
 
                 const productImage = product?.image_url || product?.thumbnail_url || '';
-                const quantity = item?.quantity || 1;
+                const quantity = Number(item?.quantity || 1);
 
                 const imageSrc = toAbsoluteUrl(productImage) || PLACEHOLDER_IMAGE;
                 
@@ -633,7 +658,14 @@ const Cart = () => {
                           </div>
                           <div className="mt-1 md:mt-2">
                             { (product?.stock ?? 0) > 0 ? (
-                                <p className="text-xs md:text-sm text-stone-500">在庫: {product?.stock}個</p>
+                                <div className="space-y-0.5">
+                                  <p className="text-xs md:text-sm text-stone-500">在庫: {product?.stock}個</p>
+                                  {product?.size_options?.length > 0 && (
+                                    <p className="text-[10px] md:text-xs font-bold text-mos-green-dark">
+                                      {getSizeSummary(productId)}
+                                    </p>
+                                  )}
+                                </div>
                               ) : (
                                 <p className="text-xs md:text-sm text-red-600 font-bold bg-red-50 inline-block px-1.5 py-0.5 rounded">本日分終了（入荷待ち）</p>
                               )
