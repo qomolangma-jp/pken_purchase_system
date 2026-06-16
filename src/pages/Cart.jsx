@@ -524,7 +524,7 @@ const Cart = () => {
     const summary = sizeOptions.map(opt => {
       const count = sameProductItems
         .filter(item => {
-          const itemSize = String(item.size || item.selected_size || item.size_label || "").trim();
+          const itemSize = String(item.size_label || item.size || item.selected_size || "").trim();
           const optionLabel = String(opt.label || "").trim();
           return itemSize === optionLabel;
         })
