@@ -547,6 +547,9 @@ const Cart = () => {
       const count = sameProductItems
         .filter(item => {
           const itemSize = String(item.selectedSize || item.size_label || item.size || item.selected_size || "").trim();
+          const optionLabel = String(opt.label || "").trim();
+          return itemSize === optionLabel;
+        })
         .reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
       return `${opt.label}:${count}`;
     });
