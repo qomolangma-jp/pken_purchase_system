@@ -35,17 +35,39 @@ export const checkUserByLineId = async (lineId) => {
  */
 export const registerUser = async (userData) => {
   try {
+    const requestBody = {
+      ...userData,
+      send_verification_email: true,
+    };
+
     const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-      body: JSON.stringify(userData),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
-      throw new Error('登録に失敗しました');
+      const responseText = await response.text().catch(() => '');
+      let errorMessage = '登録に失敗しました';
+
+      if (responseText) {
+        try {
+          const data = JSON.parse(responseText);
+          if (data.message) {
+            errorMessage = data.message;
+          } else if (data.error) {
+            errorMessage = data.error;
+          }
+        } catch {
+          // JSON 解析できない場合は text をそのまま使う
+          errorMessage = responseText;
+        }
+      }
+
+      throw new Error(errorMessage);
     }
 
     return await response.json();

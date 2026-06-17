@@ -4,8 +4,7 @@ import { Link as LinkIcon, User, CreditCard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 import { getLineProfile } from '../services/lineAuth';
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+import { registerUser } from '../utils/api';
 
 const Register = () => {
   const [name2nd, setName2nd] = useState('');
@@ -68,58 +67,9 @@ const Register = () => {
       };
 
       console.log('=== 登録リクエスト送信 ===');
-      console.log('URL:', `${API_BASE_URL}/api/auth/register`);
       console.log('送信データ:', requestData);
 
-      let response;
-      try {
-        response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestData),
-        });
-      } catch (fetchError) {
-        console.error('❌ ネットワークエラー:', fetchError);
-        throw new Error(`通信エラー: バックエンドに接続できません。\n\n原因:\n- バックエンドサーバーがダウンしている\n- CORS設定が正しくない\n- ネットワーク接続の問題\n\nバックエンド管理者に確認してください。`);
-      }
-
-      console.log('レスポンスステータス:', response.status);
-      console.log('レスポンスOK:', response.ok);
-
-      // Content-Typeをチェック
-      const contentType = response.headers.get('content-type');
-      console.log('Content-Type:', contentType);
-
-      let data;
-      const responseText = await response.text();
-
-      if (contentType && contentType.includes('application/json')) {
-        try {
-          data = responseText ? JSON.parse(responseText) : {};
-          console.log('レスポンスデータ:', data);
-        } catch {
-          console.error('JSON parse error response (最初の1000文字):', responseText.substring(0, 1000));
-          throw new Error(`バックエンド応答の解析に失敗しました (Status ${response.status})`);
-        }
-      } else {
-        // JSONでない場合（HTMLなど）
-        console.error('Non-JSON response (最初の1000文字):', responseText.substring(0, 1000));
-
-        // HTMLからエラーメッセージを抽出を試みる
-        const titleMatch = responseText.match(/<title>(.*?)<\/title>/i);
-        const h1Match = responseText.match(/<h1[^>]*>(.*?)<\/h1>/i);
-        const errorInfo = titleMatch ? titleMatch[1] : (h1Match ? h1Match[1] : 'サーバーエラー');
-
-        throw new Error(`バックエンドエラー (Status ${response.status}): ${errorInfo}\n\nバックエンド側のログを確認してください。`);
-      }
-
-      if (!response.ok) {
-        console.error('登録エラーレスポンス:', data);
-        const errorMessage = data.message || data.error || '登録に失敗しました';
-        throw new Error(errorMessage);
-      }
+      const data = await registerUser(requestData);
 
       console.log('✅ 登録成功！');
       console.log('ユーザーデータ:', data.user);
@@ -136,7 +86,7 @@ const Register = () => {
       openModal({
         type: 'success',
         title: '登録完了',
-        message: '登録が完了しました！自動的にログインします。',
+        message: '登録が完了しました！認証用のメールを送信しました。メール内のリンクからアカウントを有効化してください。',
         onConfirm: () => navigate('/')
       });
       console.log('トップページへリダイレクト');
