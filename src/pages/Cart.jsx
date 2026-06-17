@@ -680,56 +680,53 @@ const Cart = () => {
                             {productName}
                           </Link>
                           
-                          {canChooseSize ? (
-                            <div className="mb-2">
-                              <label className="text-xs md:text-sm text-stone-600 mb-1 block">サイズ</label>
-                              <select
-                                value={selectedSize || ''}
-                                onChange={(e) => {
-                                  const id = item?.id || item?.cart_id || item?.cart_item_id;
-                                  handleSizeChange(id, e.target.value, quantity, product?.stock || 0);
-                                }}
-                                className="w-full rounded border border-stone-300 bg-white text-sm md:text-sm text-stone-800 py-2 px-2"
-                              >
-                                {sizeOptions.map((opt) => (
-                                  <option key={opt.label} value={opt.label}>
-                                    {opt.label}{opt.price_adjustment ? ` (+¥${Number(opt.price_adjustment).toLocaleString()})` : ''}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          ) : currentSize ? (
-                            <div className="text-xs md:text-sm text-mos-green font-bold mb-2 bg-green-50 inline-block px-2 py-0.5 rounded">
-                              サイズ: {currentSize}
-                            </div>
-                          ) : null}
-                          
                           {/* Quantity Controls */}
-                          <div className="flex items-center gap-2 md:gap-3 mt-1 md:mt-2">
-                            <span className="text-xs md:text-sm text-stone-600">数量:</span>
-                            <div className="flex items-center gap-1 md:gap-1.5 bg-stone-100 rounded">
-                              <button
-                                onClick={() => {
-                                  const id = item?.id || item?.cart_id || item?.cart_item_id;
-                                  updateCartItem(id, Math.max(1, quantity - 1), selectedSize, product?.stock || 0);
-                                }}
-                                disabled={quantity <= 1 || (product?.stock ?? 0) <= 0}
-                                className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
-                              >
-                                −
-                              </button>
-                              <span className="w-6 md:w-8 text-center text-sm md:text-base font-semibold">{quantity}</span>
-                              <button
-                                onClick={() => {
-                                  const id = item?.id || item?.cart_id || item?.cart_item_id;
-                                  updateCartItem(id, quantity + 1, selectedSize, product?.stock || 0);
-                                }}
-                                disabled={(product?.stock ?? 0) <= 0 || quantity >= (product?.stock ?? 0)}
-                                className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
-                              >
-                                +
-                              </button>
+                          <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-1 md:mt-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs md:text-sm text-stone-600">数量:</span>
+                              <div className="flex items-center gap-1 md:gap-1.5 bg-stone-100 rounded">
+                                <button
+                                  onClick={() => {
+                                    const id = item?.id || item?.cart_id || item?.cart_item_id;
+                                    updateCartItem(id, Math.max(1, quantity - 1), selectedSize, product?.stock || 0);
+                                  }}
+                                  disabled={quantity <= 1 || (product?.stock ?? 0) <= 0}
+                                  className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
+                                >
+                                  −
+                                </button>
+                                <span className="w-6 md:w-8 text-center text-sm md:text-base font-semibold">{quantity}</span>
+                                <button
+                                  onClick={() => {
+                                    const id = item?.id || item?.cart_id || item?.cart_item_id;
+                                    updateCartItem(id, quantity + 1, selectedSize, product?.stock || 0);
+                                  }}
+                                  disabled={(product?.stock ?? 0) <= 0 || quantity >= (product?.stock ?? 0)}
+                                  className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
+                                >
+                                  +
+                                </button>
+                              </div>
                             </div>
+                            {canChooseSize ? (
+                              <div className="ml-auto flex min-w-[160px] flex-col gap-1">
+                                <label className="text-xs md:text-sm text-stone-600">サイズ</label>
+                                <select
+                                  value={selectedSize || ''}
+                                  onChange={(e) => {
+                                    const id = item?.id || item?.cart_id || item?.cart_item_id;
+                                    handleSizeChange(id, e.target.value, quantity, product?.stock || 0);
+                                  }}
+                                  className="w-full rounded border border-stone-300 bg-white text-sm md:text-sm text-stone-800 py-2 px-2"
+                                >
+                                  {sizeOptions.map((opt) => (
+                                    <option key={opt.label} value={opt.label}>
+                                      {opt.label}{opt.price_adjustment ? ` (+¥${Number(opt.price_adjustment).toLocaleString()})` : ''}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            ) : null}
                           </div>
                           <div className="mt-1 md:mt-2">
                             { (product?.stock ?? 0) > 0 ? (
