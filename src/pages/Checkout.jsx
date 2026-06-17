@@ -283,7 +283,10 @@ const Checkout = () => {
         }
       } else {
         // --- 通常注文フロー ---
-        const orderData = { items };
+        const orderData = {
+          items,
+          payment_method: paymentMethod,
+        };
 
         console.log('注文データを送信:', orderData);
 
@@ -528,6 +531,17 @@ const Checkout = () => {
                       />
                       <span className="ml-2 text-sm font-medium text-stone-700">PayPay</span>
                     </label>
+                    <label className="flex items-center p-2 border border-stone-300 rounded bg-stone-50">
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value="deferred"
+                        checked={paymentMethod === 'deferred'}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-4 h-4"
+                      />
+                      <span className="ml-2 text-sm font-medium text-stone-700">後払い</span>
+                    </label>
                   </div>
                 </div>
 
@@ -541,7 +555,7 @@ const Checkout = () => {
                     ? (paymentMethod === 'paypay' ? 'PayPayへ移動中...' : '処理中...')
                     : paymentMethod === 'paypay'
                     ? 'PayPayで支払う'
-                    : '注文を確定する'}
+                    : '後払いで注文する'}
                 </button>
 
                 <Link
