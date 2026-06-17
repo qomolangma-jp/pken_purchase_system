@@ -627,7 +627,7 @@ const Cart = () => {
                 const basePrice = Number(product?.price || 0);
                 
                 // サイズ調整
-                const currentSize = item.size_label || item.size || item.selected_size ||
+                const currentSize = item.selectedSize || item.size_label || item.size || item.selected_size ||
                                     item.product?.size_label || item.product?.size || item.product?.selected_size;
                 
                 const sizeOption = (product.size_options || []).find(opt => {
