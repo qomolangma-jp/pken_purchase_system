@@ -238,7 +238,7 @@ const Checkout = () => {
         // --- PayPay 支払いフロー ---
         const paymentPayload = {
           items,
-          payment_method: 'paypay',
+          payment_method: paymentMethod,
         };
 
         console.log('PayPay 支払いデータを送信:', paymentPayload);
@@ -286,6 +286,7 @@ const Checkout = () => {
         const orderData = {
           items,
           payment_method: paymentMethod,
+          ...(paymentMethod === 'deferred' ? { status: '調理済' } : {}),
         };
 
         console.log('注文データを送信:', orderData);
@@ -340,12 +341,12 @@ const Checkout = () => {
       navigate(`/order-complete?order_id=${orderId}`);
 
     } catch (err) {
-      console.error('Order processing error:', err);
-      setError(err.message || '注文処理に失敗しました');
+      console.error('Order processing error:', err?.message || err, err);
+      setError(err?.message || '注文処理に失敗しました');
       openModal({
         type: 'error',
         title: '注文エラー',
-        message: err.message || '注文処理に失敗しました。もう一度お試しください。'
+        message: err?.message || '注文処理に失敗しました。もう一度お試しください。'
       });
     } finally {
       if (!isRedirecting) {
