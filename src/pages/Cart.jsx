@@ -120,19 +120,22 @@ const Cart = () => {
         console.log('合計金額:', data.data.total);
         items = data.data.items.map(item => ({
           ...item,
-          id: item.cart_id || item.id // cart_idを優先してidとして扱う
+          id: item.cart_id || item.id, // cart_idを優先してidとして扱う
+          selectedSize: item.size || item.selected_size || item.size_label || null,
         }));
       } else if (Array.isArray(data)) {
         console.log('カートアイテム数:', data.length);
         items = data.map(item => ({
           ...item,
-          id: item.cart_id || item.id
+          id: item.cart_id || item.id,
+          selectedSize: item.size || item.selected_size || item.size_label || null,
         }));
       } else if (data.data && Array.isArray(data.data)) {
         // ネストされたdata.dataが配列の場合に対応
         items = data.data.map(item => ({
           ...item,
-          id: item.cart_id || item.id
+          id: item.cart_id || item.id,
+          selectedSize: item.size || item.selected_size || item.size_label || null,
         }));
       } else {
         console.warn('カートデータが期待する構造ではありません:', data);
@@ -239,10 +242,23 @@ const Cart = () => {
               }).catch(e => console.error('更新リクエスト失敗:', e))
             );
           }
-          adjustedItems.push({ ...item, id: cartItemId, quantity: stock, product: productData, size: item.size || item.selected_size || item.size_label });
+          adjustedItems.push({
+            ...item,
+            id: cartItemId,
+            quantity: stock,
+            product: productData,
+            size: item.size || item.selected_size || item.size_label,
+            selectedSize: item.selectedSize || item.size || item.selected_size || item.size_label || null,
+          });
         } else {
           // 在庫あり: 商品情報を最新に更新
-          adjustedItems.push({ ...item, id: cartItemId, product: productData, size: item.size || item.selected_size || item.size_label });
+          adjustedItems.push({
+            ...item,
+            id: cartItemId,
+            product: productData,
+            size: item.size || item.selected_size || item.size_label,
+            selectedSize: item.selectedSize || item.size || item.selected_size || item.size_label || null,
+          });
         }
       }
 
@@ -292,25 +308,27 @@ const Cart = () => {
         console.log(`表示上で商品を統合: ID ${productId}, サイズ ${sizeKey}, 新しい数量: ${existingItem.quantity}`);
       } else {
         // オブジェクト全体をコピーして保持
-        mergedMap.set(mapKey, { ...item });
+        mergedMap.set(mapKey, { ...item, selectedSize: item.selectedSize || item.size || item.selected_size || item.size_label || null });
       }
     });
     
     return Array.from(mergedMap.values());
   };
 
-  const updateQuantity = async (itemId, newQuantity, maxStock = 999) => {
-    console.log("受信データ詳細:", { itemId, newQuantity, maxStock });
+  const getItemSize = (item) => {
+    return item.selectedSize || item.size || item.selected_size || item.size_label || null;
+  };
+
+  const updateCartItem = async (itemId, newQuantity, newSize = undefined, maxStock = 999) => {
+    console.log('受信データ詳細:', { itemId, newQuantity, newSize, maxStock });
     
     if (newQuantity < 1) return;
     
-    // itemIdの存在確認
     if (!itemId) {
-      console.error("更新失敗: itemIdが渡されていません。データ構造を確認してください。", { itemId, newQuantity });
+      console.error('更新失敗: itemIdが渡されていません。データ構造を確認してください。', { itemId, newQuantity, newSize });
       return;
     }
 
-    // 在庫チェック
     if (newQuantity > maxStock) {
       openModal({
         type: 'warning',
@@ -324,14 +342,15 @@ const Cart = () => {
       const token = localStorage.getItem('authToken');
       if (!token) return;
 
-      // 1. 楽観的UI更新: サーバーの応答を待たずにUIを更新
       const previousItems = [...cartItems];
+      const sizeToSend = newSize !== undefined ? newSize : getItemSize(previousItems.find(item => item.id === itemId) || {});
+
       setCartItems(prev => prev.map(item => 
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
+        item.id === itemId ? { ...item, quantity: newQuantity, selectedSize: sizeToSend } : item
       ));
       
       const url = `${API_BASE_URL}/api/cart/${itemId}`;
-      console.log('📦 カート更新リクエスト (楽観的):', { itemId, newQuantity });
+      console.log('📦 カート更新リクエスト (楽観的):', { itemId, newQuantity, size: sizeToSend });
       
       const response = await fetch(url, {
         method: 'PUT',
@@ -340,23 +359,19 @@ const Cart = () => {
           'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',
-        body: JSON.stringify({ quantity: newQuantity }),
+        body: JSON.stringify({ quantity: newQuantity, size: sizeToSend }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        // 失敗した場合は元の状態に戻す
         setCartItems(previousItems);
         throw new Error(data.message || '数量の更新に失敗しました');
       }
 
-      // 2. ヘッダーの点数バッジなどを更新 (これは軽いリクエスト)
       await fetchCartCount();
-      
       console.log('📦 カート更新成功');
     } catch (err) {
       console.error('Update quantity error:', err);
-      // エラー時は改めてサーバーから正確なデータを取得
       await fetchCart();
       
       openModal({
@@ -365,6 +380,13 @@ const Cart = () => {
         message: err.message || '数量の更新に失敗しました'
       });
     }
+  };
+
+  const handleSizeChange = async (itemId, newSize, quantity, maxStock = 999) => {
+    if (!itemId) return;
+    if (!newSize) return;
+
+    await updateCartItem(itemId, quantity, newSize, maxStock);
   };
 
   const removeItem = async (itemId, showConfirm = true) => {
@@ -483,8 +505,8 @@ const Cart = () => {
       const basePrice = Number(product?.price || 0);
       const quantity = Number(item?.quantity || 0);
       
-      // バックエンドが返す可能性のある全てのサイズキーを網羅
-      const currentSize = item.size_label || item.size || item.selected_size || 
+      // カート内でユーザーが選択したサイズを優先
+      const currentSize = item.selectedSize || item.size_label || item.size || item.selected_size || 
                           item.product?.size_label || item.product?.size || item.product?.selected_size;
       
       const sizeOption = (product.size_options || []).find(opt => {
@@ -524,10 +546,7 @@ const Cart = () => {
     const summary = sizeOptions.map(opt => {
       const count = sameProductItems
         .filter(item => {
-          const itemSize = String(item.size_label || item.size || item.selected_size || "").trim();
-          const optionLabel = String(opt.label || "").trim();
-          return itemSize === optionLabel;
-        })
+          const itemSize = String(item.selectedSize || item.size_label || item.size || item.selected_size || "").trim();
         .reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
       return `${opt.label}:${count}`;
     });
@@ -626,6 +645,10 @@ const Cart = () => {
                   console.log(`[ImageDebug] Cart: ${productName}, Size: ${currentSize}, Adjustment: ${priceAdjustment}`);
                 }
 
+                const selectedSize = item.selectedSize || currentSize;
+                const sizeOptions = product.size_options || [];
+                const canChooseSize = sizeOptions.length > 0;
+
                 return (
                   <React.Fragment key={item?.id || index}>
                     <div className="bg-white rounded-lg shadow-sm p-2 md:p-4">
@@ -654,12 +677,29 @@ const Cart = () => {
                             {productName}
                           </Link>
                           
-                          {/* サイズ表示 */}
-                          {currentSize && (
+                          {canChooseSize ? (
+                            <div className="mb-2">
+                              <label className="text-xs md:text-sm text-stone-600 mb-1 block">サイズ</label>
+                              <select
+                                value={selectedSize || ''}
+                                onChange={(e) => {
+                                  const id = item?.id || item?.cart_id || item?.cart_item_id;
+                                  handleSizeChange(id, e.target.value, quantity, product?.stock || 0);
+                                }}
+                                className="w-full rounded border border-stone-300 bg-white text-sm md:text-sm text-stone-800 py-2 px-2"
+                              >
+                                {sizeOptions.map((opt) => (
+                                  <option key={opt.label} value={opt.label}>
+                                    {opt.label}{opt.price_adjustment ? ` (+¥${Number(opt.price_adjustment).toLocaleString()})` : ''}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          ) : currentSize ? (
                             <div className="text-xs md:text-sm text-mos-green font-bold mb-2 bg-green-50 inline-block px-2 py-0.5 rounded">
                               サイズ: {currentSize}
                             </div>
-                          )}
+                          ) : null}
                           
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-2 md:gap-3 mt-1 md:mt-2">
@@ -668,7 +708,7 @@ const Cart = () => {
                               <button
                                 onClick={() => {
                                   const id = item?.id || item?.cart_id || item?.cart_item_id;
-                                  updateQuantity(id, Math.max(1, quantity - 1), product?.stock || 0);
+                                  updateCartItem(id, Math.max(1, quantity - 1), selectedSize, product?.stock || 0);
                                 }}
                                 disabled={quantity <= 1 || (product?.stock ?? 0) <= 0}
                                 className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
@@ -679,7 +719,7 @@ const Cart = () => {
                               <button
                                 onClick={() => {
                                   const id = item?.id || item?.cart_id || item?.cart_item_id;
-                                  updateQuantity(id, quantity + 1, product?.stock || 0);
+                                  updateCartItem(id, quantity + 1, selectedSize, product?.stock || 0);
                                 }}
                                 disabled={(product?.stock ?? 0) <= 0 || quantity >= (product?.stock ?? 0)}
                                 className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
