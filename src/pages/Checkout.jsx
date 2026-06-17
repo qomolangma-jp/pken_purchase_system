@@ -50,6 +50,11 @@ const handleImageError = (e, src) => {
   target.onerror = null;
 };
 
+const PAYMENT_METHOD_MAP = {
+  paypay: 'paypay',
+  deferred: 'atobarai',
+};
+
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -232,13 +237,14 @@ const Checkout = () => {
         size: item.size,
       }));
 
+      const backendPaymentMethod = PAYMENT_METHOD_MAP[paymentMethod] || paymentMethod;
       let data;
 
       if (paymentMethod === 'paypay') {
         // --- PayPay 支払いフロー ---
         const paymentPayload = {
           items,
-          payment_method: paymentMethod,
+          payment_method: backendPaymentMethod,
         };
 
         console.log('PayPay 支払いデータを送信:', paymentPayload);
@@ -285,7 +291,7 @@ const Checkout = () => {
         // --- 通常注文フロー ---
         const orderData = {
           items,
-          payment_method: paymentMethod,
+          ...(paymentMethod === 'paypay' ? { payment_method: backendPaymentMethod } : {}),
           ...(paymentMethod === 'deferred' ? { status: '調理済' } : {}),
         };
 
