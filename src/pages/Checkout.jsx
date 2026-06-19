@@ -59,7 +59,7 @@ const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('paypay');
+  const [paymentMethod, setPaymentMethod] = useState('deferred');
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
