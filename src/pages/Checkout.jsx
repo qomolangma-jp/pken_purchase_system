@@ -292,7 +292,7 @@ const Checkout = () => {
         const orderData = {
           items,
           ...(paymentMethod === 'paypay' ? { payment_method: backendPaymentMethod } : {}),
-          ...(paymentMethod === 'deferred' ? { status: '調理済' } : {}),
+          ...(paymentMethod === 'deferred' ? { status: '後払い購入' } : {}),
         };
 
         console.log('注文データを送信:', orderData);
