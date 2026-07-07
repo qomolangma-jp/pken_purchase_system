@@ -47,7 +47,7 @@ const CategoryChips = ({
       {/* カテゴリタブコンテナ */}
       <div
         ref={scrollContainerRef}
-        className="flex flex-wrap items-center flex-1 bg-white"
+        className="flex flex-nowrap items-center flex-1 overflow-x-auto bg-white no-scrollbar"
         style={{
           scrollBehavior: 'smooth',
           WebkitOverflowScrolling: 'touch',
