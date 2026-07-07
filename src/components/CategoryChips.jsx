@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Search } from 'lucide-react';
 
 /**
- * CategoryChips - KFC風の横スクロール可能なカテゴリタブコンポーネント
+ * CategoryChips - カテゴリタブコンポーネント
  */
 const CategoryChips = ({
   categories = [],
@@ -47,7 +47,7 @@ const CategoryChips = ({
       {/* カテゴリタブコンテナ */}
       <div
         ref={scrollContainerRef}
-        className="flex overflow-x-auto items-center flex-1 no-scrollbar bg-white"
+        className="flex flex-wrap items-center flex-1 bg-white"
         style={{
           scrollBehavior: 'smooth',
           WebkitOverflowScrolling: 'touch',

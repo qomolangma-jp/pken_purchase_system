@@ -93,8 +93,6 @@ const ProductList = () => {
   }, [user]);
 
   const hasFetchedRef = useRef(false);
-  const touchStartXRef = useRef(null);
-  const touchStartYRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -284,36 +282,6 @@ const ProductList = () => {
     }
   };
 
-  const handleTouchStart = (e) => {
-    const touch = e.touches[0];
-    if (!touch) return;
-    touchStartXRef.current = touch.clientX;
-    touchStartYRef.current = touch.clientY;
-  };
-
-  const handleTouchEnd = (e) => {
-    const touch = e.changedTouches[0];
-    if (!touch || touchStartXRef.current === null || touchStartYRef.current === null) return;
-
-    const deltaX = touch.clientX - touchStartXRef.current;
-    const deltaY = touch.clientY - touchStartYRef.current;
-    const threshold = 60;
-
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
-      const currentIndex = categories.indexOf(activeCategory);
-      if (currentIndex !== -1) {
-        if (deltaX < 0 && currentIndex < categories.length - 1) {
-          handleCategoryChange(categories[currentIndex + 1]);
-        } else if (deltaX > 0 && currentIndex > 0) {
-          handleCategoryChange(categories[currentIndex - 1]);
-        }
-      }
-    }
-
-    touchStartXRef.current = null;
-    touchStartYRef.current = null;
-  };
-
   const handleFavoriteClick = (e, productId) => {
     e.preventDefault();
     e.stopPropagation();
@@ -379,11 +347,7 @@ const ProductList = () => {
           )}
         </div>
 
-        <div
-          className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 px-0"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 px-0">
           {displayedProducts.length === 0 ? (
             <p className="text-center py-16 text-sm text-gray-400 col-span-2">
               該当する商品が見つかりませんでした。
