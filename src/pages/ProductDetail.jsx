@@ -179,7 +179,7 @@ const ProductDetail = () => {
 
         // デフォルトのサイズを設定
         if (productData.size_options && Array.isArray(productData.size_options) && productData.size_options.length > 0) {
-          setSelectedSize(productData.size_options[0].label);
+          setSelectedSize(productData.size_options[0].label || null);
         }
         
         // 関連商品の取得
@@ -437,7 +437,7 @@ const ProductDetail = () => {
             <div className="flex-1 min-w-0">
               <p className="font-bold text-gray-900 truncate">{product.name}</p>
               <p className="text-sm text-gray-500">数量: {quantity}</p>
-              <p className="text-green-600 font-bold">¥{(product.price * quantity).toLocaleString()}</p>
+              <p className="text-green-600 font-bold">¥{(adjustedPrice * quantity).toLocaleString()}</p>
             </div>
           </div>
         ),
