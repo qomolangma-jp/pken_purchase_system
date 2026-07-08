@@ -50,7 +50,16 @@ export const getSelectedSizeId = (item = {}) => {
   }
 
   const sizeOptions = item.product?.size_options || item.size_options || [];
-  const matchedOption = findSizeOption(sizeOptions, selectedSize || getSelectedSizeLabel(item));
+  const directLabel = normalizeValue(
+    item.selectedSizeLabel ||
+    item.size ||
+    item.selected_size ||
+    item.size_label ||
+    item.product?.size ||
+    item.product?.selected_size ||
+    item.product?.size_label
+  );
+  const matchedOption = findSizeOption(sizeOptions, selectedSize || directLabel);
   return matchedOption ? getOptionId(matchedOption) : '';
 };
 
@@ -80,7 +89,17 @@ export const getSelectedSizeLabel = (item = {}) => {
   }
 
   const sizeOptions = item.product?.size_options || item.size_options || [];
-  const matchedOption = findSizeOption(sizeOptions, selectedSize || getSelectedSizeId(item));
+  const directId = normalizeValue(
+    item.selectedSizeId ||
+    item.size_id ||
+    item.selected_size_id ||
+    item.sizeOptionId ||
+    item.size_option_id ||
+    item.product?.selectedSizeId ||
+    item.product?.size_id ||
+    item.product?.selected_size_id
+  );
+  const matchedOption = findSizeOption(sizeOptions, selectedSize || directId);
   return matchedOption ? getOptionLabel(matchedOption) : null;
 };
 
