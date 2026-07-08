@@ -455,6 +455,7 @@ const ProductDetail = () => {
         confirmText: 'カートを見る',
         cancelText: '買い物を続ける',
         onConfirm: () => navigate('/cart'),
+        onCancel: () => navigate('/'),
       });
       
       // 数量をリセット

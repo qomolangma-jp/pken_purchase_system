@@ -2,7 +2,7 @@ import React from 'react';
 import { useModal } from '../contexts/ModalContext';
 
 const Modal = () => {
-  const { modalConfig, closeModal, confirmModal } = useModal();
+  const { modalConfig, closeModal, confirmModal, cancelModal } = useModal();
 
   if (!modalConfig) return null;
 
@@ -89,7 +89,7 @@ const Modal = () => {
               <button
                 type="button"
                 className="w-full py-3.5 px-4 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 active:scale-95 transition-all"
-                onClick={closeModal}
+                onClick={cancelModal}
               >
                 {cancelText}
               </button>

@@ -12,6 +12,7 @@ export const ModalProvider = ({ children }) => {
       message: '',
       data: null,
       onConfirm: null,
+      onCancel: null,
       onClose: null,
       confirmText: 'OK',
       cancelText: 'キャンセル',
@@ -33,8 +34,15 @@ export const ModalProvider = ({ children }) => {
     setModalConfig(null);
   }, [modalConfig]);
 
+  const cancelModal = useCallback(() => {
+    if (modalConfig?.onCancel) {
+      modalConfig.onCancel();
+    }
+    setModalConfig(null);
+  }, [modalConfig]);
+
   return (
-    <ModalContext.Provider value={{ openModal, closeModal, confirmModal, modalConfig }}>
+    <ModalContext.Provider value={{ openModal, closeModal, confirmModal, cancelModal, modalConfig }}>
       {children}
     </ModalContext.Provider>
   );

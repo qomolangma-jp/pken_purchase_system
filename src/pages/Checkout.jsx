@@ -541,9 +541,10 @@ const Checkout = () => {
                         value="paypay"
                         checked={paymentMethod === 'paypay'}
                         onChange={(e) => setPaymentMethod(e.target.value)}
+                        disabled
                         className="w-4 h-4"
                       />
-                      <span className="ml-2 text-sm font-medium text-stone-700">PayPay</span>
+                      <span className="ml-2 text-sm font-medium text-stone-500">PayPay（準備中）</span>
                     </label>
                     <label className="flex items-center p-2 border border-stone-300 rounded bg-stone-50">
                       <input
