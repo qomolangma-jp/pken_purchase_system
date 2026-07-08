@@ -94,6 +94,12 @@ const ProductList = () => {
 
   const hasFetchedRef = useRef(false);
 
+  const isParentProduct = (item) => {
+    if (!item || typeof item !== 'object') return false;
+    if (!Object.prototype.hasOwnProperty.call(item, 'parent_id')) return true;
+    return item.parent_id == null;
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -216,12 +222,12 @@ const ProductList = () => {
         }
 
         const validProducts = productsData
-          .filter(item => item.id && item.name && !item.username && !item.student_id)
+          .filter(item => item.id && item.name && !item.username && !item.student_id && isParentProduct(item))
           .map(item => ({
             ...item,
             category_name: item.category_name?.trim() || 'その他',
             vendor_name: item.vendor_name?.trim() || '',
-            label: (item.label || '').trim() !== '未入力' ? (item.label || '').trim() : '',
+            label: (item.label || '').trim(),
           }));
 
         setProducts(validProducts);

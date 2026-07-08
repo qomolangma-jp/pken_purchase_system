@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
+import { getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || 
@@ -316,7 +317,7 @@ const Cart = () => {
   };
 
   const getItemSize = (item) => {
-    return item.selectedSize || item.size || item.selected_size || item.size_label || null;
+    return getSelectedSizeLabel(item);
   };
 
   const updateCartItem = async (itemId, newQuantity, newSize = undefined, maxStock = 999) => {
@@ -505,16 +506,8 @@ const Cart = () => {
       const basePrice = Number(product?.price || 0);
       const quantity = Number(item?.quantity || 0);
       
-      // カート内でユーザーが選択したサイズを優先
-      const currentSize = item.selectedSize || item.size_label || item.size || item.selected_size || 
-                          item.product?.size_label || item.product?.size || item.product?.selected_size;
-      
-      const sizeOption = (product.size_options || []).find(opt => {
-        const itemSize = String(currentSize || "").trim();
-        const optionLabel = String(opt.label || "").trim();
-        return itemSize === optionLabel;
-      });
-      const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
+      const currentSize = getSelectedSizeLabel(item);
+      const priceAdjustment = getSizePriceAdjustment(product.size_options, currentSize);
       
       const itemSubtotal = (basePrice + priceAdjustment) * quantity;
       console.log(`[Summary] Item: ${product?.name}, Size: ${currentSize || 'なし'}, Base: ${basePrice}, Adj: ${priceAdjustment}, Qty: ${quantity}, Total: ${itemSubtotal}`);
@@ -626,16 +619,8 @@ const Cart = () => {
                 const productId = product?.id || item.product_id;
                 const basePrice = Number(product?.price || 0);
                 
-                // サイズ調整
-                const currentSize = item.selectedSize || item.size_label || item.size || item.selected_size ||
-                                    item.product?.size_label || item.product?.size || item.product?.selected_size;
-                
-                const sizeOption = (product.size_options || []).find(opt => {
-                  const itemSize = String(currentSize || "").trim();
-                  const optionLabel = String(opt.label || "").trim();
-                  return itemSize === optionLabel;
-                });
-                const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
+                const currentSize = getSelectedSizeLabel(item);
+                const priceAdjustment = getSizePriceAdjustment(product.size_options, currentSize);
                 const finalPrice = basePrice + priceAdjustment;
 
                 const productImage = product?.image_url || product?.thumbnail_url || '';
@@ -721,7 +706,10 @@ const Cart = () => {
                                 >
                                   {sizeOptions.map((opt) => (
                                     <option key={opt.label} value={opt.label}>
-                                      {opt.label}{opt.price_adjustment ? ` (+¥${Number(opt.price_adjustment).toLocaleString()})` : ''}
+                                      {opt.label}{(() => {
+                                        const optionAdjustment = getSizePriceAdjustment(sizeOptions, opt.label);
+                                        return optionAdjustment ? ` (+¥${optionAdjustment.toLocaleString()})` : '';
+                                      })()}
                                     </option>
                                   ))}
                                 </select>

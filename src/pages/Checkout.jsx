@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
+import { getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || 
@@ -143,10 +144,8 @@ const Checkout = () => {
       const basePrice = Number(product.price || 0);
       const quantity = Number(item.quantity || 1);
       
-      // サイズ調整額の計算 (size, selected_size, size_label どれかを見る)
-      const currentSize = item.size || item.selected_size || item.size_label;
-      const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
-      const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
+      const currentSize = getSelectedSizeLabel(item);
+      const priceAdjustment = getSizePriceAdjustment(product.size_options, currentSize);
       
       const itemSubtotal = (basePrice + priceAdjustment) * quantity;
       console.log(`[CheckoutSummary] Item: ${product?.name}, Size: ${currentSize}, Total: ${itemSubtotal}`);
@@ -234,7 +233,7 @@ const Checkout = () => {
       const items = cartItems.map(item => ({
         product_id: item.product?.id || item.id,
         quantity: item.quantity || 1,
-        size: item.size,
+        size: getSelectedSizeLabel(item),
       }));
 
       const backendPaymentMethod = PAYMENT_METHOD_MAP[paymentMethod] || paymentMethod;
@@ -425,10 +424,8 @@ const Checkout = () => {
                   const productName = product.name || 'Unknown Product';
                   const basePrice = Number(product.price || 0);
                   
-                  // サイズ調整
-                  const currentSize = item.size || item.selected_size || item.size_label;
-                  const sizeOption = (product.size_options || []).find(opt => opt.label === currentSize);
-                  const priceAdjustment = Number(sizeOption?.price_adjustment || 0);
+                  const currentSize = getSelectedSizeLabel(item);
+                  const priceAdjustment = getSizePriceAdjustment(product.size_options, currentSize);
                   const finalPrice = basePrice + priceAdjustment;
 
                   const rawImageUrl = product.image_url || product.thumbnail_url || '';

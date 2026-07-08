@@ -4,6 +4,7 @@ import { Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
+import { getSizePriceAdjustment } from '../utils/sizePricing';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || 
@@ -512,8 +513,8 @@ const ProductDetail = () => {
     return 'text-stone-700';
   };
 
-  const selectedSizeInfo = product.size_options?.find(opt => opt.label === selectedSize);
-  const adjustedPrice = (product.price || 0) + (selectedSizeInfo?.price_adjustment || 0);
+  const sizeAdjustment = getSizePriceAdjustment(product.size_options, selectedSize);
+  const adjustedPrice = Number(product.price || 0) + sizeAdjustment;
 
  return (
     <div className="min-h-screen bg-white md:bg-stone-50 md:pt-8 lg:pt-12">
@@ -654,6 +655,9 @@ const ProductDetail = () => {
                     <label className="block text-base md:text-lg font-bold text-stone-900 mb-3 md:mb-4">サイズを選択</label>
                     <div className="flex flex-wrap gap-2">
                       {product.size_options.map((opt) => (
+                        (() => {
+                          const optionAdjustment = getSizePriceAdjustment(product.size_options, opt.label);
+                          return (
                         <button
                           key={opt.label}
                           onClick={() => setSelectedSize(opt.label)}
@@ -664,12 +668,14 @@ const ProductDetail = () => {
                           }`}
                         >
                           <span className="text-base">{opt.label}</span>
-                          {opt.price_adjustment !== 0 && (
+                          {optionAdjustment !== 0 && (
                             <span className="text-[10px] md:text-xs">
-                              ({opt.price_adjustment > 0 ? '+' : ''}{opt.price_adjustment}円)
+                              ({optionAdjustment > 0 ? '+' : ''}{optionAdjustment}円)
                             </span>
                           )}
                         </button>
+                          );
+                        })()
                       ))}
                     </div>
                   </div>
