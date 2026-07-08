@@ -4,7 +4,7 @@ import { Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
-import { getSizePriceAdjustment } from '../utils/sizePricing';
+import { getSelectedSizeId, getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || 
@@ -179,7 +179,7 @@ const ProductDetail = () => {
 
         // デフォルトのサイズを設定
         if (productData.size_options && Array.isArray(productData.size_options) && productData.size_options.length > 0) {
-          setSelectedSize(productData.size_options[0].label || null);
+          setSelectedSize(productData.size_options[0] || null);
         }
         
         // 関連商品の取得
@@ -267,10 +267,16 @@ const ProductDetail = () => {
         return;
       }
 
+      const selectedSizeLabel = getSelectedSizeLabel({ selectedSize, product });
+      const selectedSizeId = getSelectedSizeId({ selectedSize, product });
+
       const requestData = {
         product_id: parseInt(id),
         quantity: quantity,
-        size: selectedSize, // バックエンドが 'size' を期待している可能性が高いため戻す
+        size: selectedSizeLabel,
+        size_id: selectedSizeId || undefined,
+        unit_price: adjustedPrice,
+        price: adjustedPrice,
       };
 
       console.log('📦 カート追加リクエスト実行:', JSON.stringify(requestData));
@@ -288,9 +294,11 @@ const ProductDetail = () => {
             console.log('カート全アイテムデータ (デバッグ用):', items);
             existingCartItem = items.find(item => {
               const matchesId = (item.product?.id || item.product_id) === parseInt(id);
-              // size, selected_size, size_label のいずれかで一致を確認
-              const itemSize = item.size || item.selected_size || item.size_label;
-              const matchesSize = (itemSize || null) === (selectedSize || null);
+              const itemSizeId = item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || item.selectedSizeId || item.selectedSize?.id || null;
+              const itemSizeLabel = item.size || item.selected_size || item.size_label || item.selectedSize?.label || null;
+              const matchesSize = selectedSizeId
+                ? String(itemSizeId || '') === String(selectedSizeId)
+                : String(itemSizeLabel || '') === String(selectedSizeLabel || '');
               return matchesId && matchesSize;
             });
           }
@@ -342,10 +350,13 @@ const ProductDetail = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ 
-              quantity: newTotalQuantity,
-              size: selectedSize // 数量更新時もサイズを念のため送る
-            }),
+              body: JSON.stringify({ 
+                quantity: newTotalQuantity,
+                size: selectedSizeLabel,
+                size_id: selectedSizeId || undefined,
+                unit_price: adjustedPrice,
+                price: adjustedPrice,
+              }),
           });
         }
       } else {
@@ -656,13 +667,17 @@ const ProductDetail = () => {
                     <div className="flex flex-wrap gap-2">
                       {product.size_options.map((opt) => (
                         (() => {
-                          const optionAdjustment = getSizePriceAdjustment(product.size_options, opt.label);
+                          const optionAdjustment = getSizePriceAdjustment(product.size_options, opt);
+                          const optionKey = opt.id || opt.size_id || opt.value || opt.size_option_id || opt.label;
+                          const isSelected = selectedSize && typeof selectedSize === 'object'
+                            ? String(selectedSize.id || selectedSize.size_id || selectedSize.value || selectedSize.size_option_id || '') === String(optionKey || '')
+                            : String(getSelectedSizeLabel({ selectedSize, product }) || '') === String(opt.label || '');
                           return (
                         <button
-                          key={opt.label}
-                          onClick={() => setSelectedSize(opt.label)}
+                          key={optionKey}
+                          onClick={() => setSelectedSize(opt)}
                           className={`px-6 py-2 rounded-xl border-2 font-bold transition-all duration-200 min-w-[100px] flex flex-col items-center ${
-                            selectedSize === opt.label
+                            isSelected
                               ? 'border-mos-green bg-green-50 text-mos-green'
                               : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300'
                           }`}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
-import { getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
+import { getSelectedSizeId, getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || 
@@ -123,6 +123,8 @@ const Cart = () => {
           ...item,
           id: item.cart_id || item.id, // cart_idを優先してidとして扱う
           selectedSize: item.size || item.selected_size || item.size_label || null,
+          selectedSizeLabel: item.size || item.selected_size || item.size_label || null,
+          selectedSizeId: item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
         }));
       } else if (Array.isArray(data)) {
         console.log('カートアイテム数:', data.length);
@@ -130,6 +132,8 @@ const Cart = () => {
           ...item,
           id: item.cart_id || item.id,
           selectedSize: item.size || item.selected_size || item.size_label || null,
+          selectedSizeLabel: item.size || item.selected_size || item.size_label || null,
+          selectedSizeId: item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
         }));
       } else if (data.data && Array.isArray(data.data)) {
         // ネストされたdata.dataが配列の場合に対応
@@ -137,6 +141,8 @@ const Cart = () => {
           ...item,
           id: item.cart_id || item.id,
           selectedSize: item.size || item.selected_size || item.size_label || null,
+          selectedSizeLabel: item.size || item.selected_size || item.size_label || null,
+          selectedSizeId: item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
         }));
       } else {
         console.warn('カートデータが期待する構造ではありません:', data);
@@ -250,6 +256,8 @@ const Cart = () => {
             product: productData,
             size: item.size || item.selected_size || item.size_label,
             selectedSize: item.selectedSize || item.size || item.selected_size || item.size_label || null,
+            selectedSizeLabel: item.selectedSizeLabel || item.size || item.selected_size || item.size_label || null,
+            selectedSizeId: item.selectedSizeId || item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
           });
         } else {
           // 在庫あり: 商品情報を最新に更新
@@ -259,6 +267,8 @@ const Cart = () => {
             product: productData,
             size: item.size || item.selected_size || item.size_label,
             selectedSize: item.selectedSize || item.size || item.selected_size || item.size_label || null,
+            selectedSizeLabel: item.selectedSizeLabel || item.size || item.selected_size || item.size_label || null,
+            selectedSizeId: item.selectedSizeId || item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
           });
         }
       }
@@ -300,7 +310,7 @@ const Cart = () => {
       // カートアイテム自体のIDを保持するように修正
       // 同じ商品でもサイズが異なる場合は、別のアイテムとして扱う
       const productId = item.product?.id || item.product_id || item.id;
-      const sizeKey = item.size || 'default';
+      const sizeKey = item.size_id || item.selected_size_id || item.selectedSizeId || item.sizeOptionId || item.size_option_id || item.selectedSize?.id || item.size || item.selected_size || item.size_label || 'default';
       const mapKey = `${productId}-${sizeKey}`;
       
       if (mergedMap.has(mapKey)) {
@@ -309,7 +319,12 @@ const Cart = () => {
         console.log(`表示上で商品を統合: ID ${productId}, サイズ ${sizeKey}, 新しい数量: ${existingItem.quantity}`);
       } else {
         // オブジェクト全体をコピーして保持
-        mergedMap.set(mapKey, { ...item, selectedSize: item.selectedSize || item.size || item.selected_size || item.size_label || null });
+        mergedMap.set(mapKey, {
+          ...item,
+          selectedSize: item.selectedSize || item.size || item.selected_size || item.size_label || null,
+          selectedSizeLabel: item.selectedSizeLabel || item.size || item.selected_size || item.size_label || null,
+          selectedSizeId: item.selectedSizeId || item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
+        });
       }
     });
     
@@ -318,6 +333,10 @@ const Cart = () => {
 
   const getItemSize = (item) => {
     return getSelectedSizeLabel(item);
+  };
+
+  const getItemSizeId = (item) => {
+    return getSelectedSizeId(item);
   };
 
   const updateCartItem = async (itemId, newQuantity, newSize = undefined, maxStock = 999) => {
@@ -344,14 +363,16 @@ const Cart = () => {
       if (!token) return;
 
       const previousItems = [...cartItems];
-      const sizeToSend = newSize !== undefined ? newSize : getItemSize(previousItems.find(item => item.id === itemId) || {});
+      const previousItem = previousItems.find(item => item.id === itemId) || {};
+      const sizeToSend = newSize !== undefined ? getSelectedSizeLabel({ selectedSize: newSize, product: previousItem.product }) : getItemSize(previousItem);
+      const sizeIdToSend = newSize !== undefined ? getSelectedSizeId({ selectedSize: newSize, product: previousItem.product }) : getItemSizeId(previousItem);
 
       setCartItems(prev => prev.map(item => 
-        item.id === itemId ? { ...item, quantity: newQuantity, selectedSize: sizeToSend } : item
+        item.id === itemId ? { ...item, quantity: newQuantity, selectedSize: newSize !== undefined ? newSize : item.selectedSize, selectedSizeLabel: sizeToSend, selectedSizeId: sizeIdToSend } : item
       ));
       
       const url = `${API_BASE_URL}/api/cart/${itemId}`;
-      console.log('📦 カート更新リクエスト (楽観的):', { itemId, newQuantity, size: sizeToSend });
+      console.log('📦 カート更新リクエスト (楽観的):', { itemId, newQuantity, size: sizeToSend, size_id: sizeIdToSend });
       
       const response = await fetch(url, {
         method: 'PUT',
@@ -360,7 +381,7 @@ const Cart = () => {
           'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',
-        body: JSON.stringify({ quantity: newQuantity, size: sizeToSend }),
+        body: JSON.stringify({ quantity: newQuantity, size: sizeToSend, size_id: sizeIdToSend || undefined }),
       });
 
       if (!response.ok) {
@@ -507,10 +528,14 @@ const Cart = () => {
       const quantity = Number(item?.quantity || 0);
       
       const currentSize = getSelectedSizeLabel(item);
-      const priceAdjustment = getSizePriceAdjustment(product.size_options, currentSize);
+      const currentSizeId = getItemSizeId(item);
+      const sizeSelection = currentSizeId
+        ? (product.size_options || []).find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || '') === String(currentSizeId)) || currentSize
+        : currentSize;
+      const priceAdjustment = getSizePriceAdjustment(product.size_options, sizeSelection);
       
       const itemSubtotal = (basePrice + priceAdjustment) * quantity;
-      console.log(`[Summary] Item: ${product?.name}, Size: ${currentSize || 'なし'}, Base: ${basePrice}, Adj: ${priceAdjustment}, Qty: ${quantity}, Total: ${itemSubtotal}`);
+      console.log(`[Summary] Item: ${product?.name}, Size: ${currentSize || 'なし'}, SizeId: ${currentSizeId || 'なし'}, Base: ${basePrice}, Adj: ${priceAdjustment}, Qty: ${quantity}, Total: ${itemSubtotal}`);
       
       return total + itemSubtotal;
     }, 0);
@@ -539,7 +564,12 @@ const Cart = () => {
     const summary = sizeOptions.map(opt => {
       const count = sameProductItems
         .filter(item => {
-          const itemSize = String(item.selectedSize || item.size_label || item.size || item.selected_size || "").trim();
+          const itemSizeId = String(item.selectedSizeId || item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || item.selectedSize?.id || "").trim();
+          const optionId = String(opt.id || opt.size_id || opt.value || opt.size_option_id || "").trim();
+          if (itemSizeId && optionId) {
+            return itemSizeId === optionId;
+          }
+          const itemSize = String(item.selectedSizeLabel || item.selectedSize || item.size_label || item.size || item.selected_size || "").trim();
           const optionLabel = String(opt.label || "").trim();
           return itemSize === optionLabel;
         })
@@ -620,7 +650,11 @@ const Cart = () => {
                 const basePrice = Number(product?.price || 0);
                 
                 const currentSize = getSelectedSizeLabel(item);
-                const priceAdjustment = getSizePriceAdjustment(product.size_options, currentSize);
+                const currentSizeId = getItemSizeId(item);
+                const sizeSelection = currentSizeId
+                  ? (product.size_options || []).find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || '') === String(currentSizeId)) || currentSize
+                  : currentSize;
+                const priceAdjustment = getSizePriceAdjustment(product.size_options, sizeSelection);
                 const finalPrice = basePrice + priceAdjustment;
 
                 const productImage = product?.image_url || product?.thumbnail_url || '';
@@ -633,7 +667,7 @@ const Cart = () => {
                   console.log(`[ImageDebug] Cart: ${productName}, Size: ${currentSize}, Adjustment: ${priceAdjustment}`);
                 }
 
-                const selectedSize = item.selectedSize || currentSize;
+                const selectedSize = item.selectedSizeId || currentSizeId || item.selectedSize || currentSize;
                 const sizeOptions = product.size_options || [];
                 const canChooseSize = sizeOptions.length > 0;
 
@@ -700,14 +734,15 @@ const Cart = () => {
                                   value={selectedSize || ''}
                                   onChange={(e) => {
                                     const id = item?.id || item?.cart_id || item?.cart_item_id;
-                                    handleSizeChange(id, e.target.value, quantity, product?.stock || 0);
+                                    const selectedOption = sizeOptions.find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || opt?.label || '') === String(e.target.value));
+                                    handleSizeChange(id, selectedOption || e.target.value, quantity, product?.stock || 0);
                                   }}
                                   className="w-full rounded border border-stone-300 bg-white text-sm md:text-sm text-stone-800 py-2 px-2"
                                 >
                                   {sizeOptions.map((opt) => (
-                                    <option key={opt.label} value={opt.label}>
+                                    <option key={opt.id || opt.size_id || opt.value || opt.size_option_id || opt.label} value={opt.id || opt.size_id || opt.value || opt.size_option_id || opt.label}>
                                       {opt.label}{(() => {
-                                        const optionAdjustment = getSizePriceAdjustment(sizeOptions, opt.label);
+                                        const optionAdjustment = getSizePriceAdjustment(sizeOptions, opt);
                                         return optionAdjustment ? ` (+¥${optionAdjustment.toLocaleString()})` : '';
                                       })()}
                                     </option>

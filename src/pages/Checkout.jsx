@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
-import { getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
+import { getSelectedSizeId, getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || 
@@ -145,10 +145,14 @@ const Checkout = () => {
       const quantity = Number(item.quantity || 1);
       
       const currentSize = getSelectedSizeLabel(item);
-      const priceAdjustment = getSizePriceAdjustment(product.size_options, currentSize);
+      const currentSizeId = getSelectedSizeId(item);
+      const sizeSelection = currentSizeId
+        ? (product.size_options || []).find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || '') === String(currentSizeId)) || currentSize
+        : currentSize;
+      const priceAdjustment = getSizePriceAdjustment(product.size_options, sizeSelection);
       
       const itemSubtotal = (basePrice + priceAdjustment) * quantity;
-      console.log(`[CheckoutSummary] Item: ${product?.name}, Size: ${currentSize}, Total: ${itemSubtotal}`);
+      console.log(`[CheckoutSummary] Item: ${product?.name}, Size: ${currentSize}, SizeId: ${currentSizeId || 'なし'}, Total: ${itemSubtotal}`);
       
       return total + itemSubtotal;
     }, 0);
@@ -234,6 +238,8 @@ const Checkout = () => {
         product_id: item.product?.id || item.id,
         quantity: item.quantity || 1,
         size: getSelectedSizeLabel(item),
+        size_id: getSelectedSizeId(item) || undefined,
+        unit_price: Number(item.product?.price || item.price || 0) + getSizePriceAdjustment(item.product?.size_options || [], getSelectedSizeId(item) ? (item.product?.size_options || []).find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || '') === String(getSelectedSizeId(item))) || getSelectedSizeLabel(item) : getSelectedSizeLabel(item)),
       }));
 
       const backendPaymentMethod = PAYMENT_METHOD_MAP[paymentMethod] || paymentMethod;
@@ -425,7 +431,11 @@ const Checkout = () => {
                   const basePrice = Number(product.price || 0);
                   
                   const currentSize = getSelectedSizeLabel(item);
-                  const priceAdjustment = getSizePriceAdjustment(product.size_options, currentSize);
+                  const currentSizeId = getSelectedSizeId(item);
+                  const sizeSelection = currentSizeId
+                    ? (product.size_options || []).find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || '') === String(currentSizeId)) || currentSize
+                    : currentSize;
+                  const priceAdjustment = getSizePriceAdjustment(product.size_options, sizeSelection);
                   const finalPrice = basePrice + priceAdjustment;
 
                   const rawImageUrl = product.image_url || product.thumbnail_url || '';
