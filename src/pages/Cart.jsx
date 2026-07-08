@@ -122,6 +122,9 @@ const Cart = () => {
         items = data.data.items.map(item => ({
           ...item,
           id: item.cart_id || item.id, // cart_idを優先してidとして扱う
+          product_id: item.product?.id || item.product_id || null,
+          size_id: item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || item.selectedSizeId || null,
+          quantity: item.quantity || 1,
           selectedSize: item.size || item.selected_size || item.size_label || null,
           selectedSizeLabel: item.size || item.selected_size || item.size_label || null,
           selectedSizeId: item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
@@ -131,6 +134,9 @@ const Cart = () => {
         items = data.map(item => ({
           ...item,
           id: item.cart_id || item.id,
+          product_id: item.product?.id || item.product_id || null,
+          size_id: item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || item.selectedSizeId || null,
+          quantity: item.quantity || 1,
           selectedSize: item.size || item.selected_size || item.size_label || null,
           selectedSizeLabel: item.size || item.selected_size || item.size_label || null,
           selectedSizeId: item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
@@ -140,6 +146,9 @@ const Cart = () => {
         items = data.data.map(item => ({
           ...item,
           id: item.cart_id || item.id,
+          product_id: item.product?.id || item.product_id || null,
+          size_id: item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || item.selectedSizeId || null,
+          quantity: item.quantity || 1,
           selectedSize: item.size || item.selected_size || item.size_label || null,
           selectedSizeLabel: item.size || item.selected_size || item.size_label || null,
           selectedSizeId: item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
@@ -252,6 +261,8 @@ const Cart = () => {
           adjustedItems.push({
             ...item,
             id: cartItemId,
+            product_id: productData.id,
+            size_id: item.size_id || item.selectedSizeId || item.selected_size_id || item.sizeOptionId || item.size_option_id || item.selectedSize?.id || null,
             quantity: stock,
             product: productData,
             size: item.size || item.selected_size || item.size_label,
@@ -264,6 +275,8 @@ const Cart = () => {
           adjustedItems.push({
             ...item,
             id: cartItemId,
+            product_id: productData.id,
+            size_id: item.size_id || item.selectedSizeId || item.selected_size_id || item.sizeOptionId || item.size_option_id || item.selectedSize?.id || null,
             product: productData,
             size: item.size || item.selected_size || item.size_label,
             selectedSize: item.selectedSize || item.size || item.selected_size || item.size_label || null,
@@ -321,6 +334,8 @@ const Cart = () => {
         // オブジェクト全体をコピーして保持
         mergedMap.set(mapKey, {
           ...item,
+          product_id: item.product_id || item.product?.id || null,
+          size_id: item.size_id || item.selectedSizeId || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
           selectedSize: item.selectedSize || item.size || item.selected_size || item.size_label || null,
           selectedSizeLabel: item.selectedSizeLabel || item.size || item.selected_size || item.size_label || null,
           selectedSizeId: item.selectedSizeId || item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || null,
@@ -337,6 +352,13 @@ const Cart = () => {
 
   const getItemSizeId = (item) => {
     return getSelectedSizeId(item);
+  };
+
+  const getCurrentSizeOption = (item) => {
+    const product = item?.product || item || {};
+    const sizeOptions = Array.isArray(product.size_options) ? product.size_options : [];
+    const sizeKey = item?.size_id || item?.selectedSizeId || item?.selected_size_id || item?.sizeOptionId || item?.size_option_id || item?.selectedSize || item?.selectedSizeLabel || getSelectedSizeLabel(item);
+    return findSizeOption(sizeOptions, sizeKey);
   };
 
   const updateCartItem = async (itemId, newQuantity, newSize = undefined, maxStock = 999) => {
@@ -364,11 +386,12 @@ const Cart = () => {
 
       const previousItems = [...cartItems];
       const previousItem = previousItems.find(item => item.id === itemId) || {};
+      const previousSizeId = previousItem.size_id || previousItem.selectedSizeId || previousItem.selected_size_id || previousItem.sizeOptionId || previousItem.size_option_id || null;
       const sizeToSend = newSize !== undefined ? getSelectedSizeLabel({ selectedSize: newSize, product: previousItem.product }) : getItemSize(previousItem);
       const sizeIdToSend = newSize !== undefined ? getSelectedSizeId({ selectedSize: newSize, product: previousItem.product }) : getItemSizeId(previousItem);
 
       setCartItems(prev => prev.map(item => 
-        item.id === itemId ? { ...item, quantity: newQuantity, selectedSize: newSize !== undefined ? newSize : item.selectedSize, selectedSizeLabel: sizeToSend, selectedSizeId: sizeIdToSend } : item
+        item.id === itemId ? { ...item, quantity: newQuantity, product_id: item.product_id || item.product?.id || null, size_id: sizeIdToSend || previousSizeId || item.size_id || null, selectedSize: newSize !== undefined ? newSize : item.selectedSize, selectedSizeLabel: sizeToSend, selectedSizeId: sizeIdToSend || previousSizeId || item.selectedSizeId || null } : item
       ));
       
       const url = `${API_BASE_URL}/api/cart/${itemId}`;
@@ -528,7 +551,7 @@ const Cart = () => {
       const quantity = Number(item?.quantity || 0);
       
       const currentSize = getSelectedSizeLabel(item);
-      const currentSizeId = getItemSizeId(item);
+      const currentSizeId = getItemSizeId(item) || item.size_id || item.selectedSizeId || item.selected_size_id || item.sizeOptionId || item.size_option_id || '';
       const sizeSelection = currentSizeId
         ? (product.size_options || []).find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || '') === String(currentSizeId)) || currentSize
         : currentSize;
@@ -564,7 +587,7 @@ const Cart = () => {
     const summary = sizeOptions.map(opt => {
       const count = sameProductItems
         .filter(item => {
-          const itemSizeId = String(item.selectedSizeId || item.size_id || item.selected_size_id || item.sizeOptionId || item.size_option_id || item.selectedSize?.id || "").trim();
+          const itemSizeId = String(item.size_id || item.selectedSizeId || item.selected_size_id || item.sizeOptionId || item.size_option_id || item.selectedSize?.id || "").trim();
           const optionId = String(opt.id || opt.size_id || opt.value || opt.size_option_id || "").trim();
           if (itemSizeId && optionId) {
             return itemSizeId === optionId;
@@ -651,8 +674,8 @@ const Cart = () => {
                 const sizeOptions = Array.isArray(product?.size_options) ? product.size_options : [];
                 
                 const currentSize = getSelectedSizeLabel(item);
-                const currentSizeId = getItemSizeId(item);
-                const currentSizeOption = findSizeOption(sizeOptions, currentSizeId || currentSize || item.selectedSize || item.selectedSizeLabel);
+                const currentSizeId = item.size_id || getItemSizeId(item);
+                const currentSizeOption = getCurrentSizeOption(item);
                 const sizeSelection = currentSizeOption || currentSize;
                 const priceAdjustment = getSizePriceAdjustment(sizeOptions, sizeSelection);
                 const finalPrice = basePrice + priceAdjustment;
@@ -668,9 +691,15 @@ const Cart = () => {
                 }
 
                 const selectedSizeOption = currentSizeOption;
-                const selectedSizeValue = selectedSizeOption
-                  ? String(selectedSizeOption.id || selectedSizeOption.size_id || selectedSizeOption.value || selectedSizeOption.size_option_id || '')
-                  : String(currentSizeId || '');
+                const selectedSizeValue = String(
+                  item.size_id ||
+                  selectedSizeOption?.id ||
+                  selectedSizeOption?.size_id ||
+                  selectedSizeOption?.value ||
+                  selectedSizeOption?.size_option_id ||
+                  currentSizeId ||
+                  ''
+                );
                 const canChooseSize = sizeOptions.length > 0;
                 const displayStock = selectedSizeOption?.stock ?? product?.stock ?? 0;
 
