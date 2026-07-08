@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
-import { getSelectedSizeId, getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
+import { findSizeOption, getSelectedSizeId, getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || 
@@ -648,13 +648,13 @@ const Cart = () => {
                 const productName = product?.name || '不明な商品';
                 const productId = product?.id || item.product_id;
                 const basePrice = Number(product?.price || 0);
+                const sizeOptions = Array.isArray(product?.size_options) ? product.size_options : [];
                 
                 const currentSize = getSelectedSizeLabel(item);
                 const currentSizeId = getItemSizeId(item);
-                const sizeSelection = currentSizeId
-                  ? (product.size_options || []).find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || '') === String(currentSizeId)) || currentSize
-                  : currentSize;
-                const priceAdjustment = getSizePriceAdjustment(product.size_options, sizeSelection);
+                const currentSizeOption = findSizeOption(sizeOptions, currentSizeId || currentSize || item.selectedSize || item.selectedSizeLabel);
+                const sizeSelection = currentSizeOption || currentSize;
+                const priceAdjustment = getSizePriceAdjustment(sizeOptions, sizeSelection);
                 const finalPrice = basePrice + priceAdjustment;
 
                 const productImage = product?.image_url || product?.thumbnail_url || '';
@@ -667,9 +667,12 @@ const Cart = () => {
                   console.log(`[ImageDebug] Cart: ${productName}, Size: ${currentSize}, Adjustment: ${priceAdjustment}`);
                 }
 
-                const selectedSize = item.selectedSizeId || currentSizeId || item.selectedSize || currentSize;
-                const sizeOptions = product.size_options || [];
+                const selectedSizeOption = currentSizeOption;
+                const selectedSizeValue = selectedSizeOption
+                  ? String(selectedSizeOption.id || selectedSizeOption.size_id || selectedSizeOption.value || selectedSizeOption.size_option_id || '')
+                  : String(currentSizeId || '');
                 const canChooseSize = sizeOptions.length > 0;
+                const displayStock = selectedSizeOption?.stock ?? product?.stock ?? 0;
 
                 return (
                   <React.Fragment key={item?.id || index}>
@@ -707,9 +710,9 @@ const Cart = () => {
                                 <button
                                   onClick={() => {
                                     const id = item?.id || item?.cart_id || item?.cart_item_id;
-                                    updateCartItem(id, Math.max(1, quantity - 1), selectedSize, product?.stock || 0);
+                                    updateCartItem(id, Math.max(1, quantity - 1), selectedSizeValue, displayStock || 0);
                                   }}
-                                  disabled={quantity <= 1 || (product?.stock ?? 0) <= 0}
+                                  disabled={quantity <= 1 || (displayStock ?? 0) <= 0}
                                   className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-l disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                                 >
                                   −
@@ -718,9 +721,9 @@ const Cart = () => {
                                 <button
                                   onClick={() => {
                                     const id = item?.id || item?.cart_id || item?.cart_item_id;
-                                    updateCartItem(id, quantity + 1, selectedSize, product?.stock || 0);
+                                    updateCartItem(id, quantity + 1, selectedSizeValue, displayStock || 0);
                                   }}
-                                  disabled={(product?.stock ?? 0) <= 0 || quantity >= (product?.stock ?? 0)}
+                                  disabled={(displayStock ?? 0) <= 0 || quantity >= (displayStock ?? 0)}
                                   className="w-8 h-8 md:w-9 md:h-9 text-base md:text-lg font-bold text-mos-green flex items-center justify-center hover:bg-green-200 active:bg-green-300 transition-colors rounded-r disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200"
                                 >
                                   +
@@ -731,11 +734,11 @@ const Cart = () => {
                               <div className="ml-auto flex min-w-[160px] flex-col gap-1">
                                 <label className="text-xs md:text-sm text-stone-600">サイズ</label>
                                 <select
-                                  value={selectedSize || ''}
+                                  value={selectedSizeValue}
                                   onChange={(e) => {
                                     const id = item?.id || item?.cart_id || item?.cart_item_id;
-                                    const selectedOption = sizeOptions.find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || opt?.label || '') === String(e.target.value));
-                                    handleSizeChange(id, selectedOption || e.target.value, quantity, product?.stock || 0);
+                                    const selectedOption = sizeOptions.find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || '') === String(e.target.value));
+                                    handleSizeChange(id, selectedOption || e.target.value, quantity, selectedOption?.stock ?? product?.stock ?? 0);
                                   }}
                                   className="w-full rounded border border-stone-300 bg-white text-sm md:text-sm text-stone-800 py-2 px-2"
                                 >
@@ -752,9 +755,9 @@ const Cart = () => {
                             ) : null}
                           </div>
                           <div className="mt-1 md:mt-2">
-                            { (product?.stock ?? 0) > 0 ? (
+                            { (displayStock ?? 0) > 0 ? (
                                 <div className="space-y-0.5">
-                                  <p className="text-xs md:text-sm text-stone-500">在庫: {product?.stock}個</p>
+                                  <p className="text-xs md:text-sm text-stone-500">在庫: {displayStock}個</p>
                                   {product?.size_options?.length > 0 && (
                                     <p className="text-[10px] md:text-xs font-bold text-mos-green-dark">
                                       {getSizeSummary(productId)}
