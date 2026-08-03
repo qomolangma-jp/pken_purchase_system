@@ -67,17 +67,6 @@ const Checkout = () => {
   const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
   const { openModal } = useModal();
 
-  useEffect(() => {
-    if (authLoading) {
-      return;
-    }
-    if (!isAuthenticated || !user) {
-      setLoading(false);
-      return;
-    }
-    fetchCart();
-  }, [authLoading, isAuthenticated, user]);
-
   const fetchCart = async () => {
     try {
       const token = localStorage.getItem('authToken');
@@ -163,6 +152,17 @@ const Checkout = () => {
   const userPoints = Number(user?.points ?? 0);
   const isPointsPayment = paymentMethod === 'points';
   const hasInsufficientPoints = isPointsPayment && totalPrice > userPoints;
+
+  useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+    if (!isAuthenticated || !user) {
+      setLoading(false);
+      return;
+    }
+    fetchCart();
+  }, [authLoading, isAuthenticated, user]);
 
   const handleConfirmOrder = async () => {
     if (cartItems.length === 0) {
