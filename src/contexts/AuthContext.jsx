@@ -13,12 +13,14 @@ const normalizePoints = (points) => {
 const normalizeUser = (rawUser, fallback = {}) => {
   if (!rawUser) return null;
 
+  const rawPoints = rawUser?.points ?? rawUser?.wallet_balance ?? rawUser?.current_points ?? fallback.points;
+
   return {
     ...rawUser,
     ...fallback,
     displayName: rawUser.displayName || rawUser.display_name || rawUser.name || rawUser.student_id || fallback.displayName || 'ゲスト',
     lineId: rawUser.lineId || rawUser.line_id || fallback.lineId,
-    points: normalizePoints(rawUser.points ?? fallback.points),
+    points: normalizePoints(rawPoints),
   };
 };
 
