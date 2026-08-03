@@ -16,6 +16,8 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import OrderComplete from './pages/OrderComplete';
 import PurchaseHistory from './pages/PurchaseHistory';
+import MyPage from './pages/MyPage';
+import PointCharge from './pages/PointCharge';
 import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
 import ForgotPassword from './pages/ForgotPassword';
@@ -80,6 +82,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <PurchaseHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mypage"
+            element={
+              <ProtectedRoute>
+                <MyPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/charge"
+            element={
+              <ProtectedRoute>
+                <PointCharge />
               </ProtectedRoute>
             }
           />
