@@ -66,10 +66,6 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
   const { openModal } = useModal();
-  const totalPrice = getTotalPrice();
-  const userPoints = Number(user?.points ?? 0);
-  const isPointsPayment = paymentMethod === 'points';
-  const hasInsufficientPoints = isPointsPayment && totalPrice > userPoints;
 
   useEffect(() => {
     if (authLoading) {
@@ -162,6 +158,11 @@ const Checkout = () => {
       return total + itemSubtotal;
     }, 0);
   };
+
+  const totalPrice = getTotalPrice();
+  const userPoints = Number(user?.points ?? 0);
+  const isPointsPayment = paymentMethod === 'points';
+  const hasInsufficientPoints = isPointsPayment && totalPrice > userPoints;
 
   const handleConfirmOrder = async () => {
     if (cartItems.length === 0) {
