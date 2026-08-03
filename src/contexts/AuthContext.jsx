@@ -3,6 +3,24 @@ import liff from '@line/liff';
 import { getLineProfile } from '../services/lineAuth';
 console.log("VITE_DEBUG_MOCKの値:", import.meta.env.VITE_DEBUG_MOCK);
 const AuthContext = createContext();
+const DEFAULT_USER_POINTS = 1000;
+
+const normalizePoints = (points) => {
+  const parsedPoints = Number(points);
+  return Number.isFinite(parsedPoints) && parsedPoints >= 0 ? parsedPoints : DEFAULT_USER_POINTS;
+};
+
+const normalizeUser = (rawUser, fallback = {}) => {
+  if (!rawUser) return null;
+
+  return {
+    ...rawUser,
+    ...fallback,
+    displayName: rawUser.displayName || rawUser.display_name || rawUser.name || rawUser.student_id || fallback.displayName || 'ゲスト',
+    lineId: rawUser.lineId || rawUser.line_id || fallback.lineId,
+    points: normalizePoints(rawUser.points ?? fallback.points),
+  };
+};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -140,11 +158,7 @@ export const AuthProvider = ({ children }) => {
         console.log('保存された認証情報を使用');
         try {
           const parsedUser = JSON.parse(storedUser);
-          const normalizedUser = {
-            ...parsedUser,
-            displayName: parsedUser.displayName || parsedUser.display_name || parsedUser.name || parsedUser.student_id || 'ゲスト',
-            lineId: parsedUser.lineId || parsedUser.line_id,
-          };
+          const normalizedUser = normalizeUser(parsedUser);
           console.log('✅ Restored user from storage:', { id: normalizedUser.id, displayName: normalizedUser.displayName });
           setUser(normalizedUser);
           setIsAuthenticated(true);
@@ -180,11 +194,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const parsedUser = JSON.parse(storedUser);
           // sessionStorage から復元されたユーザーを正規化
-          const normalizedUser = {
-            ...parsedUser,
-            displayName: parsedUser.displayName || parsedUser.display_name || parsedUser.name || parsedUser.student_id || 'ゲスト',
-            lineId: parsedUser.lineId || parsedUser.line_id,
-          };
+          const normalizedUser = normalizeUser(parsedUser);
           console.log('✅ Restored normalized user:', { id: normalizedUser.id, displayName: normalizedUser.displayName });
           setUser(normalizedUser);
           setIsAuthenticated(true);
@@ -300,13 +310,14 @@ export const AuthProvider = ({ children }) => {
             displayName: profile.displayName,
             pictureUrl: profile.pictureUrl,
           };
-          
-          console.log('✅ Setting user object:', { id: userObject.id, displayName: userObject.displayName });
-          setUser(userObject);
+          const normalizedUser = normalizeUser(userObject, { points: DEFAULT_USER_POINTS });
+
+          console.log('✅ Setting user object:', { id: normalizedUser.id, displayName: normalizedUser.displayName, points: normalizedUser.points });
+          setUser(normalizedUser);
           setIsAuthenticated(true);
           
           // セッションストレージに保存（setUser と同じ形式で保存）
-          sessionStorage.setItem('user', JSON.stringify(userObject));
+          sessionStorage.setItem('user', JSON.stringify(normalizedUser));
         } else {
           // ユーザーが見つからない場合はnullのまま（ログインページへリダイレクト）
           console.log('ユーザーが見つかりません');
@@ -359,13 +370,31 @@ export const AuthProvider = ({ children }) => {
     console.log('✅ Setting normalized user from login():', { 
       id: normalizedUser.id, 
       displayName: normalizedUser.displayName,
+      points: normalizedUser.points,
       keys: Object.keys(normalizedUser).filter(k => k !== 'display_name' && k !== 'name_1st' && k !== 'name_2nd').slice(0, 5)
     });
     
-    setUser(normalizedUser);
+    const nextUser = normalizeUser(normalizedUser);
+    setUser(nextUser);
     setIsAuthenticated(true);
     setHasApiToken(Boolean(localStorage.getItem('authToken')));
-    sessionStorage.setItem('user', JSON.stringify(normalizedUser));
+    sessionStorage.setItem('user', JSON.stringify(nextUser));
+  };
+
+  const updateUserPoints = (nextPoints) => {
+    setUser((currentUser) => {
+      if (!currentUser) {
+        return currentUser;
+      }
+
+      const updatedUser = {
+        ...currentUser,
+        points: normalizePoints(nextPoints),
+      };
+
+      sessionStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
   };
 
   const logout = () => {
@@ -389,6 +418,7 @@ export const AuthProvider = ({ children }) => {
     fetchCartCount,
     login,
     logout,
+    updateUserPoints,
     liff,
   };
 

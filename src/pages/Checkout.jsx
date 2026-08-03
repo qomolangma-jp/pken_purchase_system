@@ -53,6 +53,7 @@ const handleImageError = (e, src) => {
 
 const PAYMENT_METHOD_MAP = {
   paypay: 'paypay',
+  points: 'points',
   deferred: 'atobarai',
 };
 
@@ -65,6 +66,10 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
   const { openModal } = useModal();
+  const totalPrice = getTotalPrice();
+  const userPoints = Number(user?.points ?? 0);
+  const isPointsPayment = paymentMethod === 'points';
+  const hasInsufficientPoints = isPointsPayment && totalPrice > userPoints;
 
   useEffect(() => {
     if (authLoading) {
@@ -164,6 +169,16 @@ const Checkout = () => {
         type: 'warning',
         title: '商品がありません',
         message: 'カートに商品がありません。'
+      });
+      return;
+    }
+
+    if (paymentMethod === 'points' && hasInsufficientPoints) {
+      setError('ポイントが不足しています');
+      openModal({
+        type: 'warning',
+        title: 'ポイントが不足しています',
+        message: '所持ポイントを超える注文はできません。',
       });
       return;
     }
@@ -296,7 +311,7 @@ const Checkout = () => {
         // --- 通常注文フロー ---
         const orderData = {
           items,
-          ...(paymentMethod === 'paypay' ? { payment_method: backendPaymentMethod } : {}),
+          payment_method: backendPaymentMethod,
           ...(paymentMethod === 'deferred' ? { status: '後払い購入' } : {}),
         };
 
@@ -346,6 +361,12 @@ const Checkout = () => {
       } catch (clearErr) {
         console.warn('カート削除エラー（処理は継続）:', clearErr);
       }
+
+      // DEBUG: ポイント決済の成功をフロント側で疑似再現したい場合は、以下を有効化してください。
+      // if (paymentMethod === 'points') {
+      //   const nextPoints = Math.max(0, Number(user?.points ?? 0) - totalPrice);
+      //   updateUserPoints(nextPoints);
+      // }
 
       // 注文完了画面へ遷移（注文番号をパラメータで渡す）
       const orderId = data?.data?.id || data?.order_id || Math.random().toString(36).substr(2, 9);
@@ -550,6 +571,19 @@ const Checkout = () => {
                       <input
                         type="radio"
                         name="payment_method"
+                        value="points"
+                        checked={paymentMethod === 'points'}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-4 h-4"
+                      />
+                      <span className="ml-2 text-sm font-medium text-stone-700">
+                        ポイント支払い
+                      </span>
+                    </label>
+                    <label className="flex items-center p-2 border border-stone-300 rounded bg-stone-50">
+                      <input
+                        type="radio"
+                        name="payment_method"
                         value="deferred"
                         checked={paymentMethod === 'deferred'}
                         onChange={(e) => setPaymentMethod(e.target.value)}
@@ -558,18 +592,28 @@ const Checkout = () => {
                       <span className="ml-2 text-sm font-medium text-stone-700">後払い</span>
                     </label>
                   </div>
+
+                  {isPointsPayment && (
+                    <div className={`mt-2 rounded border px-3 py-2 text-xs ${hasInsufficientPoints ? 'border-red-200 bg-red-50 text-red-700' : 'border-green-200 bg-green-50 text-green-700'}`}>
+                      <p>所持ポイント: {userPoints.toLocaleString()} pt</p>
+                      <p>必要ポイント: {totalPrice.toLocaleString()} pt</p>
+                      {hasInsufficientPoints && <p className="mt-1 font-bold">ポイントが不足しています</p>}
+                    </div>
+                  )}
                 </div>
 
                 {/* 注文確定ボタン */}
                 <button
                   onClick={handleConfirmOrder}
-                  disabled={isProcessing || cartItems.length === 0}
+                  disabled={isProcessing || cartItems.length === 0 || hasInsufficientPoints}
                   className="w-full bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2.5 px-4 rounded transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing
                     ? (paymentMethod === 'paypay' ? 'PayPayへ移動中...' : '処理中...')
                     : paymentMethod === 'paypay'
                     ? 'PayPayで支払う'
+                    : paymentMethod === 'points'
+                    ? 'ポイントで支払う'
                     : '後払いで注文する'}
                 </button>
 

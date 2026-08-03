@@ -134,6 +134,9 @@ const Header = () => {
                       <span className="font-semibold">名前:</span> {user.name || user.displayName || '未設定'}
                     </p>
                     <p className="text-xs text-stone-600">
+                      <span className="font-semibold">所持ポイント:</span> {Number(user.points ?? 0).toLocaleString()} pt
+                    </p>
+                    <p className="text-xs text-stone-600">
                       <span className="font-semibold">学生番号:</span> {user.student_id || '-'}
                     </p>
                   </div>
