@@ -174,7 +174,7 @@ const Header = () => {
                   className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-[11px] font-black text-stone-900 ring-1 ring-stone-300">P</span>
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-[11px] font-black text-stone-900 ring-1 ring-stone-900">P</span>
                   <span>ポイント申請</span>
                 </Link>
                 <Link 
