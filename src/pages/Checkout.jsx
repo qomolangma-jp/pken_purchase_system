@@ -54,14 +54,13 @@ const handleImageError = (e, src) => {
 const PAYMENT_METHOD_MAP = {
   paypay: 'paypay',
   points: 'points',
-  deferred: 'atobarai',
 };
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('deferred');
+  const [paymentMethod, setPaymentMethod] = useState('points');
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
@@ -313,7 +312,6 @@ const Checkout = () => {
         const orderData = {
           items,
           payment_method: backendPaymentMethod,
-          ...(paymentMethod === 'deferred' ? { status: '後払い購入' } : {}),
         };
 
         console.log('注文データを送信:', orderData);
@@ -560,18 +558,6 @@ const Checkout = () => {
                       <input
                         type="radio"
                         name="payment_method"
-                        value="paypay"
-                        checked={paymentMethod === 'paypay'}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        disabled
-                        className="w-4 h-4"
-                      />
-                      <span className="ml-2 text-sm font-medium text-stone-500">PayPay（準備中）</span>
-                    </label>
-                    <label className="flex items-center p-2 border border-stone-300 rounded bg-stone-50">
-                      <input
-                        type="radio"
-                        name="payment_method"
                         value="points"
                         checked={paymentMethod === 'points'}
                         onChange={(e) => setPaymentMethod(e.target.value)}
@@ -585,12 +571,13 @@ const Checkout = () => {
                       <input
                         type="radio"
                         name="payment_method"
-                        value="deferred"
-                        checked={paymentMethod === 'deferred'}
+                        value="paypay"
+                        checked={paymentMethod === 'paypay'}
                         onChange={(e) => setPaymentMethod(e.target.value)}
+                        disabled
                         className="w-4 h-4"
                       />
-                      <span className="ml-2 text-sm font-medium text-stone-700">後払い</span>
+                      <span className="ml-2 text-sm font-medium text-stone-500">PayPay（準備中）</span>
                     </label>
                   </div>
 
@@ -611,11 +598,9 @@ const Checkout = () => {
                 >
                   {isProcessing
                     ? (paymentMethod === 'paypay' ? 'PayPayへ移動中...' : '処理中...')
-                    : paymentMethod === 'paypay'
-                    ? 'PayPayで支払う'
                     : paymentMethod === 'points'
                     ? 'ポイントで支払う'
-                    : '後払いで注文する'}
+                    : 'PayPayで支払う'}
                 </button>
 
                 <Link

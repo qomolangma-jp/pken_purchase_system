@@ -35,19 +35,22 @@ const Header = () => {
         className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-3"
         style={{ backgroundColor: '#00873c', height: '56px', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
       >
-        {/* 左から右へ：ロゴ → カート → ニュース → メニュー */}
+        {/* 左から右へ：ロゴ → ポイント → カート → メニュー */}
         <div className="flex items-center gap-2 flex-1">
-          {/* 1. コマペイのロゴ */}
           <Link
             to="/"
             state={{ resetFilters: true }}
             aria-label="ホームへ"
-            className="flex items-center"
+            className="flex items-center gap-2"
           >
             <img src={logoImg} alt="ロゴ" style={{ height: '36px', width: 'auto' }} />
+            {user && (
+              <span className="hidden sm:inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                所持P: {Number(user.points ?? 0).toLocaleString()} pt
+              </span>
+            )}
           </Link>
 
-          {/* スペーサー */}
           <div className="flex-1"></div>
 
           {/* ログインユーザーのみ表示されるアイコン群 */}
@@ -71,17 +74,7 @@ const Header = () => {
                 )}
               </Link>
 
-              {/* 3. ニュースアイコン */}
-              <Link
-                to="/news"
-                aria-label="ニュース画面へ"
-                className="relative flex items-center justify-center text-black active:bg-green-700/20 rounded-full"
-                style={{ width: '40px', height: '40px' }}
-              >
-                <span className="material-icons" style={{ fontSize: '22px' }}>newspaper</span>
-              </Link>
-
-              {/* 4. メニューボタン */}
+              {/* 3. メニューボタン */}
               <button
                 className="flex items-center justify-center rounded-full text-black active:bg-green-700/20"
                 style={{ width: '40px', height: '44px' }}
@@ -177,12 +170,12 @@ const Header = () => {
                   <span>購入履歴</span>
                 </Link>
                 <Link 
-                  to="/mypage" 
+                  to="/charge" 
                   className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <span className="material-icons text-lg">account_circle</span>
-                  <span>マイページ</span>
+                  <span className="material-icons text-lg">monetization_on</span>
+                  <span>ポイント申請</span>
                 </Link>
                 <Link 
                   to="/news" 
