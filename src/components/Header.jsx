@@ -45,7 +45,7 @@ const Header = () => {
           >
             <img src={logoImg} alt="ロゴ" style={{ height: '36px', width: 'auto' }} />
             {user && (
-              <span className="hidden sm:inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+              <span className="inline-flex items-center rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm sm:px-3 sm:text-xs">
                 所持P: {Number(user.points ?? 0).toLocaleString()} pt
               </span>
             )}
@@ -174,7 +174,7 @@ const Header = () => {
                   className="px-4 py-3 hover:bg-stone-100 text-stone-800 rounded transition-colors flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <span className="material-icons text-lg">monetization_on</span>
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-mos-green text-[11px] font-black text-white">P</span>
                   <span>ポイント申請</span>
                 </Link>
                 <Link 
