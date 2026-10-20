@@ -79,16 +79,27 @@ PayPay API秘密鍵等はサーバー環境変数で管理し、レスポンス�
 
 ```json
 {
-  "merchantPaymentId": "PayPayから返されたmerchantPaymentId",
-  "transaction_id": "PayPayから返されたtransactionId",
-  "status": "PayPayから返されたstatus"
+  "merchantPaymentId": "charge_15"
 }
 ```
 
-- ブラウザーからの戻りパラメータだけで決済完了と判断せず、PayPayサーバーへ照会して支払い状態・金額・取引IDを検証する。
+- PayPayの戻りURLには `merchantPaymentId` しか含まれない場合がある。`transaction_id` と `status` は戻りURLにある場合だけ任意項目として受け取り、必須バリデーションにしない。ブラウザーから送られた値は検証の根拠にせず、保存済みの `merchantPaymentId` を使ってPayPayサーバーへ照会すること。
+- 確認APIで必須にする識別子は `merchantPaymentId` のみとする。バックエンド内で `merchantPaymentId` から該当チャージとPayPay決済を特定し、PayPayサーバーに問い合わせて支払い状態・金額・取引IDを取得・検証する。
+- `merchantPaymentId` が見つからない場合、認証ユーザーのチャージに紐づかない場合、またはPayPay照会で決済を確認できない場合は、ポイントを加算せず適切なエラーを返す。ブラウザーから送られた `transaction_id` や `status` だけで成功扱いしない。
 - 決済成功が検証できた場合に限り、DBトランザクション内で申請を完了し、申請ポイントを一度だけ加算する。再送・二重クリック・コールバック再試行による二重加算を防ぐ。
 - キャンセル、未払い、金額不一致、他ユーザーの申請、既に確定済みの申請を適切に拒否する。
-- 成功時はフロント表示用に `data.amount`（付与ポイント数）を返す。
+- 成功時はフロント表示用に `data.amount`（今回付与したポイント数）と `data.balance`（付与後の確定残高）を返す。フロントは残高を即時更新するため `balance` を優先して使用する。
+
+```json
+{
+  "success": true,
+  "message": "PayPay決済が確認され、ポイントが付与されました。",
+  "data": {
+    "amount": 1000,
+    "balance": 4330
+  }
+}
+```
 
 ## 4. データ・検証・テスト
 

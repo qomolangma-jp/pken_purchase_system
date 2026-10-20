@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL ||
@@ -13,6 +14,7 @@ const PointChargePayPayReturn = () => {
   const [message, setMessage] = useState('');
   const [creditedPoints, setCreditedPoints] = useState(null);
   const requestStarted = useRef(false);
+  const { user, updateUserPoints } = useAuth();
 
   useEffect(() => {
     if (requestStarted.current) return;
@@ -29,6 +31,18 @@ const PointChargePayPayReturn = () => {
           localStorage.setItem('authToken', token);
         }
 
+        const confirmation = {
+          merchantPaymentId: searchParams.get('merchantPaymentId'),
+        };
+        const transactionId = searchParams.get('transactionId');
+        const paymentStatus = searchParams.get('status');
+        if (transactionId) confirmation.transaction_id = transactionId;
+        if (paymentStatus) confirmation.status = paymentStatus;
+
+        if (!confirmation.merchantPaymentId) {
+          throw new Error('決済IDが戻りURLに含まれていません。マスター管理者へお問い合わせください。');
+        }
+
         const response = await fetch(`${API_BASE_URL}/api/charge/paypay/confirm`, {
           method: 'POST',
           headers: {
@@ -36,11 +50,7 @@ const PointChargePayPayReturn = () => {
             Accept: 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            merchantPaymentId: searchParams.get('merchantPaymentId'),
-            transaction_id: searchParams.get('transactionId'),
-            status: searchParams.get('status'),
-          }),
+          body: JSON.stringify(confirmation),
         });
         const contentType = response.headers.get('content-type');
         if (!contentType?.includes('application/json')) {
@@ -55,7 +65,22 @@ const PointChargePayPayReturn = () => {
         }
 
         const result = data.data || data;
-        setCreditedPoints(result.amount ?? result.points ?? null);
+        const balance = Number(
+          result.balance
+          ?? result.current_points
+          ?? result.user?.points
+        );
+        const chargedAmount = Number(result.amount ?? result.credited_points);
+        if (Number.isFinite(balance) && balance >= 0) {
+          updateUserPoints(balance);
+        } else if (Number.isFinite(chargedAmount) && chargedAmount >= 0) {
+          updateUserPoints(Number(user?.points ?? 0) + chargedAmount);
+        }
+        setCreditedPoints(
+          Number.isFinite(chargedAmount) && chargedAmount >= 0
+            ? chargedAmount
+            : null
+        );
         setMessage(data.message || 'PayPay決済が確認され、ポイントが付与されました。');
         setStatus('success');
       } catch (error) {
@@ -68,7 +93,7 @@ const PointChargePayPayReturn = () => {
     };
 
     confirmCharge();
-  }, [searchParams]);
+  }, [searchParams, updateUserPoints, user?.points]);
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center bg-gray-100 px-4 py-10">

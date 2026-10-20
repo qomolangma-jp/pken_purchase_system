@@ -154,7 +154,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('ストレージから認証情報を復元中...');
       const token = localStorage.getItem('authToken');
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = sessionStorage.getItem('user') || localStorage.getItem('authUser');
 
       if (token && storedUser) {
         console.log('保存された認証情報を使用');
@@ -163,6 +163,8 @@ export const AuthProvider = ({ children }) => {
           const normalizedUser = normalizeUser(parsedUser);
           console.log('✅ Restored user from storage:', { id: normalizedUser.id, displayName: normalizedUser.displayName });
           setUser(normalizedUser);
+          sessionStorage.setItem('user', JSON.stringify(normalizedUser));
+          localStorage.setItem('authUser', JSON.stringify(normalizedUser));
           setIsAuthenticated(true);
           setHasApiToken(true);
           return;
@@ -172,6 +174,10 @@ export const AuthProvider = ({ children }) => {
       }
 
       console.log('ストレージに認証情報がありません');
+      if (!token) {
+        localStorage.removeItem('authUser');
+        sessionStorage.removeItem('user');
+      }
       setUser(null);
       setIsAuthenticated(false);
       setHasApiToken(false);
@@ -189,7 +195,7 @@ export const AuthProvider = ({ children }) => {
       
       // まずローカルストレージのトークンをチェック
       const token = localStorage.getItem('authToken');
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = sessionStorage.getItem('user') || localStorage.getItem('authUser');
       
       if (token && storedUser) {
         console.log('保存された認証情報を使用');
@@ -199,6 +205,8 @@ export const AuthProvider = ({ children }) => {
           const normalizedUser = normalizeUser(parsedUser);
           console.log('✅ Restored normalized user:', { id: normalizedUser.id, displayName: normalizedUser.displayName });
           setUser(normalizedUser);
+          sessionStorage.setItem('user', JSON.stringify(normalizedUser));
+          localStorage.setItem('authUser', JSON.stringify(normalizedUser));
           setIsAuthenticated(true);
           setHasApiToken(true);
           setLoading(false);
@@ -320,6 +328,7 @@ export const AuthProvider = ({ children }) => {
           
           // セッションストレージに保存（setUser と同じ形式で保存）
           sessionStorage.setItem('user', JSON.stringify(normalizedUser));
+          localStorage.setItem('authUser', JSON.stringify(normalizedUser));
         } else {
           // ユーザーが見つからない場合はnullのまま（ログインページへリダイレクト）
           console.log('ユーザーが見つかりません');
@@ -381,6 +390,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
     setHasApiToken(Boolean(localStorage.getItem('authToken')));
     sessionStorage.setItem('user', JSON.stringify(nextUser));
+    localStorage.setItem('authUser', JSON.stringify(nextUser));
   };
 
   const updateUserPoints = (nextPoints) => {
@@ -395,6 +405,7 @@ export const AuthProvider = ({ children }) => {
       };
 
       sessionStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem('authUser', JSON.stringify(updatedUser));
       return updatedUser;
     });
   };
@@ -405,6 +416,7 @@ export const AuthProvider = ({ children }) => {
     setHasApiToken(false);
     setCartCount(0);
     localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
     sessionStorage.removeItem('user');
     if (liffInitialized && liff.isLoggedIn()) {
       liff.logout();
