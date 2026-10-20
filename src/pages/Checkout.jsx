@@ -51,16 +51,11 @@ const handleImageError = (e, src) => {
   target.onerror = null;
 };
 
-const PAYMENT_METHOD_MAP = {
-  paypay: 'paypay',
-  points: 'points',
-};
-
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('points');
+  const paymentMethod = 'points';
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
@@ -149,8 +144,7 @@ const Checkout = () => {
 
   const totalPrice = getTotalPrice();
   const userPoints = Number(user?.points ?? 0);
-  const isPointsPayment = paymentMethod === 'points';
-  const hasInsufficientPoints = isPointsPayment && totalPrice > userPoints;
+  const hasInsufficientPoints = totalPrice > userPoints;
 
   useEffect(() => {
     if (authLoading) {
@@ -173,7 +167,7 @@ const Checkout = () => {
       return;
     }
 
-    if (paymentMethod === 'points' && hasInsufficientPoints) {
+    if (hasInsufficientPoints) {
       setError('ポイントが不足しています');
       openModal({
         type: 'warning',
@@ -257,7 +251,7 @@ const Checkout = () => {
         unit_price: Number(item.product?.price || item.price || 0) + getSizePriceAdjustment(item.product?.size_options || [], getSelectedSizeId(item) ? (item.product?.size_options || []).find((opt) => String(opt?.id || opt?.size_id || opt?.value || opt?.size_option_id || '') === String(getSelectedSizeId(item))) || getSelectedSizeLabel(item) : getSelectedSizeLabel(item)),
       }));
 
-      const backendPaymentMethod = PAYMENT_METHOD_MAP[paymentMethod] || paymentMethod;
+      const backendPaymentMethod = 'points';
       let data;
 
       if (paymentMethod === 'paypay') {
@@ -553,41 +547,15 @@ const Checkout = () => {
                 <div className="mb-4 pb-3 border-b border-stone-200">
                   <h3 className="text-base font-bold text-stone-800 mb-2">支払い方法</h3>
                   
-                  <div className="space-y-2">
-                    <label className="flex items-center p-2 border border-stone-300 rounded bg-stone-50">
-                      <input
-                        type="radio"
-                        name="payment_method"
-                        value="points"
-                        checked={paymentMethod === 'points'}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-4 h-4"
-                      />
-                      <span className="ml-2 text-sm font-medium text-stone-700">
-                        ポイント支払い
-                      </span>
-                    </label>
-                    <label className="flex items-center p-2 border border-stone-300 rounded bg-stone-50">
-                      <input
-                        type="radio"
-                        name="payment_method"
-                        value="paypay"
-                        checked={paymentMethod === 'paypay'}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        disabled
-                        className="w-4 h-4"
-                      />
-                      <span className="ml-2 text-sm font-medium text-stone-500">PayPay（準備中）</span>
-                    </label>
+                  <div className="rounded border border-stone-300 bg-stone-50 px-3 py-2 text-sm font-medium text-stone-700">
+                    ポイント支払い
                   </div>
 
-                  {isPointsPayment && (
-                    <div className={`mt-2 rounded border px-3 py-2 text-xs ${hasInsufficientPoints ? 'border-red-200 bg-red-50 text-red-700' : 'border-green-200 bg-green-50 text-green-700'}`}>
-                      <p>所持ポイント: {userPoints.toLocaleString()} pt</p>
-                      <p>必要ポイント: {totalPrice.toLocaleString()} pt</p>
-                      {hasInsufficientPoints && <p className="mt-1 font-bold">ポイントが不足しています</p>}
-                    </div>
-                  )}
+                  <div className={`mt-2 rounded border px-3 py-2 text-xs ${hasInsufficientPoints ? 'border-red-200 bg-red-50 text-red-700' : 'border-green-200 bg-green-50 text-green-700'}`}>
+                    <p>所持ポイント: {userPoints.toLocaleString()} pt</p>
+                    <p>必要ポイント: {totalPrice.toLocaleString()} pt</p>
+                    {hasInsufficientPoints && <p className="mt-1 font-bold">ポイントが不足しています</p>}
+                  </div>
                 </div>
 
                 {/* 注文確定ボタン */}
@@ -596,11 +564,7 @@ const Checkout = () => {
                   disabled={isProcessing || cartItems.length === 0 || hasInsufficientPoints}
                   className="w-full bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2.5 px-4 rounded transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isProcessing
-                    ? (paymentMethod === 'paypay' ? 'PayPayへ移動中...' : '処理中...')
-                    : paymentMethod === 'points'
-                    ? 'ポイントで支払う'
-                    : 'PayPayで支払う'}
+                  {isProcessing ? '処理中...' : 'ポイントで支払う'}
                 </button>
 
                 <Link
