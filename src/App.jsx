@@ -21,6 +21,7 @@ import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
 import ForgotPassword from './pages/ForgotPassword';
 import PayPayReturn from './pages/PayPayReturn';
+import PointChargePayPayReturn from './pages/PointChargePayPayReturn';
 import './App.css';
 
 function App() {
@@ -89,6 +90,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PointCharge />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/charge/paypay/return"
+            element={
+              <ProtectedRoute>
+                <PointChargePayPayReturn />
               </ProtectedRoute>
             }
           />
