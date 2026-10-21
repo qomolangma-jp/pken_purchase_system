@@ -124,10 +124,10 @@ const PointChargePayPayReturn = () => {
               <p className="mb-6 font-bold text-mos-green">{Number(creditedPoints).toLocaleString()}pt</p>
             )}
             <Link
-              to="/mypage"
+              to="/point-history"
               className="inline-block rounded bg-mos-green px-6 py-2 font-bold text-white transition-all hover:bg-mos-green-dark"
             >
-              マイページへ
+              ポイント履歴へ
             </Link>
           </>
         )}
@@ -146,8 +146,8 @@ const PointChargePayPayReturn = () => {
               >
                 チャージ画面に戻る
               </Link>
-              <Link to="/mypage" className="py-2 text-sm text-stone-600 hover:text-stone-800">
-                マイページへ
+              <Link to="/point-history" className="py-2 text-sm text-stone-600 hover:text-stone-800">
+                ポイント履歴へ
               </Link>
             </div>
           </>
