@@ -17,6 +17,7 @@ import Checkout from './pages/Checkout';
 import OrderComplete from './pages/OrderComplete';
 import PurchaseHistory from './pages/PurchaseHistory';
 import PointCharge from './pages/PointCharge';
+import PointHistory from './pages/PointHistory';
 import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
 import ForgotPassword from './pages/ForgotPassword';
@@ -90,6 +91,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PointCharge />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/point-history"
+            element={
+              <ProtectedRoute>
+                <PointHistory />
               </ProtectedRoute>
             }
           />

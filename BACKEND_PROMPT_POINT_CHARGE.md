@@ -101,7 +101,45 @@ PayPay API秘密鍵等はサーバー環境変数で管理し、レスポンス�
 }
 ```
 
-## 4. データ・検証・テスト
+## 4. ポイント履歴（付与・利用）
+
+新規 `GET /api/points/history` を実装してください。
+
+- 認証必須。認証ユーザー自身の履歴のみを新しい順で返す。他ユーザーの履歴は取得できないこと。
+- ポイントが増減する全ての操作（現金・銀行振込・PayPayのチャージ付与、管理者による付与・調整、商品購入での利用、返金）を残高変動の台帳として記録し、そこから返す。承認待ちの申請も `status: "pending"` として含めてよい（ポイント残高にはまだ反映しない）。
+- レスポンス例（`amount` は付与が正、利用が負の整数）:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 101,
+      "type": "charge",
+      "method": "paypay",
+      "status": "completed",
+      "amount": 1000,
+      "balance_after": 4330,
+      "description": "PayPayチャージ",
+      "created_at": "2026-10-21T08:40:00+09:00"
+    },
+    {
+      "id": 102,
+      "type": "purchase",
+      "amount": -390,
+      "balance_after": 3940,
+      "description": "注文 #1234",
+      "created_at": "2026-10-21T12:10:00+09:00"
+    }
+  ]
+}
+```
+
+- `type` は `charge` / `grant` / `adjustment` / `refund` / `purchase` のいずれか。`method` は `cash` / `bank_transfer` / `paypay`（チャージの場合のみ）。`status` は `pending` / `completed` / `rejected` / `cancelled`。
+- 件数が多くなる場合はページネーション（`page` / `per_page`）を用意し、`data` は配列のままにするか、既存の `data.data` 形式に合わせる。
+- 残高の増減と台帳記録は同一トランザクションで行い、`balance_after` が常に整合するようにする。
+
+## 5. データ・検証・テスト
 
 - 既存の申請テーブルがある場合はそれを拡張し、申請ID、ユーザーID、ポイント数、方式、状態、決済手数料、決済総額、PayPay取引ID、作成・更新日時を必要に応じて保持する。
 - 状態遷移を明確にし、利用者が他人の申請・管理者機能にアクセスできないようにする。

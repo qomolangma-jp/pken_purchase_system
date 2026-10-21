@@ -23,12 +23,20 @@ const MyPage = () => {
               </div>
             </div>
 
-            <Link
-              to="/charge"
-              className="inline-flex items-center justify-center rounded-xl bg-mos-green px-5 py-3 text-sm font-bold text-white transition-all hover:bg-mos-green-dark"
-            >
-              ポイントをチャージする
-            </Link>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Link
+                to="/charge"
+                className="inline-flex items-center justify-center rounded-xl bg-mos-green px-5 py-3 text-sm font-bold text-white transition-all hover:bg-mos-green-dark"
+              >
+                ポイントをチャージする
+              </Link>
+              <Link
+                to="/point-history"
+                className="inline-flex items-center justify-center rounded-xl border border-stone-300 px-5 py-3 text-sm font-bold text-stone-700 transition-all hover:bg-stone-100"
+              >
+                ポイント履歴
+              </Link>
+            </div>
           </div>
 
           {pendingPoints > 0 && (
