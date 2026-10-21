@@ -1,9 +1,11 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import liff from '@line/liff';
 import { getLineProfile } from '../services/lineAuth';
 console.log("VITE_DEBUG_MOCKの値:", import.meta.env.VITE_DEBUG_MOCK);
 const AuthContext = createContext();
 const DEFAULT_USER_POINTS = 1000;
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 const normalizePoints = (points) => {
   const parsedPoints = Number(points);
@@ -33,6 +35,10 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const location = useLocation();
+  const refreshInFlight = useRef(false);
+  const setPointsRef = useRef(() => {});
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [liffInitialized, setLiffInitialized] = useState(false);
@@ -410,6 +416,62 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  const setPoints = (nextPoints) => {
+    const parsed = Number(nextPoints);
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      updateUserPoints(parsed);
+    }
+  };
+
+  const refreshPoints = useCallback(async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token || refreshInFlight.current) return;
+    refreshInFlight.current = true;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/user/status`, {
+        headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) return;
+      const body = await response.json();
+      const status = body?.data ?? body;
+      const parsed = Number(status?.current_points);
+      if (status?.current_points != null && Number.isFinite(parsed) && parsed >= 0) {
+        setPointsRef.current(parsed);
+      }
+      setHasPendingRequest(Boolean(status?.has_pending_request));
+    } catch (error) {
+      console.warn('ポイント残高の更新に失敗しました（次回再試行）:', error);
+    } finally {
+      refreshInFlight.current = false;
+    }
+  }, []);
+
+  setPointsRef.current = setPoints;
+
+  const userId = user?.id;
+  useEffect(() => {
+    if (!isAuthenticated || !hasApiToken || userId == null) {
+      setHasPendingRequest(false);
+      return undefined;
+    }
+
+    refreshPoints();
+
+    const intervalMs = hasPendingRequest ? 10000 : 30000;
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') refreshPoints();
+    }, intervalMs);
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') refreshPoints();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [isAuthenticated, hasApiToken, userId, hasPendingRequest, location.pathname, refreshPoints]);
+
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
@@ -433,6 +495,8 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateUserPoints,
+    setPoints,
+    refreshPoints,
     liff,
   };
 

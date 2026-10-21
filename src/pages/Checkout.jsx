@@ -58,7 +58,7 @@ const Checkout = () => {
   const paymentMethod = 'points';
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
-  const { user, isAuthenticated, loading: authLoading, fetchCartCount } = useAuth();
+  const { user, isAuthenticated, loading: authLoading, fetchCartCount, setPoints } = useAuth();
   const { openModal } = useModal();
 
   const fetchCart = async () => {
@@ -336,6 +336,9 @@ const Checkout = () => {
         }
 
         console.log('注文完了:', data);
+        if (data?.points_balance != null) {
+          setPoints(data.points_balance);
+        }
       }
 
       // 注文成功後、カートをクリア

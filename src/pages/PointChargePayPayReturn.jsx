@@ -14,7 +14,7 @@ const PointChargePayPayReturn = () => {
   const [message, setMessage] = useState('');
   const [creditedPoints, setCreditedPoints] = useState(null);
   const requestStarted = useRef(false);
-  const { user, updateUserPoints } = useAuth();
+  const { setPoints, refreshPoints } = useAuth();
 
   useEffect(() => {
     if (requestStarted.current) return;
@@ -60,21 +60,28 @@ const PointChargePayPayReturn = () => {
         }
 
         const data = await response.json();
+        if (response.status === 409) {
+          await refreshPoints();
+          setMessage(data.message || 'この決済は既に処理済みです。');
+          setStatus('success');
+          return;
+        }
         if (!response.ok) {
           throw new Error(data.message || 'PayPay決済の確認に失敗しました。');
         }
 
         const result = data.data || data;
         const balance = Number(
-          result.balance
+          data.points_balance
+          ?? result.balance
           ?? result.current_points
           ?? result.user?.points
         );
         const chargedAmount = Number(result.amount ?? result.credited_points);
         if (Number.isFinite(balance) && balance >= 0) {
-          updateUserPoints(balance);
-        } else if (Number.isFinite(chargedAmount) && chargedAmount >= 0) {
-          updateUserPoints(Number(user?.points ?? 0) + chargedAmount);
+          setPoints(balance);
+        } else {
+          await refreshPoints();
         }
         setCreditedPoints(
           Number.isFinite(chargedAmount) && chargedAmount >= 0
@@ -93,7 +100,7 @@ const PointChargePayPayReturn = () => {
     };
 
     confirmCharge();
-  }, [searchParams, updateUserPoints, user?.points]);
+  }, [searchParams, setPoints, refreshPoints]);
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center bg-gray-100 px-4 py-10">
