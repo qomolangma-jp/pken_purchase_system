@@ -1,8 +1,8 @@
 import React, { createContext, useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import liff from '@line/liff';
-import { getLineProfile } from '../services/lineAuth';
-console.log("VITE_DEBUG_MOCKの値:", import.meta.env.VITE_DEBUG_MOCK);
+import { getLineProfile, getLineIdToken } from '../services/lineAuth';
+import { loginWithIdToken, checkUserByIdToken, ApiError, clearStoredAuth } from '../utils/api';
 const AuthContext = createContext();
 const DEFAULT_USER_POINTS = 1000;
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
   const [cartCount, setCartCount] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasApiToken, setHasApiToken] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
     initializeLiff();
@@ -102,27 +103,6 @@ export const AuthProvider = ({ children }) => {
 
   const initializeLiff = async () => {
     try {
-      // モックモードの判定
-      const isMockEnabled = import.meta.env.VITE_DEBUG_MOCK === 'true';
-
-      if (isMockEnabled) {
-        console.warn('⚠️ LINE LIFF Mock Mode is ENABLED. Skipping liff.init().');
-        // モックモード時はストレージから復元、または getLineProfile() での取得に任せる
-        // ここでは restoreAuthenticationFromStorage を呼び出して既存のセッションがあれば復元
-        await restoreAuthenticationFromStorage();
-        
-        // 認証情報がなければ、getLineProfile() を使用して強制的にログイン状態にする
-        const token = localStorage.getItem('authToken');
-        const storedUser = sessionStorage.getItem('user');
-        if (!token || !storedUser) {
-          console.log('認証情報がないため、モックユーザーで認証を開始します');
-          await checkAndAuthenticateUser();
-        }
-        
-        setLoading(false);
-        return;
-      }
-
       // LIFF IDは環境変数から取得（後で設定が必要）
       const liffId = import.meta.env.VITE_LIFF_ID;
       
@@ -222,116 +202,57 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // LINEプロフィールを取得
+      // LINEプロフィール（表示用）とIDトークン（本人確認用）を取得
       const profile = await getLineProfile();
-      const lineId = profile.userId;
-      console.log('LINEプロフィール取得成功:', { lineId, displayName: profile.displayName });
+      const idToken = await getLineIdToken();
 
-      // バックエンドAPIに問い合わせ
+      // バックエンドAPIに問い合わせ（IDトークンのみ送信。検証はバックエンド）
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒タイムアウト
-
-        const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-        console.log('認証API - ベースURL:', apiBaseUrl);
-
-        // まず /api/auth/line-login を試す（トークン生成用）
-        let apiUrl = `${apiBaseUrl}/api/auth/line-login`;
-        console.log('認証API - 試行URL:', apiUrl);
-
-        // リクエストボディ（モック時も通常のLINE ID送信を使用）
-        const requestBody = { line_id: lineId };
-
-        let response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(requestBody),
-          signal: controller.signal,
-        });
-
-        console.log('認証APIレスポンス状態:', response.status);
-        const contentType = response.headers.get('content-type');
-        console.log('認証APIレスポンス Content-Type:', contentType);
-
-        // /api/auth/line-login が存在しない場合は /api/auth/check を使用
-        if (!response.ok && response.status === 404) {
-          console.log('/api/auth/line-login が見つかりません。/api/auth/check を使用します。');
-          apiUrl = `${apiBaseUrl}/api/auth/check`;
-          console.log('認証API - フォールバックURL:', apiUrl);
-          
-          response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify(requestBody),
-            signal: controller.signal,
-          });
-
-          console.log('認証API（フォールバック）レスポンス状態:', response.status);
+        let data;
+        try {
+          data = await checkUserByIdToken(idToken, '/api/auth/line-login');
+        } catch (lineLoginError) {
+          if (lineLoginError instanceof ApiError && lineLoginError.status === 404) {
+            data = await checkUserByIdToken(idToken, '/api/auth/check');
+          } else {
+            throw lineLoginError;
+          }
         }
 
-        clearTimeout(timeoutId);
-        
-        // コンテンツタイプをチェック
-        const responseCT = response.headers.get('content-type');
-        console.log('認証API最終ステータス:', response.status, '| Content-Type:', responseCT);
-
-        if (!responseCT || !responseCT.includes('application/json')) {
-          const responseText = await response.text();
-          console.error('認証API: JSON でないレスポンス:', responseText.substring(0, 500));
-          throw new Error(`認証API が無効なレスポンス形式を返しました。Content-Type: ${responseCT}`);
-        }
-        
-        const data = await response.json();
-        console.log('認証APIレスポンスデータ（全体）:', data);
-
-        if (response.ok && data.user) {
+        if (data && data.user) {
           // ユーザーが見つかった場合、自動ログイン
-          console.log('ユーザー認証成功:', data.user);
-          console.log('data.user keys:', Object.keys(data.user));
-          
-          // Validate user object - should be an actual user object, not something else
           if (!data.user.id) {
-            console.error('❌ Invalid user object (no id):', data.user);
+            console.error('❌ Invalid user object (no id)');
             setUser(null);
             setIsAuthenticated(false);
             setHasApiToken(false);
             return;
           }
-          
-          // トークンが返されている場合は保存
-          if (data.token) {
-            console.log('トークン取得:', data.token.substring(0, 20) + '...');
-            localStorage.setItem('authToken', data.token);
-            setHasApiToken(true);
-            console.log('トークン保存完了');
-          } else {
-            console.warn('警告: APIからトークンが返されていないため /api/cart の取得は行いません。');
-            localStorage.removeItem('authToken');
+
+          // トークンが無い場合はログイン成功扱いにしない
+          if (!data.token) {
+            clearStoredAuth();
+            setUser(null);
+            setIsAuthenticated(false);
             setHasApiToken(false);
+            setCartCount(0);
+            setAuthError('認証トークンが取得できませんでした。再度ログインしてください。');
+            return;
           }
+          localStorage.setItem('authToken', data.token);
+          setHasApiToken(true);
 
           if (typeof data.cart_count === 'number') {
             setCartCount(data.cart_count);
           }
-          
-          const userObject = {
-            ...data.user,
-            lineId: lineId,
-            displayName: profile.displayName,
-            pictureUrl: profile.pictureUrl,
-          };
-          const normalizedUser = normalizeUser(userObject, { points: DEFAULT_USER_POINTS });
 
-          console.log('✅ Setting user object:', { id: normalizedUser.id, displayName: normalizedUser.displayName, points: normalizedUser.points });
+          const normalizedUser = normalizeUser(
+            { ...data.user, displayName: profile.displayName, pictureUrl: profile.pictureUrl },
+            { points: DEFAULT_USER_POINTS },
+          );
           setUser(normalizedUser);
           setIsAuthenticated(true);
-          
+          setAuthError('');
           // セッションストレージに保存（setUser と同じ形式で保存）
           sessionStorage.setItem('user', JSON.stringify(normalizedUser));
           localStorage.setItem('authUser', JSON.stringify(normalizedUser));
@@ -344,17 +265,13 @@ export const AuthProvider = ({ children }) => {
           setCartCount(0);
         }
       } catch (fetchError) {
-        console.error('認証API接続エラー:', fetchError);
-        console.error('エラー名:', fetchError.name);
-        console.error('エラーメッセージ:', fetchError.message);
-        
-        if (fetchError.name === 'AbortError') {
-          console.error('認証APIがタイムアウトしました');
-        } else {
-          console.error('認証APIへの接続に失敗しました。ネットワークまたはCORSの問題の可能性があります。');
-        }
-        
-        // API接続失敗時も、ログインページへ遷移できるようにする
+        console.error('認証APIエラー:', fetchError);
+        clearStoredAuth();
+        setAuthError(
+          fetchError instanceof ApiError
+            ? fetchError.message
+            : '認証サーバーに接続できませんでした。ネットワークを確認してください。'
+        );
         setUser(null);
         setIsAuthenticated(false);
         setHasApiToken(false);
@@ -362,7 +279,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('認証チェックエラー:', error);
-      console.error('エラー詳細:', error.message, error.stack);
+      if (error.message !== 'LIFF_NOT_LOGGED_IN') {
+        setAuthError(error.message || '認証に失敗しました。');
+      }
       setUser(null);
       setIsAuthenticated(false);
       setHasApiToken(false);
@@ -372,29 +291,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (userData) => {
-    // userData は DB user object なので、セッションストレージに直接保存するのではなく、
-    // 形式を統一する
-    const normalizedUser = {
+  const login = async (userData, token) => {
+    if (!token && !localStorage.getItem('authToken')) {
+      throw new Error('認証トークンが取得できませんでした');
+    }
+    if (token) {
+      localStorage.setItem('authToken', token);
+    }
+    const nextUser = normalizeUser({
       ...userData,
-      // displayName と pictureUrl は userData に含まれていない可能性があるため、
-      // 利用可能な情報から生成する
       displayName: userData.display_name || userData.name || userData.student_id || 'ゲスト',
-      // lineId は userData に含まれているはず
-      lineId: userData.line_id,
-    };
-    
-    console.log('✅ Setting normalized user from login():', { 
-      id: normalizedUser.id, 
-      displayName: normalizedUser.displayName,
-      points: normalizedUser.points,
-      keys: Object.keys(normalizedUser).filter(k => k !== 'display_name' && k !== 'name_1st' && k !== 'name_2nd').slice(0, 5)
     });
-    
-    const nextUser = normalizeUser(normalizedUser);
     setUser(nextUser);
     setIsAuthenticated(true);
-    setHasApiToken(Boolean(localStorage.getItem('authToken')));
+    setAuthError('');
+    setHasApiToken(true);
     sessionStorage.setItem('user', JSON.stringify(nextUser));
     localStorage.setItem('authUser', JSON.stringify(nextUser));
   };
@@ -490,6 +401,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     liffInitialized,
     isAuthenticated,
+    authError,
     cartCount,
     fetchCartCount,
     login,

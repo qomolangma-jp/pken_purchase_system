@@ -1,40 +1,39 @@
 import liff from '@line/liff';
 
 /**
- * LINEプロフィール情報を取得する共通関数
- * モックモードが有効な場合は、テスト用のユーザー情報を返します。
- * 
+ * LINEプロフィール（表示名・画像用）を取得する。
+ * 本人確認には使わず、認証には getLineIdToken() の IDトークンを使うこと。
+ *
  * @returns {Promise<{userId: string, displayName: string, pictureUrl: string}>}
  */
 export const getLineProfile = async () => {
-  // 環境変数の確認 (Vite では import.meta.env を使用)
-  const isMockEnabled = import.meta.env.VITE_DEBUG_MOCK === 'true';
-
-  if (isMockEnabled) {
-    console.warn('⚠️ LINE LIFF Mock Mode is ENABLED.');
-    
-    // 指定された既存ユーザーのLINE IDでモック
-    return {
-      userId: 'Ue48f511733e6fba12c3b498402a160b8',
-      displayName: 'テストユーザー (MOCK)',
-      pictureUrl: 'https://profile.line-scdn.net/mock-image-url'
-    };
-  }
-
-  // 通常のLIFF処理
   if (!liff.isLoggedIn()) {
-    console.log('LIFF is not logged in. Triggering login...');
     liff.login();
-    // ログイン処理後はリダイレクトされるため、ここでは空のプロミスを返すか
-    // エラーを投げて呼び出し側でハンドリングさせる
     throw new Error('LIFF_NOT_LOGGED_IN');
   }
 
   try {
-    const profile = await liff.getProfile();
-    return profile;
+    return await liff.getProfile();
   } catch (error) {
     console.error('Error fetching LINE profile:', error);
     throw error;
   }
+};
+
+/**
+ * LINE(LIFF)が発行したIDトークンを取得する。検証はバックエンドが行う。
+ * 取得できない場合はエラーを投げる（ログイン成功扱いにしない）。
+ *
+ * @returns {Promise<string>}
+ */
+export const getLineIdToken = async () => {
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    throw new Error('LIFF_NOT_LOGGED_IN');
+  }
+  const idToken = liff.getIDToken();
+  if (!idToken) {
+    throw new Error('LINEのIDトークンを取得できませんでした。LINEでログインし直してください。');
+  }
+  return idToken;
 };

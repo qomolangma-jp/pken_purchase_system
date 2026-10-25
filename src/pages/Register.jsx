@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Link as LinkIcon, User, CreditCard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
-import { getLineProfile } from '../services/lineAuth';
+import { getLineIdToken } from '../services/lineAuth';
 import { registerUser } from '../utils/api';
 
 const Register = () => {
@@ -12,7 +12,7 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [studentId, setStudentId] = useState('');
   const [password, setPassword] = useState('');
-  const [lineId, setLineId] = useState('');
+  const [lineReady, setLineReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -27,61 +27,35 @@ const Register = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    // LIFFからLINE IDを取得
-    const getLineId = async () => {
-      if (liffInitialized && liff.isLoggedIn()) {
-        try {
-          const profile = await getLineProfile();
-          setLineId(profile.userId);
-          console.log('LINE ID取得:', profile.userId);
-        } catch (err) {
-          console.error('LINE IDの取得に失敗しました:', err);
-          setError('LINE IDの取得に失敗しました');
-        }
-      }
-    };
-
-    getLineId();
+    // LIFFのログイン状態とIDトークンの有無を確認（IDトークン自体は送信時に取得）
+    if (liffInitialized && liff.isLoggedIn() && liff.getIDToken()) {
+      setLineReady(true);
+    }
   }, [liff, liffInitialized]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // LINE ID の検証
-    if (!lineId) {
-      setError('LINE IDがまだ取得されていません。少し待ってからやり直してください。');
-      return;
-    }
-
     setLoading(true);
 
     try {
+      const idToken = await getLineIdToken();
+
+      // status / is_admin / line_id は送らない（権限はバックエンドが student に設定）
       const requestData = {
+        id_token: idToken,
         username: email,
         name_2nd: name2nd,
         name_1st: name1st,
         student_id: studentId,
         password: password,
-        line_id: lineId,
       };
-
-      console.log('=== 登録リクエスト送信 ===');
-      console.log('送信データ:', requestData);
 
       const data = await registerUser(requestData);
 
-      console.log('✅ 登録成功！');
-      console.log('ユーザーデータ:', data.user);
-
-      // 認証コンテキストにログイン
-      await login(data.user);
-
-      // 登録成功時、トークンがあれば保存
-      if (data.token) {
-        localStorage.setItem('authToken', data.token);
-        console.log('トークン保存完了');
-      }
+      // 通常のログインと同様に認証状態を更新
+      await login(data.user, data.token);
 
       openModal({
         type: 'success',
@@ -184,21 +158,20 @@ const Register = () => {
               />
             </div>
 
-            {/* LINE ID (Readonly) */}
+            {/* LINE連携状態 (Readonly) */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-stone-600 ml-1 flex items-center gap-1" htmlFor="line_id">
-                LINE ID
-                <span className="text-[10px] font-normal text-stone-400">(自動取得済み)</span>
+              <label className="text-xs font-semibold text-stone-600 ml-1 flex items-center gap-1" htmlFor="line_status">
+                LINE連携
+                <span className="text-[10px] font-normal text-stone-400">(自動確認)</span>
               </label>
               <div className="relative">
                 <input
-                  id="line_id"
+                  id="line_status"
                   type="text"
                   className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-500 outline-none text-sm cursor-not-allowed"
-                  placeholder="LIFFから自動取得中..."
+                  placeholder="LINE連携を確認中..."
                   readOnly
-                  required
-                  value={lineId}
+                  value={lineReady ? 'LINE連携済み' : ''}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400">
                   <LinkIcon size={16} />
@@ -209,9 +182,9 @@ const Register = () => {
             <button 
               type="submit" 
               className="w-full mt-2 bg-stone-900 hover:bg-stone-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm active:scale-[0.98]"
-              disabled={loading || !lineId}
+              disabled={loading || !lineReady}
             >
-              {loading ? '登録中...' : (lineId ? '登録する' : 'LINE ID を取得中...')}
+              {loading ? '登録中...' : (lineReady ? '登録する' : 'LINE連携を確認中...')}
             </button>
           </form>
 

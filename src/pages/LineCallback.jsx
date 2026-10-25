@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { buildErrorMessage } from '../utils/api';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
@@ -42,20 +43,18 @@ const LineCallback = () => {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data.message || 'ログインに失敗しました');
+        throw new Error(buildErrorMessage(response.status, data, 'ログインに失敗しました'));
       }
 
-      // トークンを保存
-      if (data.token) {
-        localStorage.setItem('authToken', data.token);
+      if (!data || !data.token || !data.user) {
+        throw new Error('認証トークンが取得できませんでした');
       }
 
-      // ユーザー情報をコンテキストに保存
-      // Note: login() が userData を正規化し、DB object の直接保存を防ぐ
-      await login(data.user);
+      // ユーザー情報とトークンをコンテキストに保存
+      await login(data.user, data.token);
 
       // カート数を取得
       await fetchCartCount();

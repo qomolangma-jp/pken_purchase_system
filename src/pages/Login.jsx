@@ -3,9 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
-import { getLineProfile } from '../services/lineAuth';
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+import { loginWithPassword } from '../utils/api';
 
 const Login = () => {
   const [studentId, setStudentId] = useState('');
@@ -14,7 +12,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login, liff, liffInitialized, user } = useAuth();
+  const { login, user, authError } = useAuth();
   const { openModal } = useModal();
 
   // すでにログイン済みの場合はトップページへリダイレクト
@@ -50,90 +48,14 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // LIFFプロフィールからLINE IDを取得
-      let lineId = null;
-      if (liffInitialized && liff.isLoggedIn()) {
-        const profile = await getLineProfile();
-        lineId = profile.userId;
-      }
-
-      console.log('=== ログインリクエスト送信 ===');
-      console.log('URL:', `${API_BASE_URL}/api/auth/login`);
-      console.log('送信データ:', { student_id: studentId, password: '***', line_id: lineId });
-
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // クッキー送信（セッション維持対応）
-        body: JSON.stringify({
-          student_id: studentId,
-          password: password,
-          line_id: lineId, // LINE IDも送信
-        }),
-        // リダイレクト時にメソッドを保持するため、手動リダイレクト処理の対応
-        // redirect: 'manual' // 必要に応じて有効化
+      // パスワードログイン（LINE IDは送らない）。失敗時はトークン保存・ログイン状態更新をしない
+      const data = await loginWithPassword({
+        studentId: studentId.includes('@') ? undefined : studentId,
+        username: studentId.includes('@') ? studentId : undefined,
+        password,
       });
 
-      console.log('レスポンスステータス:', response.status);
-      console.log('レスポンスOK:', response.ok);
-
-      // Content-Typeをチェック
-      const contentType = response.headers.get('content-type');
-      console.log('Content-Type:', contentType);
-      
-      // まずテキストで全て取得
-      const responseText = await response.text();
-      console.log('レスポンステキスト（最初の500文字）:', responseText.substring(0, 500));
-      
-      let data;
-      
-      if (contentType && contentType.includes('application/json')) {
-        try {
-          data = JSON.parse(responseText);
-          console.log('レスポンスデータ:', data);
-        } catch (parseErr) {
-          console.error('JSON パースエラー:', parseErr);
-          throw new Error(`JSONパースに失敗しました: ${parseErr.message}`);
-        }
-      } else {
-        // JSONでない場合（HTMLなど）
-        console.error('❌ HTMLレスポンスが返されました（APIエンドポイントが見つからない可能性）');
-        console.error('ステータス:', response.status);
-        console.error('Content-Type:', contentType);
-        console.error('レスポンス内容（最初の1000文字）:', responseText.substring(0, 1000));
-        
-        if (response.status === 404) {
-          throw new Error('APIエンドポイント /api/auth/login が見つかりません。バックエンドが正しく起動しているか確認してください。');
-        } else if (response.status >= 500) {
-          throw new Error(`バックエンドサーバーエラー (Status: ${response.status})`);
-        } else {
-          throw new Error(`サーバーからHTMLが返されました (Status: ${response.status})。バックエンドが正しく応答していません。`);
-        }
-      }
-
-      if (!response.ok) {
-        console.error('ログイン失敗レスポンス:', data);
-        const errorMessage = data.message || data.error || `ログインに失敗しました (Status: ${response.status})`;
-        throw new Error(errorMessage);
-      }
-
-      // 認証コンテキストにログイン
-      // Note: login() が userData を正規化し、DB object の直接保存を防ぐ
-      await login(data.user);
-
-      // トークンを保存
-      if (data.token) {
-        console.log('トークン保存:', data.token.substring(0, 20) + '...');
-        localStorage.setItem('authToken', data.token);
-        // 保存確認
-        const savedToken = localStorage.getItem('authToken');
-        console.log('トークン保存確認:', savedToken ? '成功' : '失敗');
-      } else {
-        console.error('サーバーからトークンが返されませんでした:', data);
-        throw new Error('認証トークンが取得できませんでした');
-      }
+      await login(data.user, data.token);
 
       openModal({
         type: 'success',
@@ -173,9 +95,9 @@ const Login = () => {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
           <h1 className="text-xl font-bold text-center mb-6 text-stone-800">ログイン</h1>
 
-          {error && (
+          {(error || authError) && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-xl mb-4 text-xs">
-              {error}
+              {error || authError}
             </div>
           )}
 
