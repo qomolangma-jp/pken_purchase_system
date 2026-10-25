@@ -35,5 +35,25 @@ export const getLineIdToken = async () => {
   if (!idToken) {
     throw new Error('LINEのIDトークンを取得できませんでした。LINEでログインし直してください。');
   }
+  logIdTokenClaims(idToken);
   return idToken;
+};
+
+/**
+ * 認証失敗の切り分け用に、IDトークンの aud / iss / exp のみを出力する（署名や本体は出さない）。
+ * 検証自体はバックエンドが行う。
+ */
+const logIdTokenClaims = (idToken) => {
+  try {
+    const payload = JSON.parse(atob(idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const expiresInSec = payload.exp ? payload.exp - Math.floor(Date.now() / 1000) : null;
+    console.info('[LINE IDトークン]', {
+      aud: payload.aud,
+      iss: payload.iss,
+      expiresInSec,
+      expired: expiresInSec !== null && expiresInSec <= 0,
+    });
+  } catch {
+    console.warn('[LINE IDトークン] 解析できませんでした');
+  }
 };
