@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   loginWithIdToken,
-  loginWithPassword,
   checkUserByIdToken,
   registerUser,
   masterRequest,
@@ -67,20 +66,6 @@ describe('LINE IDトークンログイン', () => {
     const { init, body } = lastCall();
     expect(init.method).toBe('POST');
     expect(body).toEqual({ id_token: 'ID' });
-  });
-});
-
-describe('パスワードログイン', () => {
-  it('student_id と password を送り line_id は送らない', async () => {
-    fetch.mockResolvedValue(jsonResponse(200, { token: 't', user: { id: 1 } }));
-    await loginWithPassword({ studentId: 'S1', password: 'pw' });
-    expect(lastCall().body).toEqual({ student_id: 'S1', password: 'pw' });
-  });
-
-  it('失敗時はトークンを保存しない', async () => {
-    fetch.mockResolvedValue(jsonResponse(401, { message: 'パスワードが設定されていません' }));
-    await expect(loginWithPassword({ studentId: 'S1', password: 'pw' })).rejects.toThrow('パスワードが設定されていません');
-    expect(localStorage.getItem('authToken')).toBeNull();
   });
 });
 

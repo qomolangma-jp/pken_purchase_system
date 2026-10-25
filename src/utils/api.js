@@ -93,16 +93,6 @@ export const loginWithIdToken = async (idToken) => {
 };
 
 /**
- * パスワードログイン（username または student_id）
- */
-export const loginWithPassword = async ({ studentId, username, password }) => {
-  const body = { password };
-  if (studentId) body.student_id = studentId;
-  if (username) body.username = username;
-  return assertAuthResponse(await postJson('/api/auth/login', body, 'ログインに失敗しました'));
-};
-
-/**
  * IDトークンでユーザーの存在確認（POST）。
  * ユーザー未登録（404）の場合は null、それ以外のエラーは ApiError を投げる。
  */
