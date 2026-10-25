@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
+import SubmitButton from '../components/SubmitButton';
+import {
+  IDEMPOTENCY_HEADER,
+  getIdempotencyKey,
+  clearIdempotencyKey,
+  shouldReleaseIdempotencyKey,
+} from '../utils/api';
 import { getSelectedSizeId, getSelectedSizeLabel, getSizePriceAdjustment } from '../utils/sizePricing';
 
 const API_BASE_URL = (
@@ -57,6 +64,7 @@ const Checkout = () => {
   const [error, setError] = useState('');
   const paymentMethod = 'points';
   const [isProcessing, setIsProcessing] = useState(false);
+  const submitLockRef = useRef(false);
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, fetchCartCount, setPoints } = useAuth();
   const { openModal } = useModal();
@@ -177,6 +185,8 @@ const Checkout = () => {
       return;
     }
 
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsProcessing(true);
     let isRedirecting = false;
 
@@ -263,14 +273,18 @@ const Checkout = () => {
 
         console.log('PayPay 支払いデータを送信:', paymentPayload);
 
+        const paymentKey = getIdempotencyKey('order:paypay', paymentPayload);
         const paymentResponse = await fetch(`${API_BASE_URL}/api/payments/paypay`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            [IDEMPOTENCY_HEADER]: paymentKey,
             'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(paymentPayload),
         });
+
+        if (shouldReleaseIdempotencyKey(paymentResponse.status)) clearIdempotencyKey('order:paypay');
 
         console.log('PayPay 送信 - API URL:', API_BASE_URL + '/api/payments/paypay');
         console.log('PayPay 送信 - ステータス:', paymentResponse.status);
@@ -310,14 +324,18 @@ const Checkout = () => {
 
         console.log('注文データを送信:', orderData);
 
+        const orderKey = getIdempotencyKey('order', orderData);
         const response = await fetch(`${API_BASE_URL}/api/orders`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            [IDEMPOTENCY_HEADER]: orderKey,
             'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(orderData),
         });
+
+        if (shouldReleaseIdempotencyKey(response.status)) clearIdempotencyKey('order');
 
         console.log('注文送信 - API URL:', API_BASE_URL + '/api/orders');
         console.log('注文送信 - ステータス:', response.status);
@@ -378,6 +396,7 @@ const Checkout = () => {
       });
     } finally {
       if (!isRedirecting) {
+        submitLockRef.current = false;
         setIsProcessing(false);
       }
     }
@@ -562,13 +581,14 @@ const Checkout = () => {
                 </div>
 
                 {/* 注文確定ボタン */}
-                <button
+                <SubmitButton
                   onClick={handleConfirmOrder}
-                  disabled={isProcessing || cartItems.length === 0 || hasInsufficientPoints}
+                  loading={isProcessing}
+                  disabled={cartItems.length === 0 || hasInsufficientPoints}
                   className="w-full bg-mos-green hover:bg-mos-green-dark text-white font-bold py-2.5 px-4 rounded transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isProcessing ? '処理中...' : 'ポイントで支払う'}
-                </button>
+                  ポイントで支払う
+                </SubmitButton>
 
                 <Link
                   to="/cart"

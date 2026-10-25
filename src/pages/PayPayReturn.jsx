@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  IDEMPOTENCY_HEADER,
+  getIdempotencyKey,
+  clearIdempotencyKey,
+  shouldReleaseIdempotencyKey,
+} from '../utils/api';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL ||
@@ -61,19 +67,24 @@ const PayPayReturn = () => {
       }
 
       // バックエンドに決済完了を通知して注文を確定させる
+      const confirmScope = `order-confirm:${merchantPaymentId}`;
+      const confirmBody = {
+        merchantPaymentId: merchantPaymentId,
+        transaction_id: transactionId,
+        status: paymentStatus,
+      };
+      const confirmKey = getIdempotencyKey(confirmScope, confirmBody);
       const response = await fetch(`${API_BASE_URL}/api/payments/paypay/confirm`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          [IDEMPOTENCY_HEADER]: confirmKey,
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          merchantPaymentId: merchantPaymentId,
-          transaction_id: transactionId,
-          status: paymentStatus,
-        }),
+        body: JSON.stringify(confirmBody),
       });
+      if (shouldReleaseIdempotencyKey(response.status)) clearIdempotencyKey(confirmScope);
 
       console.log('[PayPayReturn] 確定 API ステータス:', response.status);
 

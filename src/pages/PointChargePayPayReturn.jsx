@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  IDEMPOTENCY_HEADER,
+  getIdempotencyKey,
+  clearIdempotencyKey,
+  shouldReleaseIdempotencyKey,
+} from '../utils/api';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL ||
@@ -43,16 +49,20 @@ const PointChargePayPayReturn = () => {
           throw new Error('決済IDが戻りURLに含まれていません。マスター管理者へお問い合わせください。');
         }
 
+        const confirmScope = `charge-confirm:${confirmation.merchantPaymentId}`;
+        const confirmKey = getIdempotencyKey(confirmScope, confirmation);
         const response = await fetch(`${API_BASE_URL}/api/charge/paypay/confirm`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
+            [IDEMPOTENCY_HEADER]: confirmKey,
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(confirmation),
         });
         const contentType = response.headers.get('content-type');
+        if (shouldReleaseIdempotencyKey(response.status)) clearIdempotencyKey(confirmScope);
         if (!contentType?.includes('application/json')) {
           const responseText = await response.text();
           console.error('JSON でないレスポンス:', responseText.substring(0, 500));

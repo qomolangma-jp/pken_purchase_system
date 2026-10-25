@@ -2,7 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
-
+import SubmitButton from '../components/SubmitButton';
+import { useAsyncSubmit, KEEP_LOCKED } from '../hooks/useAsyncSubmit';
+import {
+  IDEMPOTENCY_HEADER,
+  getIdempotencyKey,
+  clearIdempotencyKey,
+  shouldReleaseIdempotencyKey,
+} from '../utils/api';
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_API_URL ||
@@ -53,7 +60,6 @@ const PointCharge = () => {
   const { openModal } = useModal();
   const [amount, setAmount] = useState(1000);
   const [method, setMethod] = useState('cash');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedRequest, setSubmittedRequest] = useState(null);
 
   const normalizedAmount = useMemo(() => {
@@ -81,8 +87,7 @@ const PointCharge = () => {
     });
   };
 
-  const submitChargeRequest = async () => {
-    setIsSubmitting(true);
+  const executeChargeRequest = async () => {
     setSubmittedRequest(null);
 
     try {
@@ -92,17 +97,22 @@ const PointCharge = () => {
       }
 
       if (method === 'paypay') {
+        const paypayBody = {
+          amount: normalizedAmount,
+          return_url: `${window.location.origin}/charge/paypay/return`,
+        };
+        // 同一内容の再送（連打・再試行）には同じキーを使う
+        const idempotencyKey = getIdempotencyKey('charge:paypay', paypayBody);
         const response = await fetch(`${API_BASE_URL}/api/charge/paypay`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            [IDEMPOTENCY_HEADER]: idempotencyKey,
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            amount: normalizedAmount,
-            return_url: `${window.location.origin}/charge/paypay/return`,
-          }),
+          body: JSON.stringify(paypayBody),
         });
+        if (shouldReleaseIdempotencyKey(response.status)) clearIdempotencyKey('charge:paypay');
         const data = await getResponseData(response, 'PayPay決済を開始できませんでした。');
         const paymentUrl = data.payment_url || data.data?.payment_url || data.redirect_url;
         if (!paymentUrl) {
@@ -111,17 +121,21 @@ const PointCharge = () => {
 
         sessionStorage.setItem('charge_paypay_session_token', token);
         window.location.assign(paymentUrl);
-        return;
+        return KEEP_LOCKED;
       }
 
+      const applyBody = { amount: normalizedAmount, method };
+      const applyKey = getIdempotencyKey('charge:apply', applyBody);
       const response = await fetch(`${API_BASE_URL}/api/charge/apply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          [IDEMPOTENCY_HEADER]: applyKey,
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ amount: normalizedAmount, method }),
+        body: JSON.stringify(applyBody),
       });
+      if (shouldReleaseIdempotencyKey(response.status)) clearIdempotencyKey('charge:apply');
       const data = await getResponseData(response, 'チャージ申請に失敗しました。');
       setSubmittedRequest({
         method,
@@ -134,10 +148,11 @@ const PointCharge = () => {
         title: '申請エラー',
         message: error?.message || 'チャージ申請に失敗しました。',
       });
-    } finally {
-      setIsSubmitting(false);
     }
+    return undefined;
   };
+
+  const { run: submitChargeRequest, isSubmitting } = useAsyncSubmit(executeChargeRequest);
 
   const handleSubmit = () => {
     if (!user) {
@@ -305,14 +320,14 @@ const PointCharge = () => {
             </div>
           )}
 
-          <button
-            type="button"
+          <SubmitButton
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            loading={isSubmitting}
+            loadingText="送信中..."
             className="mt-6 w-full rounded-xl bg-mos-green px-4 py-3 text-base font-bold text-white transition-all hover:bg-mos-green-dark disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? '送信中...' : method === 'paypay' ? 'PayPayで決済する' : '申請する'}
-          </button>
+            {method === 'paypay' ? 'PayPayで決済する' : '申請する'}
+          </SubmitButton>
         </section>
       </div>
     </div>

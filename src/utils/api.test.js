@@ -4,6 +4,11 @@ import {
   checkUserByIdToken,
   registerUser,
   masterRequest,
+  authFetch,
+  generateIdempotencyKey,
+  getIdempotencyKey,
+  shouldReleaseIdempotencyKey,
+  IDEMPOTENCY_HEADER,
   ApiError,
 } from './api';
 
@@ -92,6 +97,43 @@ describe('登録', () => {
   it('バリデーションエラーの詳細を表示用メッセージに含める', async () => {
     fetch.mockResolvedValue(jsonResponse(422, { message: '入力エラー', errors: { student_id: ['学籍番号は既に使われています'] } }));
     await expect(registerUser({ id_token: 'ID' })).rejects.toThrow('学籍番号は既に使われています');
+  });
+});
+
+describe('冪等性キー', () => {
+  const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+  it('UUID v4 を生成する', () => {
+    expect(generateIdempotencyKey()).toMatch(UUID_V4);
+  });
+
+  it('同一内容の再送は同じキー、内容が変われば別キー', () => {
+    const a = getIdempotencyKey('charge:apply', { amount: 1000 });
+    expect(getIdempotencyKey('charge:apply', { amount: 1000 })).toBe(a);
+    expect(getIdempotencyKey('charge:apply', { amount: 2000 })).not.toBe(a);
+  });
+
+  it('キー破棄の判定: 成功と確定的な4xxは破棄、5xx/409/429は保持', () => {
+    expect(shouldReleaseIdempotencyKey(200)).toBe(true);
+    expect(shouldReleaseIdempotencyKey(422)).toBe(true);
+    expect(shouldReleaseIdempotencyKey(500)).toBe(false);
+    expect(shouldReleaseIdempotencyKey(409)).toBe(false);
+    expect(shouldReleaseIdempotencyKey(429)).toBe(false);
+  });
+
+  it('authFetch は scope 指定で X-Idempotency-Key を付け、失敗(5xx)後の再送で同一キー', async () => {
+    localStorage.setItem('authToken', 'TOK');
+    fetch.mockResolvedValueOnce(jsonResponse(500, {})).mockResolvedValueOnce(jsonResponse(200, { ok: true })).mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+    const opts = { method: 'POST', body: { amount: 500 }, idempotencyScope: 'charge:apply' };
+    await expect(authFetch('/api/charge/apply', opts)).rejects.toMatchObject({ status: 500 });
+    const first = fetch.mock.calls[0][1].headers[IDEMPOTENCY_HEADER];
+    await authFetch('/api/charge/apply', opts);
+    const second = fetch.mock.calls[1][1].headers[IDEMPOTENCY_HEADER];
+    expect(first).toMatch(UUID_V4);
+    expect(second).toBe(first);
+    // 成功後は破棄され、次の操作は新しいキー
+    await authFetch('/api/charge/apply', { ...opts });
+    expect(fetch.mock.calls[2][1].headers[IDEMPOTENCY_HEADER]).not.toBe(first);
   });
 });
 

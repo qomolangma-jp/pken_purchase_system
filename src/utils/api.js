@@ -52,6 +52,64 @@ const readJson = async (response) => {
 
 export const getAuthToken = () => localStorage.getItem('authToken');
 
+export const IDEMPOTENCY_HEADER = 'X-Idempotency-Key';
+
+export const generateIdempotencyKey = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0'));
+  return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10).join('')}`;
+};
+
+const IDEMPOTENCY_STORAGE_PREFIX = 'idem:';
+
+/**
+ * 同じ操作（scope + 内容 fingerprint）の再送には同じキーを返す。
+ * 連打・通信瞬断後の再試行・リロードでも同一キーになるよう sessionStorage に保持する。
+ * 内容が変われば新しいキーを発行する。
+ */
+export const getIdempotencyKey = (scope, fingerprint = '') => {
+  const storageKey = IDEMPOTENCY_STORAGE_PREFIX + scope;
+  const fp = typeof fingerprint === 'string' ? fingerprint : JSON.stringify(fingerprint);
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(storageKey) || 'null');
+    if (saved && saved.fp === fp && saved.key) return saved.key;
+  } catch {
+    // 壊れた保存値は破棄して再発行
+  }
+  const key = generateIdempotencyKey();
+  try {
+    sessionStorage.setItem(storageKey, JSON.stringify({ fp, key }));
+  } catch {
+    // ストレージ不可でもキー自体は有効
+  }
+  return key;
+};
+
+export const clearIdempotencyKey = (scope) => {
+  try {
+    sessionStorage.removeItem(IDEMPOTENCY_STORAGE_PREFIX + scope);
+  } catch {
+    // 無視
+  }
+};
+
+/**
+ * レスポンス確定後にキーを破棄すべきか。
+ * 成功、または再送しても結果が変わらない確定的な 4xx では破棄。
+ * ネットワーク断・5xx・408/409/429 は再送されうるため同じキーを保持する。
+ */
+export const shouldReleaseIdempotencyKey = (status) => {
+  if (status >= 200 && status < 300) return true;
+  if ([408, 409, 429].includes(status)) return false;
+  return status >= 400 && status < 500;
+};
+
 export const clearStoredAuth = () => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('authUser');
@@ -125,24 +183,31 @@ export const registerUser = async (userData) => {
  * 認証付きでAPIを呼ぶ共通関数（マスター管理API等）。
  * 401: 保存済み認証情報を破棄し、onUnauthorized を呼ぶ。403: 権限不足の ApiError。
  */
-export const authFetch = async (path, { method = 'GET', body, headers = {}, onUnauthorized } = {}) => {
+export const authFetch = async (path, { method = 'GET', body, headers = {}, onUnauthorized, idempotencyKey, idempotencyScope } = {}) => {
   const token = getAuthToken();
   if (!token) {
     if (onUnauthorized) onUnauthorized();
     throw new ApiError('ログインが必要です。再度ログインしてください。', 401);
   }
+  // 明示キーが無く scope が指定された場合は、内容に応じた永続キーを自動付与
+  const key = idempotencyKey
+    || (idempotencyScope ? getIdempotencyKey(idempotencyScope, body ?? '') : undefined);
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: {
       Accept: 'application/json',
       ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
       ...headers,
+      ...(key ? { [IDEMPOTENCY_HEADER]: key } : {}),
       Authorization: `Bearer ${token}`,
     },
     credentials: 'include',
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
   const data = await readJson(response);
+  if (idempotencyScope && shouldReleaseIdempotencyKey(response.status)) {
+    clearIdempotencyKey(idempotencyScope);
+  }
   if (!response.ok) {
     if (response.status === 401) {
       clearStoredAuth();
